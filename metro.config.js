@@ -1,10 +1,11 @@
+const path = require("path");
+
+const withStorybook = require("@storybook/react-native/metro/withStorybook");
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
-const {
-  wrapWithReanimatedMetroConfig,
-} = require("react-native-reanimated/metro-config");
-const withStorybook = require("@storybook/react-native/metro/withStorybook");
-const path = require("path");
+// const {
+//   wrapWithReanimatedMetroConfig,
+// } = require("react-native-reanimated/metro-config");
 
 // 기본 Expo 설정 불러오기
 let config = getDefaultConfig(__dirname);

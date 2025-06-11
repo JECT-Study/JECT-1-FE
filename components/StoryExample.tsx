@@ -8,7 +8,9 @@ type Props = {
 export function StoryExample({ label, onPress }: Props) {
   return (
     <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.text} className="underline">{label}</Text>
+      <Text style={styles.text} className="underline">
+        {label}
+      </Text>
     </Pressable>
   );
 }
