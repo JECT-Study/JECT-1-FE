@@ -1,30 +1,24 @@
-import { Pressable, Text, StyleSheet } from "react-native";
+import React from "react";
 
-type Props = {
+import { Text, TouchableOpacity } from "react-native";
+
+interface StoryExampleProps {
   label: string;
-  onPress?: () => void;
-};
-
-export function StoryExample({ label, onPress }: Props) {
-  return (
-    <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.text} className="underline">
-        {label}
-      </Text>
-    </Pressable>
-  );
+  onPress: () => void;
 }
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: "#4f46e5",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  text: {
-    color: "#ffffff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+export const StoryExample: React.FC<StoryExampleProps> = ({
+  label,
+  onPress,
+}) => {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className="rounded-lg bg-blue-500 px-4 py-2 active:bg-blue-600"
+    >
+      <Text className="text-center font-medium text-white">{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
+export default StoryExample;
