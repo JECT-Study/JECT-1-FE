@@ -4,7 +4,6 @@ import { initializeKakaoSDK } from "@react-native-kakao/core";
 import { login } from "@react-native-kakao/user";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
 
 export default function KakaoLogin() {

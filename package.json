@@ -15,6 +15,7 @@
     "storybook:android": "STORYBOOK_ENABLED='true' expo start --android"
   },
   "dependencies": {
+    "@animatereactnative/marquee": "^0.5.2",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-kakao/core": "^2.4.0",
     "@react-native-kakao/user": "^2.4.0",

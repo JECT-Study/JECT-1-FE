@@ -1,11 +1,12 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import KakaoLogin from "@/components/social/KakaoLogin";
+
+import KakaoLogin from "@/components/login/KakaoLogin";
 
 export default function SocialLoginButtons() {
   return (
-    <View className="mb-6 w-full space-y-3 p-4">
+    <View className="w-full bg-white py-20">
       <Pressable
         onPress={() => router.push("/login/apple")}
         className="flex-row items-center justify-center gap-2 rounded-xl bg-black px-6 py-4 shadow-md active:opacity-80"
@@ -21,6 +22,10 @@ export default function SocialLoginButtons() {
       </Pressable>
       <View className="my-2" />
       <KakaoLogin />
+      <View className="my-2" />
+      <Text className="text-center text-xs text-gray-500 underline">
+        둘러보기
+      </Text>
     </View>
   );
 }
