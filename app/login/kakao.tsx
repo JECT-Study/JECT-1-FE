@@ -2,13 +2,16 @@ import { useEffect } from "react";
 
 import { initializeKakaoSDK } from "@react-native-kakao/core";
 import { login } from "@react-native-kakao/user";
+import Constants from "expo-constants";
 import { Button, SafeAreaView } from "react-native";
 
 export default function KakaoLogin() {
-  const kakaoNativeAppKey = process.env.KAKAO_NATIVE_APP_KEY || "";
+  const kakaoNativeAppKey =
+    Constants.expoConfig?.extra?.kakaoNativeAppKey ?? "";
+  console.log("KakaoNativeAppKey!", kakaoNativeAppKey);
   useEffect(() => {
     initializeKakaoSDK(kakaoNativeAppKey);
-  }, []);
+  }, [kakaoNativeAppKey]);
 
   async function kakaoLogin() {
     try {

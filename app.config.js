@@ -77,5 +77,6 @@ export default ({ config }) => ({
   },
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
+    kakaoNativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
   },
 });
