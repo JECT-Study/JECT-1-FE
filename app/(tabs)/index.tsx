@@ -12,7 +12,7 @@ import { ThemedView } from "@/components/ThemedView";
 
 const SkeletonCard = () => (
   <View className="mr-4">
-    <View className="h-30 mb-2 w-40 rounded-lg bg-gray-400" />
+    <View className="mb-2 h-32 w-40 rounded-lg bg-gray-400" />
     <View className="w-30 mb-1 h-3 rounded bg-gray-300" />
     <View className="h-3 w-20 rounded bg-gray-300" />
   </View>
@@ -55,7 +55,7 @@ export default function HomeScreen() {
             {categoryData.map((item) => (
               <View
                 key={item.id}
-                className="w-15 h-15 mr-2 rounded-2xl bg-gray-300"
+                className="mr-2 h-16 w-16 rounded-2xl bg-gray-300"
               />
             ))}
           </View>
