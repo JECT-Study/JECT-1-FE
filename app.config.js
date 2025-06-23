@@ -11,7 +11,7 @@ export default ({ config }) => ({
   ios: {
     supportsTablet: true,
     usesAppleSignIn: true,
-    bundleIdentifier: "com.wldnd2977.JECT1",
+    bundleIdentifier: process.env.bundleIdentifier,
     infoPlist: {
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
@@ -31,7 +31,7 @@ export default ({ config }) => ({
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
-    package: "com.wldnd2977.JECT1",
+    package: process.env.package,
   },
   web: {
     bundler: "metro",
