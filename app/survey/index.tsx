@@ -35,6 +35,7 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("step2", { ...context, step1: answerIndex })
           }
+          onBack={() => history.push("step1", context)}
           total={totalQuestions}
           currentStep={1}
         />
@@ -46,6 +47,7 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("step3", { ...context, step2: answerIndex })
           }
+          onBack={() => history.push("step1", context)}
           total={totalQuestions}
           currentStep={2}
         />
@@ -57,6 +59,7 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("done", { ...context, step3: answerIndex })
           }
+          onBack={() => history.push("step2", context)}
           total={totalQuestions}
           currentStep={3}
         />

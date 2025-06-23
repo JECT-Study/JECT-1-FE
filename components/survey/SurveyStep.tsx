@@ -1,6 +1,7 @@
 // 각 선택지의 질문과 선택지 받기
 import { useState } from "react";
 
+import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 import Percentage from "./Percentage";
@@ -9,12 +10,14 @@ export default function SurveyStep({
   question,
   options,
   onNext,
+  onBack,
   total,
   currentStep,
 }: {
   question: string;
   options: string[];
   onNext: (answerIndex: number) => void;
+  onBack?: () => void;
   total: number;
   currentStep: number;
 }) {
@@ -24,10 +27,21 @@ export default function SurveyStep({
       <Percentage current={currentStep} total={total} />
       <View className="flex-1 px-6 py-8">
         {/* 진행상태 */}
-        <View className="mb-8 items-center">
-          <Text className="text-lg text-gray-500">
+        <View className="mb-8 flex-row items-center justify-between">
+          {currentStep > 1 ? (
+            <TouchableOpacity
+              onPress={() => (onBack ? onBack() : router.back())}
+              className="flex-row items-center"
+            >
+              <Text className="text-lg text-black">뒤로가기</Text>
+            </TouchableOpacity>
+          ) : (
+            <View className="w-12" />
+          )}
+          <Text className="text-lg text-black">
             {currentStep} / {total}
           </Text>
+          <View className="w-12" />
         </View>
 
         {/* 질문 */}
