@@ -1,4 +1,5 @@
-module.exports = {
+export default ({ config }) => ({
+  ...config,
   name: "JECT-1-FE",
   slug: "JECT-1-FE",
   version: "1.0.0",
@@ -9,6 +10,20 @@ module.exports = {
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
+    usesAppleSignIn: true,
+    bundleIdentifier: process.env.bundleIdentifier,
+    infoPlist: {
+      LSApplicationQueriesSchemes: [
+        "kakaokompassauth",
+        "kakaolink",
+        "kakaoplus",
+      ],
+      CFBundleURLTypes: [
+        {
+          CFBundleURLSchemes: [`kakao${process.env.KAKAO_NATIVE_APP_KEY}`],
+        },
+      ],
+    },
   },
   android: {
     adaptiveIcon: {
@@ -16,6 +31,7 @@ module.exports = {
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
+    package: process.env.package,
   },
   web: {
     bundler: "metro",
@@ -33,11 +49,34 @@ module.exports = {
         backgroundColor: "#ffffff",
       },
     ],
+    [
+      "expo-build-properties",
+      {
+        android: {
+          extraMavenRepos: [
+            "https://devrepo.kakao.com/nexus/content/groups/public/",
+          ],
+        },
+      },
+    ],
+    [
+      "@react-native-kakao/core",
+      {
+        nativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
+        android: {
+          authCodeHandlerActivity: true,
+        },
+        ios: {
+          handleKakaoOpenUrl: true,
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
   },
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
+    kakaoNativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
   },
-};
+});
