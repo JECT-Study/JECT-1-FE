@@ -1,7 +1,7 @@
 // 각 선택지의 질문과 선택지 받기
 import { useState } from "react";
 
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 import Percentage from "./Percentage";
 
@@ -20,7 +20,7 @@ export default function SurveyStep({
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1">
       <Percentage current={currentStep} total={total} />
       <View className="flex-1 px-6 py-8">
         {/* 진행상태 */}
@@ -81,6 +81,6 @@ export default function SurveyStep({
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
