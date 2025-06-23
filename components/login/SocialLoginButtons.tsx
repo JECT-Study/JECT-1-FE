@@ -9,7 +9,7 @@ export default function SocialLoginButtons() {
     <View className="w-full gap-3 bg-white py-20">
       <Pressable
         onPress={() => router.push("/login/apple")}
-        className="flex-row items-center justify-center gap-2 rounded-xl bg-black px-6 py-4 shadow-md active:opacity-80"
+        className="flex-row items-center justify-center gap-2 rounded-xl bg-black px-6 py-4 active:opacity-80"
       >
         <Image
           source={require("@/assets/images/login/apple_logo.png")} // 이미지 교체 예정
@@ -21,19 +21,18 @@ export default function SocialLoginButtons() {
         </Text>
       </Pressable>
       <KakaoLogin />
+
       <Pressable
         onPress={() => router.push("/(tabs)")}
-        className="flex-row items-center justify-center gap-2 rounded-xl bg-gray-500 px-6 py-4 shadow-md active:opacity-80"
+        className="mt-4 flex-row items-center justify-center"
       >
-        <Text className="text-base font-semibold text-white">둘러보기</Text>
+        <Text className="text-lg text-black">둘러보기</Text>
       </Pressable>
       <Pressable
         onPress={() => router.push("/survey")}
-        className="flex-row items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-4 shadow-md active:opacity-80"
+        className="flex-row items-center justify-center"
       >
-        <Text className="text-base font-semibold text-white">
-          설문조사 시작하기
-        </Text>
+        <Text className="text-lg text-black">설문조사 시작하기</Text>
       </Pressable>
     </View>
   );

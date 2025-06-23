@@ -26,7 +26,7 @@ export default function KakaoLogin() {
   return (
     <Pressable
       onPress={kakaoLogin}
-      className="flex-row items-center justify-center gap-2 rounded-xl bg-yellow-300 px-6 py-4 shadow-md active:opacity-80"
+      className="flex-row items-center justify-center gap-2 rounded-xl bg-yellow-300 px-6 py-4 active:opacity-80"
     >
       <Image
         source={require("@/assets/images/login/kakao_logo.png")}
