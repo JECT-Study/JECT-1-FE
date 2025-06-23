@@ -1,5 +1,4 @@
 import { useFunnel } from "@use-funnel/react-navigation-native";
-import { SafeAreaView } from "react-native";
 
 import AfterSurvey from "@/components/survey/AfterSurvey";
 import SurveyStep from "@/components/survey/SurveyStep";
@@ -28,45 +27,43 @@ export default function SurveyScreen() {
   const totalQuestions = 3;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <funnel.Render
-        step1={({ history, context }) => (
-          <SurveyStep
-            question={questions.Q1}
-            options={options.Q1}
-            onNext={(answerIndex) =>
-              history.push("step2", { ...context, step1: answerIndex })
-            }
-            total={totalQuestions}
-            currentStep={1}
-          />
-        )}
-        step2={({ history, context }) => (
-          <SurveyStep
-            question={questions.Q2}
-            options={options.Q2}
-            onNext={(answerIndex) =>
-              history.push("step3", { ...context, step2: answerIndex })
-            }
-            total={totalQuestions}
-            currentStep={2}
-          />
-        )}
-        step3={({ history, context }) => (
-          <SurveyStep
-            question={questions.Q3}
-            options={options.Q3}
-            onNext={(answerIndex) =>
-              history.push("done", { ...context, step3: answerIndex })
-            }
-            total={totalQuestions}
-            currentStep={3}
-          />
-        )}
-        done={({ context, history }) => (
-          <AfterSurvey context={context} history={history} />
-        )}
-      />
-    </SafeAreaView>
+    <funnel.Render
+      step1={({ history, context }) => (
+        <SurveyStep
+          question={questions.Q1}
+          options={options.Q1}
+          onNext={(answerIndex) =>
+            history.push("step2", { ...context, step1: answerIndex })
+          }
+          total={totalQuestions}
+          currentStep={1}
+        />
+      )}
+      step2={({ history, context }) => (
+        <SurveyStep
+          question={questions.Q2}
+          options={options.Q2}
+          onNext={(answerIndex) =>
+            history.push("step3", { ...context, step2: answerIndex })
+          }
+          total={totalQuestions}
+          currentStep={2}
+        />
+      )}
+      step3={({ history, context }) => (
+        <SurveyStep
+          question={questions.Q3}
+          options={options.Q3}
+          onNext={(answerIndex) =>
+            history.push("done", { ...context, step3: answerIndex })
+          }
+          total={totalQuestions}
+          currentStep={3}
+        />
+      )}
+      done={({ context, history }) => (
+        <AfterSurvey context={context} history={history} />
+      )}
+    />
   );
 }

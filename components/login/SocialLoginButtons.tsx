@@ -6,7 +6,7 @@ import KakaoLogin from "@/components/login/KakaoLogin";
 
 export default function SocialLoginButtons() {
   return (
-    <View className="w-full bg-white py-20">
+    <View className="w-full gap-3 bg-white py-20">
       <Pressable
         onPress={() => router.push("/login/apple")}
         className="flex-row items-center justify-center gap-2 rounded-xl bg-black px-6 py-4 shadow-md active:opacity-80"
@@ -20,12 +20,21 @@ export default function SocialLoginButtons() {
           Apple 계정으로 로그인하기(미완)
         </Text>
       </Pressable>
-      <View className="my-2" />
       <KakaoLogin />
-      <View className="my-2" />
-      <Text className="text-center text-xs text-gray-500 underline">
-        둘러보기
-      </Text>
+      <Pressable
+        onPress={() => router.push("/(tabs)")}
+        className="flex-row items-center justify-center gap-2 rounded-xl bg-gray-500 px-6 py-4 shadow-md active:opacity-80"
+      >
+        <Text className="text-base font-semibold text-white">둘러보기</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => router.push("/survey")}
+        className="flex-row items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-4 shadow-md active:opacity-80"
+      >
+        <Text className="text-base font-semibold text-white">
+          설문조사 시작하기
+        </Text>
+      </Pressable>
     </View>
   );
 }
