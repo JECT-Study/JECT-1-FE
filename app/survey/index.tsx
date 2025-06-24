@@ -4,6 +4,7 @@ import AfterSurvey from "@/components/survey/AfterSurvey";
 import SurveyIntro from "@/components/survey/SurveyIntro";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
+import { router } from "expo-router";
 
 type SurveyResult = {
   step1?: number;
@@ -40,7 +41,7 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("step2", { ...context, step1: answerIndex })
           }
-          onBack={() => history.push("step1", context)}
+          onBack={() => router.replace("/survey")}
           total={totalQuestions}
           currentStep={1}
         />
