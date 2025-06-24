@@ -28,15 +28,17 @@ export default function SocialLoginButtons() {
         >
           <Text className="text-[13px] text-[#AAAAAA] underline">둘러보기</Text>
         </Pressable>
+        <Pressable
+          onPress={() => router.push("/survey")}
+          className="flex-row items-center justify-center"
+        >
+          <Text className="text-[13px] text-[#AAAAAA] underline">
+            설문조사 시작하기
+          </Text>
+        </Pressable>
         <View className="m-4" />
         <View style={{ marginBottom: insets.bottom - 1 }} />
       </View>
-      <Pressable
-        onPress={() => router.push("/survey")}
-        className="flex-row items-center justify-center"
-      >
-        <Text className="text-lg text-black">설문조사 시작하기</Text>
-      </Pressable>
     </View>
   );
 }
