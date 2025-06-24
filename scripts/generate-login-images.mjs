@@ -16,11 +16,8 @@ const files = fs.readdirSync(imagesDir).filter((file) => file.endsWith(".png"));
 // 이미지 타입 관련 적용
 
 lines.push('import { ImageSourcePropType } from "react-native";');
+lines.push("export type LoginImageType = [string, ImageSourcePropType][];");
 
-lines.push(`export type LoginImageType = {`);
-lines.push(`  ImageName: string;`);
-lines.push(`  ImageSrc: ImageSourcePropType;`);
-lines.push(`};`);
 // 이미지 파일 확인 및 코드 작성
 
 lines.push("export const loginImages = {");
