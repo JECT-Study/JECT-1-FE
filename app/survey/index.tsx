@@ -1,6 +1,7 @@
 import { useFunnel } from "@use-funnel/react-navigation-native";
 
 import AfterSurvey from "@/components/survey/AfterSurvey";
+import SurveyIntro from "@/components/survey/SurveyIntro";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
 
@@ -12,6 +13,7 @@ type SurveyResult = {
 
 export default function SurveyScreen() {
   const funnel = useFunnel<{
+    intro: SurveyResult;
     step1: SurveyResult;
     step2: SurveyResult;
     step3: SurveyResult;
@@ -19,7 +21,7 @@ export default function SurveyScreen() {
   }>({
     id: "survey-app",
     initial: {
-      step: "step1",
+      step: "intro",
       context: {},
     },
   });
@@ -28,6 +30,9 @@ export default function SurveyScreen() {
 
   return (
     <funnel.Render
+      intro={({ history }) => (
+        <SurveyIntro onNext={() => history.push("step1")} />
+      )}
       step1={({ history, context }) => (
         <SurveyStep
           question={questions.Q1}

@@ -19,7 +19,7 @@ export default function SocialLoginButtons() {
       />
       <View className="bg-black">
         <KakaoLogin />
-        <View className="m-4" />
+        <View className="m-2" />
         <AppleLogin />
         <View className="m-4" />
         <Pressable
@@ -31,12 +31,12 @@ export default function SocialLoginButtons() {
         <View className="m-4" />
         <View style={{ marginBottom: insets.bottom - 1 }} />
       </View>
-      {/*<Pressable*/}
-      {/*  onPress={() => router.push("/survey")}*/}
-      {/*  className="flex-row items-center justify-center"*/}
-      {/*>*/}
-      {/*  <Text className="text-lg text-black">설문조사 시작하기</Text>*/}
-      {/*</Pressable>*/}
+      <Pressable
+        onPress={() => router.push("/survey")}
+        className="flex-row items-center justify-center"
+      >
+        <Text className="text-lg text-black">설문조사 시작하기</Text>
+      </Pressable>
     </View>
   );
 }

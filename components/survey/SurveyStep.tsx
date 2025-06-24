@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import Percentage from "./Percentage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SurveyStep({
   question,
@@ -24,7 +25,7 @@ export default function SurveyStep({
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <View className="flex-1">
+    <SafeAreaView className="flex-1">
       <Percentage current={currentStep} total={total} />
       <View className="flex-1 px-6 py-8">
         {/* 진행상태 */}
@@ -96,6 +97,6 @@ export default function SurveyStep({
           </Pressable>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

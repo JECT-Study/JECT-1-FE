@@ -3,8 +3,9 @@ import { useEffect } from "react";
 import { initializeKakaoSDK } from "@react-native-kakao/core";
 import { login } from "@react-native-kakao/user";
 import Constants from "expo-constants";
-import { Image } from "expo-image";
 import { Pressable, Text } from "react-native";
+
+import KakaoIcon from "@/components/icons/KakaoIcon";
 
 export default function KakaoLogin() {
   const kakaoNativeAppKey =
@@ -28,14 +29,8 @@ export default function KakaoLogin() {
       onPress={kakaoLogin}
       className="flex-row items-center justify-center gap-2 rounded-xl bg-yellow-300 px-6 py-4 active:opacity-80"
     >
-      <Image
-        source={require("@/assets/images/login/kakao_logo.png")}
-        contentFit="contain"
-        style={{ width: 24, height: 24 }}
-      />
-      <Text className="text-base font-semibold text-black">
-        카카오톡으로 로그인하기
-      </Text>
+      <KakaoIcon size={20} color="#3E1918" />
+      <Text className="text-black">카카오톡으로 시작하기</Text>
     </Pressable>
   );
 }
