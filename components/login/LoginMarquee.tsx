@@ -20,7 +20,7 @@ export default function LoginMarquee({
         return (
           <View
             key={imageName}
-            className="my-2 flex h-[213px] w-[158px] items-center justify-center overflow-hidden rounded-[26px] bg-gray-200"
+            className="my-2 flex h-[213px] w-[158px] items-center justify-center overflow-hidden rounded-[26px]"
           >
             <Image
               source={imageSrc}
