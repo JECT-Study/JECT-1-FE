@@ -1,44 +1,14 @@
-import * as AppleAuthentication from "expo-apple-authentication";
-import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
+import AppleLogin from "@/components/login/AppleLogin";
 import KakaoLogin from "@/components/login/KakaoLogin";
 
 export default function SocialLoginButtons() {
   return (
     <View className="w-full gap-3 bg-white py-20">
-      <Pressable
-        onPress={async () => {
-          try {
-            const credential = await AppleAuthentication.signInAsync({
-              requestedScopes: [
-                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                AppleAuthentication.AppleAuthenticationScope.EMAIL,
-              ],
-            });
-            console.log("credential", credential);
-          } catch (error: any) {
-            if (error.code === "ERR_REQUEST_CANCELED") {
-              console.log("user canceled the sign - in flow");
-            } else {
-              console.log(error);
-            }
-          }
-        }}
-        className="flex-row items-center justify-center gap-2 rounded-xl bg-black px-6 py-4 active:opacity-80"
-      >
-        <Image
-          source={require("@/assets/images/login/apple_logo.png")} // 이미지 교체 예정
-          contentFit="contain"
-          style={{ width: 24, height: 24 }}
-        />
-        <Text className="text-base font-semibold text-white">
-          Apple 계정으로 로그인하기(IOS)
-        </Text>
-      </Pressable>
+      <AppleLogin />
       <KakaoLogin />
-
       <Pressable
         onPress={() => router.push("/(tabs)")}
         className="mt-4 flex-row items-center justify-center"
