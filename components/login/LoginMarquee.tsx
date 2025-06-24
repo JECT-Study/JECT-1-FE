@@ -24,7 +24,7 @@ export default function LoginMarquee({
           >
             <Image
               source={imageSrc}
-              style={{ width: "100%", height: "100%" }}
+              style={{ width: "100%", height: "100%", opacity: 0.3 }}
               contentFit="cover"
             />
           </View>
