@@ -71,6 +71,7 @@ export default ({ config }) => ({
         },
       },
     ],
+    "expo-apple-authentication",
   ],
   experiments: {
     typedRoutes: true,
