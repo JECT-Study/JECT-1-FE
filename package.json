@@ -13,7 +13,7 @@
     "storybook-generate": "sb-rn-get-stories",
     "storybook:ios": "STORYBOOK_ENABLED='true' expo start --ios",
     "storybook:android": "STORYBOOK_ENABLED='true' expo start --android",
-    "update-login-images": "node ./scripts/generate-login-images.js"
+    "update-login-images": "node scripts/generate-login-images.mjs"
   },
   "dependencies": {
     "@animatereactnative/marquee": "^0.5.2",
