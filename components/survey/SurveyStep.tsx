@@ -1,7 +1,8 @@
 // 각 선택지의 질문과 선택지 받기
 import { useState } from "react";
 
-import { Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 
 import Percentage from "./Percentage";
 
@@ -9,25 +10,39 @@ export default function SurveyStep({
   question,
   options,
   onNext,
+  onBack,
   total,
   currentStep,
 }: {
   question: string;
   options: string[];
   onNext: (answerIndex: number) => void;
+  onBack?: () => void;
   total: number;
   currentStep: number;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
+
   return (
     <View className="flex-1">
       <Percentage current={currentStep} total={total} />
       <View className="flex-1 px-6 py-8">
         {/* 진행상태 */}
-        <View className="mb-8 items-center">
-          <Text className="text-lg text-gray-500">
+        <View className="mb-8 flex-row items-center justify-between">
+          {currentStep > 1 ? (
+            <Pressable
+              onPress={() => (onBack ? onBack() : router.back())}
+              className="flex-row items-center"
+            >
+              <Text className="text-lg text-black">뒤로가기</Text>
+            </Pressable>
+          ) : (
+            <View className="w-12" />
+          )}
+          <Text className="text-lg text-black">
             {currentStep} / {total}
           </Text>
+          <View className="w-12" />
         </View>
 
         {/* 질문 */}
@@ -40,7 +55,7 @@ export default function SurveyStep({
         {/* 선택지 */}
         <View className="mb-6 flex-1">
           {options.map((label, index) => (
-            <TouchableOpacity
+            <Pressable
               key={index}
               onPress={() => setSelected(index)}
               className={`mb-3 rounded-lg border-2 p-4 ${
@@ -58,13 +73,13 @@ export default function SurveyStep({
               >
                 {label}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
         {/* Next Button */}
         <View className="mb-10">
-          <TouchableOpacity
+          <Pressable
             className={`rounded-[23px] px-6 py-4 ${
               selected === null ? "bg-gray-300" : "bg-[#816BFF]"
             }`}
@@ -78,7 +93,7 @@ export default function SurveyStep({
             >
               다음으로
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </View>

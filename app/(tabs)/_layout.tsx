@@ -1,58 +1,64 @@
-import React from "react";
-
 import { Tabs } from "expo-router";
-import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import HomeIcon from "@/components/icons/HomeIcon";
+import MyIcon from "@/components/icons/MyIcon";
+import ScheduleIcon from "@/components/icons/ScheduleIcon";
+import SearchIcon from "@/components/icons/SearchIcon";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          paddingBottom: 10,
+          paddingTop: 5,
+          height: 60,
+        },
+        tabBarIconStyle: {
+          marginBottom: 3,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+        },
+        tabBarActiveTintColor: "#816BFF",
+        tabBarInactiveTintColor: "#9CA3AF",
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          title: "홈",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="search"
         options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          title: "검색",
+          tabBarIcon: ({ color, size }) => (
+            <SearchIcon color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="jiwoong"
+        name="schedule"
         options={{
-          title: "Jiwoong",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          title: "일정 별 컨텐츠",
+          tabBarIcon: ({ color, size }) => (
+            <ScheduleIcon color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="my"
+        options={{
+          title: "마이페이지",
+          tabBarIcon: ({ color, size }) => <MyIcon color={color} size={size} />,
         }}
       />
     </Tabs>

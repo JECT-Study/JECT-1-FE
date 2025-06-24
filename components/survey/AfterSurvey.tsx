@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { ActivityIndicator, Button, Text, View } from "react-native";
+import { router } from "expo-router";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 export default function AfterSurvey({
   context,
@@ -36,10 +37,12 @@ export default function AfterSurvey({
             분석 완료 🎉
           </Text>
           <Text>{JSON.stringify(context)}</Text>
-          <Button
-            title="처음으로"
-            onPress={() => history.replace("step1", {})}
-          ></Button>
+          <Pressable
+            onPress={() => router.push("/(tabs)")}
+            className="flex-row items-center justify-center gap-2 rounded-xl bg-gray-500 px-6 py-4 shadow-md active:opacity-80"
+          >
+            <Text className="text-base font-semibold text-white">둘러보기</Text>
+          </Pressable>
         </View>
       )}
     </View>
