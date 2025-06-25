@@ -2,6 +2,7 @@ import { SafeAreaView, Text, View } from "react-native";
 
 import MyMenus from "@/components/mypage/MyMenus";
 import MyPageMenus from "@/components/mypage/MyPageMenus";
+import NicknameModal from "@/components/mypage/NicknameModal";
 import UserInfo from "@/components/mypage/UserInfo";
 
 export default function MyScreen() {
@@ -15,6 +16,7 @@ export default function MyScreen() {
         className="my-2 h-[12px] w-full bg-[#F2F2F7]"
       />
       <MyPageMenus />
+      <NicknameModal />
     </SafeAreaView>
   );
 }
