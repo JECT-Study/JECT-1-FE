@@ -1,19 +1,18 @@
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text } from "react-native";
 
 import LoginCardSlider from "@/components/login/LoginCardSlider";
 import SocialLoginButtons from "@/components/login/SocialLoginButtons";
 
 export default function Login() {
-  const insets = useSafeAreaInsets();
   return (
-    <View
-      className="flex-1 items-center bg-white px-4"
-      style={{
-        paddingTop: insets.top,
-      }}
-    >
+    <View className="flex-1 items-center bg-black px-4">
       <LoginCardSlider />
+      <View className="items-center">
+        <Text className="text-[34px] font-semibold text-white">마이코드</Text>
+        <Text className="text-[18px] text-white">
+          나에게 맞는 컨텐츠를 한눈에
+        </Text>
+      </View>
       <SocialLoginButtons />
     </View>
   );

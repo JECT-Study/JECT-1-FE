@@ -1,44 +1,17 @@
-import { Marquee } from "@animatereactnative/marquee";
-import { Image } from "expo-image";
 import { View } from "react-native";
 
-const images = [
-  require("@/assets/images/login/apple_logo.png"),
-  require("@/assets/images/login/kakao_logo.png"),
-];
+import LoginMarquee from "@/components/login/LoginMarquee";
+import { loginImages } from "@/constants/LoginImages";
+
+const images = Object.entries(loginImages);
+const leftImages = images.splice(0, Math.floor(images.length / 2));
 
 export default function LoginCardSlider() {
   return (
     <View className="flex flex-1 flex-row">
-      <Marquee direction="vertical" speed={0.3} withGesture={false}>
-        {images.map((src, index) => (
-          <View
-            key={index}
-            className="my-2 flex h-[213px] w-[158px] items-center justify-center rounded-[26px] bg-gray-200"
-          >
-            <Image
-              source={src}
-              style={{ width: 100, height: 100 }}
-              contentFit="contain"
-            />
-          </View>
-        ))}
-      </Marquee>
+      <LoginMarquee imageList={leftImages} direction={"up"} />
       <View className="m-2" />
-      <Marquee direction="vertical" speed={-0.3} withGesture={false}>
-        {images.map((src, index) => (
-          <View
-            key={index}
-            className="my-2 flex h-[213px] w-[158px] items-center justify-center rounded-[26px] bg-gray-200"
-          >
-            <Image
-              source={src}
-              style={{ width: 100, height: 100 }}
-              contentFit="contain"
-            />
-          </View>
-        ))}
-      </Marquee>
+      <LoginMarquee imageList={images} direction={"down"} />
     </View>
   );
 }

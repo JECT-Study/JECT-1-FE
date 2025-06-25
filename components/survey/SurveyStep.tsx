@@ -3,9 +3,11 @@ import { useState } from "react";
 
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import Chevron from "@/components/icons/Chevron";
 
 import Percentage from "./Percentage";
-
 export default function SurveyStep({
   question,
   options,
@@ -24,27 +26,20 @@ export default function SurveyStep({
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <View className="flex-1">
+    <SafeAreaView className="w-full flex-1 justify-between">
       <Percentage current={currentStep} total={total} />
-      <View className="flex-1 px-6 py-8">
-        {/* 진행상태 */}
-        <View className="mb-8 flex-row items-center justify-between">
-          {currentStep > 1 ? (
-            <Pressable
-              onPress={() => (onBack ? onBack() : router.back())}
-              className="flex-row items-center"
-            >
-              <Text className="text-lg text-black">뒤로가기</Text>
-            </Pressable>
-          ) : (
-            <View className="w-12" />
-          )}
-          <Text className="text-lg text-black">
-            {currentStep} / {total}
-          </Text>
-          <View className="w-12" />
-        </View>
-
+      <View className="relative h-[60px] items-center justify-center">
+        <Text className="text-[20px] text-[#383535]">
+          {currentStep}/{total}
+        </Text>
+        <Pressable
+          className="absolute left-4 top-1/2 -translate-y-1/2"
+          onPress={() => (onBack ? onBack() : router.back())}
+        >
+          <Chevron direction="left" />
+        </Pressable>
+      </View>
+      <View className="flex-1 px-4">
         {/* 질문 */}
         <View className="mb-8 flex items-center">
           <Text className="text-xl font-semibold text-gray-800">
@@ -53,7 +48,7 @@ export default function SurveyStep({
         </View>
 
         {/* 선택지 */}
-        <View className="mb-6 flex-1">
+        <View className="flex-1">
           {options.map((label, index) => (
             <Pressable
               key={index}
@@ -78,24 +73,24 @@ export default function SurveyStep({
         </View>
 
         {/* Next Button */}
-        <View className="mb-10">
-          <Pressable
-            className={`rounded-[23px] px-6 py-4 ${
-              selected === null ? "bg-gray-300" : "bg-[#816BFF]"
-            }`}
-            disabled={selected === null}
-            onPress={() => selected !== null && onNext(selected)}
-          >
-            <Text
-              className={`text-center text-lg font-semibold ${
-                selected === null ? "text-gray-500" : "text-white"
-              }`}
-            >
-              다음으로
-            </Text>
-          </Pressable>
-        </View>
       </View>
-    </View>
+      <View className="px-4 py-6">
+        <Pressable
+          className={`h-[47px] w-full items-center justify-center rounded-[6px] ${
+            selected === null ? "bg-gray-300" : "bg-[#816BFF]"
+          }`}
+          disabled={selected === null}
+          onPress={() => selected !== null && onNext(selected)}
+        >
+          <Text
+            className={`text-center text-lg font-semibold ${
+              selected === null ? "text-gray-500" : "text-white"
+            }`}
+          >
+            다음으로
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
