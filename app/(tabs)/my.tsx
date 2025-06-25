@@ -1,14 +1,20 @@
-import { ScrollView } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import MyMenus from "@/components/mypage/MyMenus";
+import MyPageMenus from "@/components/mypage/MyPageMenus";
+import UserInfo from "@/components/mypage/UserInfo";
 
 export default function MyScreen() {
   return (
-    <ScrollView className="flex-1 p-4">
-      <ThemedView className="mb-4 pt-10">
-        <ThemedText type="title">마이</ThemedText>
-      </ThemedView>
-    </ScrollView>
+    <SafeAreaView className="w-full flex-1 bg-white">
+      <Text className="m-6 text-[20px] font-semibold">마이페이지</Text>
+      <UserInfo />
+      <MyMenus />
+      <View
+        aria-label="seperator"
+        className="my-2 h-[12px] w-full bg-[#F2F2F7]"
+      />
+      <MyPageMenus />
+    </SafeAreaView>
   );
 }

@@ -28,6 +28,22 @@ export default function Chevron({
         <Path d="m15 18-6-6 6-6" />
       </Svg>
     );
+  } else if (direction === "right") {
+    return (
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width={strokeWidth}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        className="lucide lucide-chevron-left-icon lucide-chevron-left"
+      >
+        <Path d="m9 18 6-6-6-6" />
+      </Svg>
+    );
   }
   return (
     <Text>
