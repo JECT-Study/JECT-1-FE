@@ -72,6 +72,13 @@ export default ({ config }) => ({
       },
     ],
     "expo-apple-authentication",
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "마이코드가 당신의 사진(앱)에 접근하려합니다.",
+        cameraPermission: "마이코드가 당신의 카메라(앱)에 접근하려합니다.",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
