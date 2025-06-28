@@ -1,10 +1,15 @@
-import { SafeAreaView, Text, View } from "react-native";
+import { useFunnel } from "@use-funnel/react-navigation-native";
+import { router } from "expo-router";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 
+import Chevron from "@/components/icons/Chevron";
+import LogoutModal from "@/components/mypage/LogoutModal";
 import MyMenus from "@/components/mypage/MyMenus";
+import MyPageMenu from "@/components/mypage/MyPageMenu";
 import MyPageMenus from "@/components/mypage/MyPageMenus";
 import NicknameModal from "@/components/mypage/NicknameModal";
 import UserInfo from "@/components/mypage/UserInfo";
-import LogoutModal from "@/components/mypage/LogoutModal";
+import SurveyIntro from "@/components/survey/SurveyIntro";
 
 export default function MyScreen() {
   return (

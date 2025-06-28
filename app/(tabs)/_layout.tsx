@@ -1,4 +1,5 @@
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
+import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -8,6 +9,7 @@ import ScheduleIcon from "@/components/icons/ScheduleIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 
 export default function TabLayout() {
+  const pathname = usePathname();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Tabs
@@ -57,12 +59,25 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="my"
+          name="my/index"
           options={{
             title: "마이페이지",
-            tabBarIcon: ({ color, size }) => (
-              <MyIcon color={color} size={size} />
-            ),
+            tabBarIcon: ({ size }) => {
+              const isActive = pathname?.startsWith("/my");
+              const color = isActive ? "#816BFF" : "#9CA3AF";
+              return <MyIcon color={color} size={size} />;
+            },
+            tabBarLabel: () => {
+              const isActive = pathname?.startsWith("/my");
+              const color = isActive ? "#816BFF" : "#9CA3AF";
+              return <Text style={{ fontSize: 11, color }}>마이페이지</Text>;
+            },
+          }}
+        />
+        <Tabs.Screen
+          name="my/terms"
+          options={{
+            href: null,
           }}
         />
       </Tabs>

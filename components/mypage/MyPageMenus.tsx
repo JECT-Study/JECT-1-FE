@@ -1,7 +1,7 @@
+import { router } from "expo-router";
 import { View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
-import { router } from "expo-router";
 import { useSetLogoutModalState } from "@/stores/useModalStateStore";
 
 export default function MyPageMenus() {
@@ -10,7 +10,7 @@ export default function MyPageMenus() {
     <View className="w-full px-4">
       <MyPageMenu
         title="이용약관"
-        onPress={() => router.push("/terms")}
+        onPress={() => router.push("/(tabs)/my/terms")}
         chevron={true}
       />
       <MyPageMenu

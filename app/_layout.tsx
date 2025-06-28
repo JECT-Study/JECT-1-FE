@@ -37,7 +37,6 @@ export default function RootLayout() {
               name="survey/index"
               options={{ headerShown: false }}
             />
-            <Stack.Screen name="terms/index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
