@@ -1,4 +1,4 @@
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { SafeAreaView, View, Text, Pressable } from "react-native";
 
 import Chevron from "@/components/icons/Chevron";
@@ -7,7 +7,6 @@ import MyPageMenu from "@/components/mypage/MyPageMenu";
 export default function Terms() {
   return (
     <>
-      <Stack.Screen options={{ title: "이용약관" }} />
       <SafeAreaView className="w-full flex-1 bg-white">
         <View className="relative h-[60px] items-center justify-center">
           <Text className="text-[20px] text-[#383535]">이용약관</Text>
