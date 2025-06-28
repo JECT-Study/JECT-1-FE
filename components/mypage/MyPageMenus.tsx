@@ -2,8 +2,10 @@ import { View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
 import { router } from "expo-router";
+import { useSetLogoutModalState } from "@/stores/useModalStateStore";
 
 export default function MyPageMenus() {
+  const setIsOpen = useSetLogoutModalState();
   return (
     <View className="w-full px-4">
       <MyPageMenu
@@ -13,7 +15,7 @@ export default function MyPageMenus() {
       />
       <MyPageMenu
         title="로그아웃"
-        onPress={() => console.log("로그아웃")}
+        onPress={() => setIsOpen(true)}
         chevron={true}
       />
       <MyPageMenu

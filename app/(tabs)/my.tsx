@@ -4,6 +4,7 @@ import MyMenus from "@/components/mypage/MyMenus";
 import MyPageMenus from "@/components/mypage/MyPageMenus";
 import NicknameModal from "@/components/mypage/NicknameModal";
 import UserInfo from "@/components/mypage/UserInfo";
+import LogoutModal from "@/components/mypage/LogoutModal";
 
 export default function MyScreen() {
   return (
@@ -17,6 +18,7 @@ export default function MyScreen() {
       />
       <MyPageMenus />
       <NicknameModal />
+      <LogoutModal />
     </SafeAreaView>
   );
 }
