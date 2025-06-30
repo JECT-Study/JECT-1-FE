@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
+import { router } from "expo-router";
 
 export default function MyMenus() {
   return (
@@ -16,7 +17,7 @@ export default function MyMenus() {
       </Pressable>
       <View aria-label="seperator" className="h-[20px] w-[1px] bg-[#DDDFE6]" />
       <Pressable
-        onPress={() => console.log("Pressable")}
+        onPress={() => router.replace("/(tabs)/my/like")}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
         <HeartIcon />
