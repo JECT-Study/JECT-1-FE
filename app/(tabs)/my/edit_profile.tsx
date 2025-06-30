@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native";
 
-import EditProfileHeader from "@/components/mypage/EditProfileHeader";
 import EditProfileImage from "@/components/mypage/EditProfileImage";
 import EditProfileNickname from "@/components/mypage/EditProfileNickname";
 import CustomHeader from "@/components/ui/CustomHeader";

@@ -1,10 +1,9 @@
 import { router } from "expo-router";
-import { SafeAreaView, View, Text, Pressable } from "react-native";
+import { SafeAreaView, View, Text } from "react-native";
 
-import Chevron from "@/components/icons/Chevron";
 import WithDrawForm from "@/components/mypage/WithDrawForm";
-import { reason } from "@/constants/WithDrawal";
 import CustomHeader from "@/components/ui/CustomHeader";
+import { reason } from "@/constants/WithDrawal";
 
 export default function Withdrawal() {
   return (

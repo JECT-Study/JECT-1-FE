@@ -20,7 +20,7 @@ export default function Terms() {
         <View className="w-full px-4">
           <MyPageMenu
             title="서비스 이용약관"
-            onPress={() => console.log("서비스 이용약관이요")}
+            onPress={() => router.push("/my/terms/service_terms")}
             chevron={false}
           />
           <MyPageMenu

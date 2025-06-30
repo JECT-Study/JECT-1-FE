@@ -1,9 +1,9 @@
+import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
-import { router } from "expo-router";
 
 export default function MyMenus() {
   return (
