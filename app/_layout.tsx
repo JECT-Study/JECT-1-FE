@@ -1,4 +1,5 @@
 import "@/global.css";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
   DarkTheme,
   DefaultTheme,
@@ -12,7 +13,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -39,6 +39,10 @@ export default function RootLayout() {
             />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
+            <Stack.Screen
+              name="my/withdrawal"
+              options={{ headerShown: false }}
+            />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

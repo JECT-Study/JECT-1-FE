@@ -36,7 +36,7 @@ export default function MyPageMenus() {
       <MyPageMenu title="로그아웃" onPress={handleLogout} chevron={true} />
       <MyPageMenu
         title="회원탈퇴"
-        onPress={() => router.push("/(tabs)/my/withdrawal")}
+        onPress={() => router.push("/my/withdrawal")}
         chevron={true}
       />
     </View>
