@@ -43,6 +43,10 @@ export default function RootLayout() {
               name="my/withdrawal"
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="my/terms/service_terms"
+              options={{ headerShown: false }}
+            />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
