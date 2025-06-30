@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 
-import LogoutModal from "@/components/mypage/LogoutModal";
 import MyMenus from "@/components/mypage/MyMenus";
 import MyPageMenus from "@/components/mypage/MyPageMenus";
 import UserInfo from "@/components/mypage/UserInfo";
@@ -23,7 +22,6 @@ export default function MyScreen() {
         className="my-2 h-[12px] w-full bg-[#F2F2F7]"
       />
       <MyPageMenus />
-      <LogoutModal />
     </SafeAreaView>
   );
 }
