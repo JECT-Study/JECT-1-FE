@@ -5,15 +5,13 @@
  * 3. 안드로이드는 정상 동작함을 확인했지만 permission에 대한 고민을 해야할듯.
  */
 
-import { useState } from "react";
-
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
 
+import { useSetTempImageUri } from "@/stores/useEditProfileStore";
+
 export default function useImagePicker() {
-  const [profileUri, setProfileUri] = useState(
-    "https://avatars.githubusercontent.com/u/156386797?v=4",
-  );
+  const setProfileUri = useSetTempImageUri();
   const { showActionSheetWithOptions } = useActionSheet();
   const onPress = () => {
     const options = ["사진 가져오기", "사진 촬영", "취소"];
@@ -36,6 +34,7 @@ export default function useImagePicker() {
               aspect: [1, 1],
               quality: 1,
             });
+            console.log(libraryResult);
             if (!libraryResult.canceled) {
               setProfileUri(libraryResult.assets[0].uri);
             }
@@ -60,6 +59,5 @@ export default function useImagePicker() {
   };
   return {
     onPress,
-    profileUri,
   };
 }
