@@ -1,11 +1,12 @@
-import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
+import usePageNavigation from "@/hooks/usePageNavigation";
 
 export default function MyMenus() {
+  const { goLike } = usePageNavigation();
   return (
     <View className="mx-6 my-4 flex flex-row items-center justify-center rounded-md bg-[#F2F3F6]">
       <Pressable
@@ -17,7 +18,7 @@ export default function MyMenus() {
       </Pressable>
       <View aria-label="seperator" className="h-[20px] w-[1px] bg-[#DDDFE6]" />
       <Pressable
-        onPress={() => router.replace("/(tabs)/my/like")}
+        onPress={() => goLike()}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
         <HeartIcon />

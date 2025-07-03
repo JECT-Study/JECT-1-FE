@@ -12,7 +12,7 @@ export default function Withdrawal() {
         <CustomHeader
           title="회원탈퇴"
           isCommit={false}
-          cancel={() => router.replace("/(tabs)/my")}
+          cancel={() => router.back()}
         />
         <Text className="m-6 text-[18px] font-medium">
           서비스를 탈퇴하는 이유가 궁금해요.

@@ -1,7 +1,7 @@
-import { router } from "expo-router";
 import { Alert, View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
+import usePageNavigation from "@/hooks/usePageNavigation";
 
 const handleLogout = () => {
   Alert.alert(
@@ -26,17 +26,14 @@ const handleLogout = () => {
 };
 
 export default function MyPageMenus() {
+  const { goTerms, goWithdrawal } = usePageNavigation();
   return (
     <View className="w-full px-4">
-      <MyPageMenu
-        title="이용약관"
-        onPress={() => router.push("/(tabs)/my/terms")}
-        chevron={true}
-      />
+      <MyPageMenu title="이용약관" onPress={() => goTerms()} chevron={true} />
       <MyPageMenu title="로그아웃" onPress={handleLogout} chevron={true} />
       <MyPageMenu
         title="회원탈퇴"
-        onPress={() => router.push("/my/withdrawal")}
+        onPress={() => goWithdrawal()}
         chevron={true}
       />
     </View>
