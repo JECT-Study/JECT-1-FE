@@ -21,7 +21,7 @@ export default function MyMenus() {
         onPress={() => goLike()}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
-        <HeartIcon />
+        <HeartIcon size={24} />
         <Text className="m-[3.25px] text-[13px]">관심목록</Text>
       </Pressable>
       <View aria-label="seperator" className="h-[20px] w-[1px] bg-[#DDDFE6]" />
