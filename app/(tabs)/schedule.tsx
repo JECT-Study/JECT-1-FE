@@ -17,10 +17,11 @@ import {
   LocaleConfig,
   DateData,
 } from "react-native-calendars";
-import type { DayProps } from "react-native-calendars/src/calendar/day";
 
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
+import DropdownIcon from "@/components/icons/DropdownIcon";
 import CustomDayComponent from "@/components/schedule/CustomDayComponent";
+import DatePickerModal from "@/components/schedule/DatePickerModal";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import {
@@ -77,6 +78,8 @@ export default function ScheduleScreen() {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string>(kstNow);
   const [schedules, setSchedules] = useState<ScheduleData>(initialScheduleData);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [tempDate, setTempDate] = useState<string>(kstNow);
 
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
@@ -111,65 +114,106 @@ export default function ScheduleScreen() {
     [schedules],
   );
 
+  const openDatePicker = () => {
+    setTempDate(selectedDate);
+    setShowDatePicker(true);
+  };
+
+  const closeDatePicker = () => {
+    setTempDate(selectedDate);
+    setShowDatePicker(false);
+  };
+
+  const confirmDateSelection = () => {
+    const newDate = dayjs(tempDate).startOf("month").format("YYYY-MM-DD");
+    setSelectedDate(newDate);
+    setShowDatePicker(false);
+  };
+
   return (
-    <View className="flex-1 bg-[#F1F3F5]">
-      <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
-      <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-        <Text className="text-center text-lg font-medium text-black">
-          나의 일정
-        </Text>
-      </View>
-      <CalendarProvider date={selectedDate}>
-        <ExpandableCalendar
-          ref={calendarRef}
-          theme={getCalendarTheme()}
-          firstDay={0} // 주의 시작 요일 (0: 일요일, 1: 월요일)
-          markedDates={getMarkedDates()} // 일정 마킹 및 선택된 날짜 표시
-          dayComponent={(props: any) => (
-            <CustomDayComponent
-              {...props}
-              primaryColor={primaryColor}
-              setSelectedDate={setSelectedDate}
-              onDayPress={(day: DateData) => {
-                console.log("Day changed:", day);
-                // 캘린더 내부 처리 완료 후 상태 업데이트 (렌더링 충돌 방지)
-                setTimeout(() => {
-                  setSelectedDate(day.dateString);
-                }, 10);
-              }}
-            />
-          )} // 커스텀 날짜 컴포넌트 (일요일 빨간색)
-          onMonthChange={(month) => {
-            const normalizedDate = {
-              ...month,
-              day: 1,
-              dateString: `${month.year}-${month.month.toString().padStart(2, "0")}-01`,
-            };
-            console.log("Month changed:", normalizedDate);
-            // 새로운 월의 1일로 선택된 날짜 업데이트
-            setSelectedDate(normalizedDate.dateString);
-          }}
-          hideKnob={true} // 캘린더 상단의 접기/펼치기 손잡이 숨김
-          closeOnDayPress={false} // 날짜 선택 시 캘린더 자동 접기 비활성화
-          disablePan={true} // 팬 제스처(드래그) 비활성화로 스크롤 충돌 방지
-        />
-        <View className="items-center rounded-b-[32px] border-b border-gray-100 bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
-          <Pressable className="p-2" onPress={toggleCalendar}>
-            <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
-          </Pressable>
+    <>
+      <View className="flex-1 bg-[#F1F3F5]">
+        <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
+        <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
+          <Text className="text-center text-lg font-medium text-black">
+            나의 일정
+          </Text>
         </View>
-        <FlatList
-          className="mt-4"
-          data={getSelectedDateSchedules(selectedDate)}
-          renderItem={({ item }) => (
-            <ScheduleItem item={item} primaryColor={primaryColor} />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={ScheduleEmptyState}
-          removeClippedSubviews={true}
-          initialNumToRender={10}
-        />
-      </CalendarProvider>
-    </View>
+
+        <View className="bg-white px-5 pb-3 pt-8">
+          <TouchableOpacity
+            className="flex-row items-center gap-1"
+            onPress={openDatePicker}
+          >
+            <Text className="text-xl font-semibold text-gray-900">
+              {dayjs(selectedDate).format("YYYY. MM")}
+            </Text>
+            <DropdownIcon />
+          </TouchableOpacity>
+        </View>
+
+        <CalendarProvider date={selectedDate}>
+          <ExpandableCalendar
+            ref={calendarRef}
+            theme={getCalendarTheme()}
+            firstDay={0}
+            markedDates={getMarkedDates()}
+            renderHeader={() => null}
+            dayComponent={(props: any) => (
+              <CustomDayComponent
+                {...props}
+                primaryColor={primaryColor}
+                setSelectedDate={setSelectedDate}
+                onDayPress={(day: DateData) => {
+                  console.log("Day changed:", day);
+                  setTimeout(() => {
+                    setSelectedDate(day.dateString);
+                  }, 10);
+                }}
+              />
+            )}
+            onMonthChange={(month) => {
+              const normalizedDate = {
+                ...month,
+                day: 1,
+                dateString: `${month.year}-${month.month.toString().padStart(2, "0")}-01`,
+              };
+              console.log("Month changed:", normalizedDate);
+              setSelectedDate(normalizedDate.dateString);
+            }}
+            hideKnob={true}
+            closeOnDayPress={false}
+            disablePan={true}
+            hideArrows={true}
+          />
+          <View className="items-center rounded-b-[32px] border-b border-gray-100 bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
+            <Pressable className="p-2" onPress={toggleCalendar}>
+              <ChevronIndicator
+                direction={isCalendarExpanded ? "up" : "down"}
+              />
+            </Pressable>
+          </View>
+          <FlatList
+            className="mt-4"
+            data={getSelectedDateSchedules(selectedDate)}
+            renderItem={({ item }) => (
+              <ScheduleItem item={item} primaryColor={primaryColor} />
+            )}
+            keyExtractor={(item) => item.id.toString()}
+            ListEmptyComponent={ScheduleEmptyState}
+            removeClippedSubviews={true}
+            initialNumToRender={10}
+          />
+        </CalendarProvider>
+      </View>
+
+      <DatePickerModal
+        visible={showDatePicker}
+        tempDate={tempDate}
+        onClose={closeDatePicker}
+        onConfirm={confirmDateSelection}
+        onDateChange={setTempDate}
+      />
+    </>
   );
 }
