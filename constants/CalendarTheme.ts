@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 
-const primaryColor = "#816BFF";
+const primaryColor = "#6B51FB";
 const backgroundColor = "#ffffff";
 const disabledColor = "#d9e1e8";
 
@@ -21,17 +21,17 @@ export const getCalendarTheme = () => {
     textMonthFontWeight: "bold" as const,
 
     // 요일 헤더 (일, 월, 화, 수, 목, 금, 토)
-    textSectionTitleColor: "#b6c1cd",
-    textDayHeaderFontSize: 13,
+    textSectionTitleColor: "#8F8F8F",
+    textDayHeaderFontSize: 11,
     textDayHeaderFontFamily: "System",
-    textDayHeaderFontWeight: 300 as const,
+    textDayHeaderFontWeight: 500 as const,
 
     // 날짜 숫자들
-    dayTextColor: "#2d4150",
+    dayTextColor: "#111111",
     todayTextColor: primaryColor,
-    textDayFontSize: 16,
+    textDayFontSize: 14,
     textDayFontFamily: "System",
-    textDayFontWeight: 300 as const,
+    textDayFontWeight: 500 as const,
     textDayStyle: { marginTop: Platform.OS === "android" ? 2 : 4 },
 
     // 선택된 날짜

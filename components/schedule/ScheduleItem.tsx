@@ -14,7 +14,7 @@ export default function ScheduleItem({
   primaryColor,
 }: ScheduleItemProps) {
   return (
-    <View className="mx-4 mb-3 rounded-lg border border-gray-100 bg-white p-4">
+    <View className="mx-5 mb-3 rounded-lg border border-gray-100 bg-white p-4">
       <View className="flex-row items-center">
         <View
           className="mr-3 h-3 w-3 rounded-full"
