@@ -1,7 +1,8 @@
 import React from "react";
 
+import { Picker } from "@react-native-picker/picker";
 import dayjs from "dayjs";
-import { Modal, View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 interface DatePickerModalProps {
   visible: boolean;
@@ -50,70 +51,68 @@ export default function DatePickerModal({
               <Text className="mb-2 text-center text-sm font-medium text-gray-700">
                 연도
               </Text>
-              <ScrollView
-                className="h-32 rounded-lg border border-gray-200"
-                showsVerticalScrollIndicator={false}
-              >
-                {years.map((year) => (
-                  <TouchableOpacity
-                    key={year}
-                    className={`p-3 ${
-                      year === currentYear ? "bg-blue-50" : ""
-                    }`}
-                    onPress={() => {
-                      const newDate = dayjs(tempDate)
-                        .year(year)
-                        .format("YYYY-MM-DD");
-                      onDateChange(newDate);
-                    }}
-                  >
-                    <Text
-                      className={`text-center ${
-                        year === currentYear
-                          ? "font-semibold text-blue-600"
-                          : "text-gray-900"
-                      }`}
-                    >
-                      {year}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+              <View className="h-32 overflow-hidden rounded-lg border border-gray-200 bg-white">
+                <Picker
+                  selectedValue={currentYear}
+                  onValueChange={(itemValue) => {
+                    const newDate = dayjs(tempDate)
+                      .year(itemValue)
+                      .format("YYYY-MM-DD");
+                    onDateChange(newDate);
+                  }}
+                  style={{
+                    height: 128,
+                    width: "100%",
+                  }}
+                  itemStyle={{
+                    height: 128,
+                    fontSize: 16,
+                    color: "#1f2937",
+                  }}
+                >
+                  {years.map((year) => (
+                    <Picker.Item
+                      key={year}
+                      label={year.toString()}
+                      value={year}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
 
             <View className="ml-2 flex-1">
               <Text className="mb-2 text-center text-sm font-medium text-gray-700">
                 월
               </Text>
-              <ScrollView
-                className="h-32 rounded-lg border border-gray-200"
-                showsVerticalScrollIndicator={false}
-              >
-                {months.map((month) => (
-                  <TouchableOpacity
-                    key={month}
-                    className={`p-3 ${
-                      month === currentMonth ? "bg-blue-50" : ""
-                    }`}
-                    onPress={() => {
-                      const newDate = dayjs(tempDate)
-                        .month(month - 1)
-                        .format("YYYY-MM-DD");
-                      onDateChange(newDate);
-                    }}
-                  >
-                    <Text
-                      className={`text-center ${
-                        month === currentMonth
-                          ? "font-semibold text-blue-600"
-                          : "text-gray-900"
-                      }`}
-                    >
-                      {month}월
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+              <View className="h-32 overflow-hidden rounded-lg border border-gray-200 bg-white">
+                <Picker
+                  selectedValue={currentMonth}
+                  onValueChange={(itemValue) => {
+                    const newDate = dayjs(tempDate)
+                      .month(itemValue - 1)
+                      .format("YYYY-MM-DD");
+                    onDateChange(newDate);
+                  }}
+                  style={{
+                    height: 128,
+                    width: "100%",
+                  }}
+                  itemStyle={{
+                    height: 128,
+                    fontSize: 16,
+                    color: "#1f2937",
+                  }}
+                >
+                  {months.map((month) => (
+                    <Picker.Item
+                      key={month}
+                      label={`${month}월`}
+                      value={month}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
           </View>
 

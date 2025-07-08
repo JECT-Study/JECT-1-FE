@@ -186,7 +186,7 @@ export default function ScheduleScreen() {
             closeOnDayPress={false}
             disablePan={true}
             hideArrows={true}
-            animateScroll={true}
+            animateScroll={false}
           />
           <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
             <Pressable className="p-2" onPress={toggleCalendar}>
