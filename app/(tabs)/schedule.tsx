@@ -1,21 +1,21 @@
-import React, { useRef, useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import {
-  Text,
-  View,
-  StatusBar,
-  TouchableOpacity,
-  Pressable,
   FlatList,
+  Pressable,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import {
-  ExpandableCalendar,
   CalendarProvider,
-  LocaleConfig,
   DateData,
+  ExpandableCalendar,
+  LocaleConfig,
 } from "react-native-calendars";
 
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
@@ -25,15 +25,15 @@ import DatePickerModal from "@/components/schedule/DatePickerModal";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import {
+  backgroundColor,
   getCalendarTheme,
   primaryColor,
-  backgroundColor,
 } from "@/constants/CalendarTheme";
 import {
   initialScheduleData,
-  ScheduleItemType,
   ScheduleByDate,
   ScheduleData,
+  ScheduleItemType,
 } from "@/constants/ScheduleData";
 
 // 한국어 로케일 설정
@@ -87,7 +87,10 @@ export default function ScheduleScreen() {
     if (calendarRef.current) {
       // 캘린더의 toggleCalendarPosition 메서드 호출하여 상태 변경
       const newState = calendarRef.current.toggleCalendarPosition();
-      setIsCalendarExpanded(newState);
+      // 캘린더 내부 애니메이션과 동기화를 위한 최소 지연
+      setTimeout(() => {
+        setIsCalendarExpanded(newState);
+      }, 300);
     }
   }, []);
 
@@ -166,9 +169,7 @@ export default function ScheduleScreen() {
                 setSelectedDate={setSelectedDate}
                 onDayPress={(day: DateData) => {
                   console.log("Day changed:", day);
-                  setTimeout(() => {
-                    setSelectedDate(day.dateString);
-                  }, 10);
+                  setSelectedDate(day.dateString);
                 }}
               />
             )}
@@ -185,8 +186,9 @@ export default function ScheduleScreen() {
             closeOnDayPress={false}
             disablePan={true}
             hideArrows={true}
+            animateScroll={true}
           />
-          <View className="items-center rounded-b-[32px] border-b border-gray-100 bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
+          <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
             <Pressable className="p-2" onPress={toggleCalendar}>
               <ChevronIndicator
                 direction={isCalendarExpanded ? "up" : "down"}

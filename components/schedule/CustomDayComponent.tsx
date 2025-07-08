@@ -1,7 +1,7 @@
 import React from "react";
 
 import dayjs from "dayjs";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { DateData } from "react-native-calendars";
 
 interface CustomDayComponentProps {
@@ -79,7 +79,7 @@ export default function CustomDayComponent({
       </Text>
       {marking?.marked && (
         <View
-          className="absolute bottom-0 h-1 w-1 rounded-full"
+          className="absolute bottom-[-0.3] h-1 w-1 rounded-full"
           style={{
             backgroundColor: primaryColor,
           }}
