@@ -35,6 +35,7 @@ import {
   ScheduleData,
   ScheduleItemType,
 } from "@/constants/ScheduleData";
+import { useDebounce } from "@/hooks/useDebounce";
 
 // 한국어 로케일 설정
 LocaleConfig.locales.ko = {
@@ -82,6 +83,8 @@ export default function ScheduleScreen() {
   const [tempDate, setTempDate] = useState<string>(kstNow);
 
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
+
+  const debounce = useDebounce();
 
   const toggleCalendar = useCallback(() => {
     if (calendarRef.current) {
@@ -133,6 +136,14 @@ export default function ScheduleScreen() {
     setShowDatePicker(false);
   };
 
+  const debouncedMonthChange = (dateString: string) => {
+    debounce(() => {
+      setSelectedDate((prevDate) => {
+        return prevDate !== dateString ? dateString : prevDate;
+      });
+    }, 200);
+  };
+
   return (
     <>
       <View className="flex-1 bg-[#F1F3F5]">
@@ -173,20 +184,21 @@ export default function ScheduleScreen() {
                 }}
               />
             )}
-            onMonthChange={(month) => {
+            onMonthChange={(month: DateData) => {
               const normalizedDate = {
                 ...month,
                 day: 1,
                 dateString: `${month.year}-${month.month.toString().padStart(2, "0")}-01`,
               };
               console.log("Month changed:", normalizedDate);
-              setSelectedDate(normalizedDate.dateString);
+
+              debouncedMonthChange(normalizedDate.dateString);
             }}
             hideKnob={true}
             closeOnDayPress={false}
             disablePan={true}
             hideArrows={true}
-            animateScroll={false}
+            animateScroll={true}
           />
           <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
             <Pressable className="p-2" onPress={toggleCalendar}>
