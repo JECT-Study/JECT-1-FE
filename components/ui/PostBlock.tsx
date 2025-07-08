@@ -18,20 +18,20 @@ export default function PostBlock({ info }: { info: infoInterface }) {
     <>
       <View className="my-4 flex flex-row items-center">
         {/*TODO : 실제 이미지로 교체 필요.*/}
-        <View className="h-[86px] w-[86px] rounded-[4px] bg-gray-200" />
+        <View className="h-[92px] w-[92px] rounded-[4px] bg-gray-200" />
         <View className="ml-[18px] flex-1 justify-center">
           <Text className="text-[16px] font-semibold leading-normal text-[#111]">
             {info.title}
           </Text>
-          <Text className="text-[12px] leading-normal text-[#9E9E9E]">
+          <Text className="text-[13px] leading-[1.4] text-[#9E9E9E]">
             {info.address}
           </Text>
-          <Text className="text-[12px] leading-normal text-[#6D6D6D]">
+          <Text className="text-[13px] leading-normal text-[#6D6D6D]">
             {info.start_date} - {info.end_date}
           </Text>
         </View>
         <Pressable className="justify-center" onPress={onPressHeart}>
-          <HeartIcon size={32} fill="#F14949" isFill={like} stroke="#C5C5C5" />
+          <HeartIcon size={32} fill="#F14949" isFill={like} stroke="#FFA7A7" />
         </Pressable>
       </View>
       <Separator />
