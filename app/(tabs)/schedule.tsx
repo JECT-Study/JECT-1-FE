@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -18,6 +18,7 @@ import {
   LocaleConfig,
 } from "react-native-calendars";
 
+import Chevron from "@/components/icons/Chevron";
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
 import CustomDayComponent from "@/components/schedule/CustomDayComponent";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
@@ -33,7 +34,7 @@ import {
   ScheduleData,
   ScheduleItemType,
 } from "@/constants/ScheduleData";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useThrottle } from "@/hooks/useThrottle";
 
 // 한국어 로케일 설정
 LocaleConfig.locales.ko = {
@@ -71,26 +72,47 @@ LocaleConfig.defaultLocale = "ko";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const getPreviousMonthDate = (date: string) => {
+  return dayjs(date).subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+};
+
+const getNextMonthDate = (date: string) => {
+  return dayjs(date).add(1, "month").startOf("month").format("YYYY-MM-DD");
+};
+
 export default function ScheduleScreen() {
   const kstNow = dayjs().tz("Asia/Seoul").format("YYYY-MM-DD");
 
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string>(kstNow);
   const [schedules, setSchedules] = useState<ScheduleData>(initialScheduleData);
+  const [canGoToPreviousMonth, setCanGoToPreviousMonth] =
+    useState<boolean>(true);
+  const [canGoToNextMonth, setCanGoToNextMonth] = useState<boolean>(true);
 
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
-  const debounce = useDebounce();
+  const throttle = useThrottle();
 
   const currentMonth = dayjs().tz("Asia/Seoul");
+
   const minDate = currentMonth
     .subtract(2, "month")
     .startOf("month")
     .format("YYYY-MM-DD");
+
   const maxDate = currentMonth
     .add(2, "month")
     .endOf("month")
     .format("YYYY-MM-DD");
+
+  useEffect(() => {
+    const previousMonthDate = getPreviousMonthDate(selectedDate);
+    const nextMonthDate = getNextMonthDate(selectedDate);
+
+    setCanGoToPreviousMonth(!dayjs(previousMonthDate).isBefore(dayjs(minDate)));
+    setCanGoToNextMonth(!dayjs(nextMonthDate).isAfter(dayjs(maxDate)));
+  }, [selectedDate, minDate, maxDate]);
 
   const toggleCalendar = useCallback(() => {
     if (calendarRef.current) {
@@ -126,8 +148,8 @@ export default function ScheduleScreen() {
     [schedules],
   );
 
-  const debouncedMonthChange = (dateString: string) => {
-    debounce(() => {
+  const throttledMonthChange = (dateString: string) => {
+    throttle(() => {
       setSelectedDate((prevDate) => {
         return prevDate !== dateString ? dateString : prevDate;
       });
@@ -135,29 +157,23 @@ export default function ScheduleScreen() {
   };
 
   const goToPreviousMonth = () => {
-    const newDate = dayjs(selectedDate)
-      .subtract(1, "month")
-      .startOf("month")
-      .format("YYYY-MM-DD");
+    const newDate = getPreviousMonthDate(selectedDate);
 
     if (dayjs(newDate).isBefore(dayjs(minDate))) {
       return;
     }
 
-    setSelectedDate(newDate);
+    throttledMonthChange(newDate);
   };
 
   const goToNextMonth = () => {
-    const newDate = dayjs(selectedDate)
-      .add(1, "month")
-      .startOf("month")
-      .format("YYYY-MM-DD");
+    const newDate = getNextMonthDate(selectedDate);
 
     if (dayjs(newDate).isAfter(dayjs(maxDate))) {
       return;
     }
 
-    setSelectedDate(newDate);
+    throttledMonthChange(newDate);
   };
 
   return (
@@ -171,23 +187,33 @@ export default function ScheduleScreen() {
 
       <View className="flex-row items-center justify-center bg-white px-4 py-3">
         <TouchableOpacity
-          onPress={goToPreviousMonth}
-          className="p-2"
+          className="px-4 py-2"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          onPress={goToPreviousMonth}
+          disabled={!canGoToPreviousMonth}
         >
-          <Text className="text-xl text-gray-600">‹</Text>
+          <Chevron
+            direction="left"
+            size={20}
+            color={canGoToPreviousMonth ? "#000000" : "#D9D9D9"}
+          />
         </TouchableOpacity>
 
-        <Text className="text-lg font-semibold text-gray-900">
-          {dayjs(selectedDate).format("M월 YYYY")}
+        <Text className="mx-1.5 text-lg font-semibold text-gray-900">
+          {dayjs(selectedDate).format("YYYY. MM")}
         </Text>
 
         <TouchableOpacity
-          onPress={goToNextMonth}
-          className="p-2"
+          className="px-4 py-2"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          onPress={goToNextMonth}
+          disabled={!canGoToNextMonth}
         >
-          <Text className="text-xl text-gray-600">›</Text>
+          <Chevron
+            direction="right"
+            size={20}
+            color={canGoToNextMonth ? "#000000" : "#D9D9D9"}
+          />
         </TouchableOpacity>
       </View>
 
@@ -205,10 +231,9 @@ export default function ScheduleScreen() {
             <CustomDayComponent
               {...props}
               primaryColor={primaryColor}
-              setSelectedDate={setSelectedDate}
               onDayPress={(day: DateData) => {
                 console.log("Day changed:", day);
-                setSelectedDate(day.dateString);
+                throttledMonthChange(day.dateString);
               }}
             />
           )}
@@ -220,22 +245,14 @@ export default function ScheduleScreen() {
             };
             console.log("Month changed:", normalizedDate);
 
-            const newDateString = normalizedDate.dateString;
-            if (
-              dayjs(newDateString).isBefore(dayjs(minDate)) ||
-              dayjs(newDateString).isAfter(dayjs(maxDate))
-            ) {
-              return;
-            }
-
-            debouncedMonthChange(normalizedDate.dateString);
+            throttledMonthChange(normalizedDate.dateString);
           }}
           hideKnob={true}
           closeOnDayPress={false}
           disablePan={true}
           animateScroll={true}
-          pastScrollRange={2}
-          futureScrollRange={2}
+          pastScrollRange={3}
+          futureScrollRange={3}
         />
         <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
           <Pressable className="p-2" onPress={toggleCalendar}>

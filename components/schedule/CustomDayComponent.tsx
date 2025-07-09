@@ -17,7 +17,6 @@ interface CustomDayComponentProps {
     dotColor?: string;
   };
   primaryColor: string;
-  setSelectedDate: (dateString: string) => void;
   onDayPress?: (day: DateData) => void;
 }
 
@@ -26,7 +25,6 @@ export default function CustomDayComponent({
   state,
   marking,
   primaryColor,
-  setSelectedDate,
   onDayPress,
 }: CustomDayComponentProps) {
   const dateObj = dayjs(date.dateString);
@@ -57,7 +55,6 @@ export default function CustomDayComponent({
       ]}
       onPress={() => {
         if (!isDisabled) {
-          setSelectedDate(date.dateString);
           onDayPress?.({
             dateString: date.dateString,
             day: date.day,

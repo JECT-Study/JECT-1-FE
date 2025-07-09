@@ -1,13 +1,14 @@
 import { useRef } from "react";
 
-export const useDebounce = () => {
+export const useThrottle = () => {
   const timerId = useRef<number | null>(null);
 
   return (callback: () => void, delay: number) => {
-    if (timerId.current) {
-      clearTimeout(timerId.current);
+    if (timerId.current) return;
+
+    timerId.current = window.setTimeout(() => {
+      callback();
       timerId.current = null;
-    }
-    timerId.current = setTimeout(callback, delay);
+    }, delay);
   };
 };
