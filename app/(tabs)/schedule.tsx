@@ -3,7 +3,14 @@ import React, { useCallback, useRef, useState } from "react";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { FlatList, Pressable, StatusBar, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   CalendarProvider,
   DateData,
@@ -75,6 +82,16 @@ export default function ScheduleScreen() {
 
   const debounce = useDebounce();
 
+  const currentMonth = dayjs().tz("Asia/Seoul");
+  const minDate = currentMonth
+    .subtract(2, "month")
+    .startOf("month")
+    .format("YYYY-MM-DD");
+  const maxDate = currentMonth
+    .add(2, "month")
+    .endOf("month")
+    .format("YYYY-MM-DD");
+
   const toggleCalendar = useCallback(() => {
     if (calendarRef.current) {
       // 캘린더의 toggleCalendarPosition 메서드 호출하여 상태 변경
@@ -114,7 +131,33 @@ export default function ScheduleScreen() {
       setSelectedDate((prevDate) => {
         return prevDate !== dateString ? dateString : prevDate;
       });
-    }, 200);
+    }, 100);
+  };
+
+  const goToPreviousMonth = () => {
+    const newDate = dayjs(selectedDate)
+      .subtract(1, "month")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+
+    if (dayjs(newDate).isBefore(dayjs(minDate))) {
+      return;
+    }
+
+    setSelectedDate(newDate);
+  };
+
+  const goToNextMonth = () => {
+    const newDate = dayjs(selectedDate)
+      .add(1, "month")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+
+    if (dayjs(newDate).isAfter(dayjs(maxDate))) {
+      return;
+    }
+
+    setSelectedDate(newDate);
   };
 
   return (
@@ -126,12 +169,38 @@ export default function ScheduleScreen() {
         </Text>
       </View>
 
+      <View className="flex-row items-center justify-center bg-white px-4 py-3">
+        <TouchableOpacity
+          onPress={goToPreviousMonth}
+          className="p-2"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text className="text-xl text-gray-600">‹</Text>
+        </TouchableOpacity>
+
+        <Text className="text-lg font-semibold text-gray-900">
+          {dayjs(selectedDate).format("M월 YYYY")}
+        </Text>
+
+        <TouchableOpacity
+          onPress={goToNextMonth}
+          className="p-2"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text className="text-xl text-gray-600">›</Text>
+        </TouchableOpacity>
+      </View>
+
       <CalendarProvider date={selectedDate}>
         <ExpandableCalendar
           ref={calendarRef}
           theme={getCalendarTheme()}
           firstDay={0}
           markedDates={getMarkedDates()}
+          renderHeader={() => null}
+          hideArrows={true}
+          minDate={minDate}
+          maxDate={maxDate}
           dayComponent={(props: any) => (
             <CustomDayComponent
               {...props}
@@ -151,12 +220,22 @@ export default function ScheduleScreen() {
             };
             console.log("Month changed:", normalizedDate);
 
+            const newDateString = normalizedDate.dateString;
+            if (
+              dayjs(newDateString).isBefore(dayjs(minDate)) ||
+              dayjs(newDateString).isAfter(dayjs(maxDate))
+            ) {
+              return;
+            }
+
             debouncedMonthChange(normalizedDate.dateString);
           }}
           hideKnob={true}
           closeOnDayPress={false}
           disablePan={true}
           animateScroll={true}
+          pastScrollRange={2}
+          futureScrollRange={2}
         />
         <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
           <Pressable className="p-2" onPress={toggleCalendar}>
