@@ -31,11 +31,15 @@ export const getCalendarTheme = () => {
 
     // 날짜 숫자들
     dayTextColor: "#111111",
-    todayTextColor: primaryColor,
+    todayTextColor: "#111111",
     textDayFontSize: 14,
     textDayFontFamily: "System",
     textDayFontWeight: 500 as const,
-    textDayStyle: { marginTop: Platform.OS === "android" ? 2 : 4 },
+    textDayStyle: {
+      marginTop: Platform.OS === "android" ? 2 : 4,
+      textAlign: "center" as const,
+      lineHeight: 23,
+    },
 
     // 선택된 날짜
     selectedDayBackgroundColor: primaryColor,

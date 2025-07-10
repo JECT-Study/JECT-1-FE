@@ -1,6 +1,8 @@
 import React, { useCallback, useRef, useState } from "react";
 
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { FlatList, Pressable, StatusBar, Text, View } from "react-native";
@@ -13,7 +15,6 @@ import {
 
 import Chevron from "@/components/icons/Chevron";
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
-import CustomDayComponent from "@/components/schedule/CustomDayComponent";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import {
@@ -23,8 +24,6 @@ import {
 } from "@/constants/CalendarTheme";
 import {
   initialScheduleData,
-  ScheduleByDate,
-  ScheduleData,
   ScheduleItemType,
 } from "@/constants/ScheduleData";
 
@@ -63,6 +62,21 @@ LocaleConfig.defaultLocale = "ko";
 // dayjs 플러그인 설정
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+
+const eventColors = [
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#96CEB4",
+  "#FFEAA7",
+  "#DDA0DD",
+  "#98D8C8",
+  "#F7DC6F",
+  "#BB8FCE",
+  "#85C1E9",
+];
 
 export default function ScheduleScreen() {
   // 오늘 날짜 기준 설정
@@ -73,7 +87,8 @@ export default function ScheduleScreen() {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string>(kstNow);
   const [visibleMonth, setVisibleMonth] = useState<number>(currentMonth);
-  const [schedules, setSchedules] = useState<ScheduleData>(initialScheduleData);
+  const [schedules, setSchedules] =
+    useState<ScheduleItemType[]>(initialScheduleData);
 
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
@@ -95,22 +110,58 @@ export default function ScheduleScreen() {
   const getMarkedDates = useCallback(() => {
     const marked: { [key: string]: any } = {};
 
-    schedules.forEach((item: ScheduleByDate) => {
-      marked[item.title] = {
-        marked: true,
-        dotColor: primaryColor,
-      };
+    // 모든 일정(schedules)을 순회하며 캘린더 마킹 데이터 생성
+    schedules.forEach((event, index) => {
+      const startDate = dayjs(event.startDate);
+      const endDate = dayjs(event.endDate);
+
+      const color = eventColors[index % eventColors.length];
+
+      // 시작일부터 종료일까지 하루씩 순회하기 위한 현재 날짜 포인터
+      let currentDate = startDate;
+
+      // 현재 날짜가 종료일과 같거나 이전인 동안 반복
+      while (currentDate.isSameOrBefore(endDate)) {
+        const dateString = currentDate.format("YYYY-MM-DD");
+
+        // 해당 날짜의 마킹 데이터가 없으면 초기화
+        if (!marked[dateString]) marked[dateString] = { periods: [] };
+
+        // 현재 날짜에 대한 period 마킹 객체 생성
+        const period = {
+          startingDay: currentDate.isSame(startDate, "day"),
+          endingDay: currentDate.isSame(endDate, "day"),
+          color: color,
+        };
+
+        // 현재 날짜의 periods 배열에 생성한 period 추가
+        marked[dateString].periods.push(period);
+
+        // 다음 날짜로 이동 (하루 증가)
+        currentDate = currentDate.add(1, "day");
+      }
     });
 
     return marked;
   }, [schedules]);
 
+  const test = getMarkedDates();
+  console.log(test);
+
   const getSelectedDateSchedules = useCallback(
     (selectedDate: string): ScheduleItemType[] => {
-      const dateItem = schedules.find(
-        (item: ScheduleByDate) => item.title === selectedDate,
-      );
-      return dateItem ? dateItem.data : [];
+      const selectedDayjs = dayjs(selectedDate);
+
+      // 선택한 날짜가 이벤트의 startDate와 endDate 사이에 있는지 확인
+      return schedules.filter((item: ScheduleItemType) => {
+        const startDate = dayjs(item.startDate);
+        const endDate = dayjs(item.endDate);
+
+        return (
+          selectedDayjs.isSameOrAfter(startDate, "day") &&
+          selectedDayjs.isSameOrBefore(endDate, "day")
+        );
+      });
     },
     [schedules],
   );
@@ -140,6 +191,7 @@ export default function ScheduleScreen() {
           theme={getCalendarTheme()}
           firstDay={0}
           markedDates={getMarkedDates()}
+          markingType="multi-period"
           monthFormat="yyyy. MM"
           disableArrowLeft={visibleMonth <= minAllowedMonth}
           disableArrowRight={visibleMonth >= maxAllowedMonth}
@@ -158,26 +210,17 @@ export default function ScheduleScreen() {
               </View>
             );
           }}
-          dayComponent={(props: any) => (
-            <CustomDayComponent
-              {...props}
-              primaryColor={primaryColor}
-              minDate={minDate}
-              maxDate={maxDate}
-              onDayPress={(day: DateData) => {
-                console.log("Day changed:", day);
-                handleDateChange(day.dateString);
-              }}
-            />
-          )}
+          onDayPress={(day: DateData) => {
+            console.log("Day changed:", day);
+            handleDateChange(day.dateString);
+          }}
           onMonthChange={(month: DateData) => {
             console.log("Month changed:", month);
             if (month.month) setVisibleMonth(month.month);
           }}
-          onCalendarToggled={(calendarOpened: boolean) => {
-            console.log("Calendar toggled:", calendarOpened);
-            setIsCalendarExpanded(calendarOpened);
-          }}
+          onCalendarToggled={(calendarOpened: boolean) =>
+            setIsCalendarExpanded(calendarOpened)
+          }
           hideKnob={true}
           closeOnDayPress={false}
           disablePan={true}
@@ -185,11 +228,13 @@ export default function ScheduleScreen() {
           pastScrollRange={3}
           futureScrollRange={3}
         />
+
         <View className="items-center rounded-b-[32px] bg-white px-4 pb-4 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.04)]">
           <Pressable className="p-2" onPress={toggleCalendar}>
             <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
           </Pressable>
         </View>
+
         <FlatList
           className="mt-4"
           data={getSelectedDateSchedules(selectedDate)}
