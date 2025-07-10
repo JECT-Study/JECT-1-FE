@@ -1,16 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import {
-  FlatList,
-  Pressable,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Pressable, StatusBar, Text, View } from "react-native";
 import {
   CalendarProvider,
   DateData,
@@ -34,7 +27,6 @@ import {
   ScheduleData,
   ScheduleItemType,
 } from "@/constants/ScheduleData";
-import { useThrottle } from "@/hooks/useThrottle";
 
 // 한국어 로케일 설정
 LocaleConfig.locales.ko = {
@@ -72,57 +64,32 @@ LocaleConfig.defaultLocale = "ko";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const getPreviousMonthDate = (date: string) => {
-  return dayjs(date).subtract(1, "month").startOf("month").format("YYYY-MM-DD");
-};
-
-const getNextMonthDate = (date: string) => {
-  return dayjs(date).add(1, "month").startOf("month").format("YYYY-MM-DD");
-};
-
 export default function ScheduleScreen() {
-  const kstNow = dayjs().tz("Asia/Seoul").format("YYYY-MM-DD");
+  // 오늘 날짜 기준 설정
+  const today = dayjs().tz("Asia/Seoul"); // 2025-07-09T15:30:00+09:00
+  const kstNow = today.format("YYYY-MM-DD"); // "2025-07-09"
+  const currentMonth = today.month() + 1; // 7 (1-12 범위)
 
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string>(kstNow);
+  const [visibleMonth, setVisibleMonth] = useState<number>(currentMonth);
   const [schedules, setSchedules] = useState<ScheduleData>(initialScheduleData);
-  const [canGoToPreviousMonth, setCanGoToPreviousMonth] =
-    useState<boolean>(true);
-  const [canGoToNextMonth, setCanGoToNextMonth] = useState<boolean>(true);
 
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
-  const throttle = useThrottle();
+  // kstNow의 월을 기준으로 화살표 활성화/비활성화 계산
+  const minAllowedMonth = currentMonth - 2;
+  const maxAllowedMonth = currentMonth + 2;
 
-  const currentMonth = dayjs().tz("Asia/Seoul");
-
-  const minDate = currentMonth
+  // 실제 날짜 범위 제한 (현재 날짜 기준 ±2달)
+  const minDate = today
     .subtract(2, "month")
     .startOf("month")
-    .format("YYYY-MM-DD");
-
-  const maxDate = currentMonth
-    .add(2, "month")
-    .endOf("month")
-    .format("YYYY-MM-DD");
-
-  useEffect(() => {
-    const previousMonthDate = getPreviousMonthDate(selectedDate);
-    const nextMonthDate = getNextMonthDate(selectedDate);
-
-    setCanGoToPreviousMonth(!dayjs(previousMonthDate).isBefore(dayjs(minDate)));
-    setCanGoToNextMonth(!dayjs(nextMonthDate).isAfter(dayjs(maxDate)));
-  }, [selectedDate, minDate, maxDate]);
+    .format("YYYY-MM-DD"); // "2025-05-01"
+  const maxDate = today.add(2, "month").endOf("month").format("YYYY-MM-DD"); // "2025-09-30"
 
   const toggleCalendar = useCallback(() => {
-    if (calendarRef.current) {
-      // 캘린더의 toggleCalendarPosition 메서드 호출하여 상태 변경
-      const newState = calendarRef.current.toggleCalendarPosition();
-      // 캘린더 내부 애니메이션과 동기화를 위한 최소 지연
-      setTimeout(() => {
-        setIsCalendarExpanded(newState);
-      }, 300);
-    }
+    if (calendarRef.current) calendarRef.current.toggleCalendarPosition();
   }, []);
 
   const getMarkedDates = useCallback(() => {
@@ -148,33 +115,7 @@ export default function ScheduleScreen() {
     [schedules],
   );
 
-  const throttledMonthChange = (dateString: string) => {
-    throttle(() => {
-      setSelectedDate((prevDate) => {
-        return prevDate !== dateString ? dateString : prevDate;
-      });
-    }, 100);
-  };
-
-  const goToPreviousMonth = () => {
-    const newDate = getPreviousMonthDate(selectedDate);
-
-    if (dayjs(newDate).isBefore(dayjs(minDate))) {
-      return;
-    }
-
-    throttledMonthChange(newDate);
-  };
-
-  const goToNextMonth = () => {
-    const newDate = getNextMonthDate(selectedDate);
-
-    if (dayjs(newDate).isAfter(dayjs(maxDate))) {
-      return;
-    }
-
-    throttledMonthChange(newDate);
-  };
+  const handleDateChange = (dateString: string) => setSelectedDate(dateString);
 
   return (
     <View className="flex-1 bg-[#F1F3F5]">
@@ -185,67 +126,57 @@ export default function ScheduleScreen() {
         </Text>
       </View>
 
-      <View className="flex-row items-center justify-center bg-white px-4 py-3">
-        <TouchableOpacity
-          className="px-4 py-2"
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          onPress={goToPreviousMonth}
-          disabled={!canGoToPreviousMonth}
-        >
-          <Chevron
-            direction="left"
-            size={20}
-            color={canGoToPreviousMonth ? "#000000" : "#D9D9D9"}
-          />
-        </TouchableOpacity>
-
-        <Text className="mx-1.5 text-lg font-semibold text-gray-900">
-          {dayjs(selectedDate).format("YYYY. MM")}
-        </Text>
-
-        <TouchableOpacity
-          className="px-4 py-2"
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          onPress={goToNextMonth}
-          disabled={!canGoToNextMonth}
-        >
-          <Chevron
-            direction="right"
-            size={20}
-            color={canGoToNextMonth ? "#000000" : "#D9D9D9"}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <CalendarProvider date={selectedDate}>
+      <CalendarProvider
+        date={selectedDate}
+        disableAutoDaySelection={[
+          ExpandableCalendar.navigationTypes.MONTH_ARROWS,
+          ExpandableCalendar.navigationTypes.WEEK_ARROWS,
+          ExpandableCalendar.navigationTypes.MONTH_SCROLL,
+          ExpandableCalendar.navigationTypes.WEEK_SCROLL,
+        ]}
+      >
         <ExpandableCalendar
           ref={calendarRef}
           theme={getCalendarTheme()}
           firstDay={0}
           markedDates={getMarkedDates()}
-          renderHeader={() => null}
-          hideArrows={true}
+          monthFormat="yyyy. MM"
+          disableArrowLeft={visibleMonth <= minAllowedMonth}
+          disableArrowRight={visibleMonth >= maxAllowedMonth}
           minDate={minDate}
           maxDate={maxDate}
+          renderArrow={(direction) => {
+            const isDisabled =
+              direction === "left"
+                ? visibleMonth <= minAllowedMonth
+                : visibleMonth >= maxAllowedMonth;
+            const arrowColor = isDisabled ? "#D9D9D9" : "#6D6D6D";
+
+            return (
+              <View>
+                <Chevron direction={direction} color={arrowColor} />
+              </View>
+            );
+          }}
           dayComponent={(props: any) => (
             <CustomDayComponent
               {...props}
               primaryColor={primaryColor}
+              minDate={minDate}
+              maxDate={maxDate}
               onDayPress={(day: DateData) => {
                 console.log("Day changed:", day);
-                throttledMonthChange(day.dateString);
+                handleDateChange(day.dateString);
               }}
             />
           )}
           onMonthChange={(month: DateData) => {
-            const normalizedDate = {
-              ...month,
-              day: 1,
-              dateString: `${month.year}-${month.month.toString().padStart(2, "0")}-01`,
-            };
-            console.log("Month changed:", normalizedDate);
-
-            throttledMonthChange(normalizedDate.dateString);
+            console.log("Month changed:", month);
+            if (month.month) setVisibleMonth(month.month);
+          }}
+          onCalendarToggled={(calendarOpened: boolean) => {
+            console.log("Calendar toggled:", calendarOpened);
+            setIsCalendarExpanded(calendarOpened);
           }}
           hideKnob={true}
           closeOnDayPress={false}

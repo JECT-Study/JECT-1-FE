@@ -18,6 +18,8 @@ interface CustomDayComponentProps {
   };
   primaryColor: string;
   onDayPress?: (day: DateData) => void;
+  minDate?: string;
+  maxDate?: string;
 }
 
 export default function CustomDayComponent({
@@ -26,12 +28,23 @@ export default function CustomDayComponent({
   marking,
   primaryColor,
   onDayPress,
+  minDate,
+  maxDate,
 }: CustomDayComponentProps) {
   const dateObj = dayjs(date.dateString);
   const isSunday = dateObj.day() === 0;
   const isSelected = state === "selected";
   const isToday = state === "today";
-  const isDisabled = state === "disabled";
+
+  // 날짜 범위 확인
+  const isInRange = (() => {
+    if (minDate && dateObj.isBefore(dayjs(minDate), "day")) return false;
+    if (maxDate && dateObj.isAfter(dayjs(maxDate), "day")) return false;
+    return true;
+  })();
+
+  // 범위 안에 있으면 활성화, 범위 밖이면 비활성화
+  const isDisabled = !isInRange;
 
   let textColor = "#111111"; // 기본 텍스트 색상
 

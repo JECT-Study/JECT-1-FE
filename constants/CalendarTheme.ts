@@ -11,8 +11,11 @@ export const getCalendarTheme = () => {
     calendarBackground: backgroundColor,
 
     // 화살표 (월 이동)
-    arrowColor: primaryColor,
-    arrowStyle: { padding: 0 },
+    arrowColor: "#6D6D6D", // 활성화된 화살표 색상
+    arrowStyle: {
+      padding: 0,
+      marginHorizontal: 60,
+    },
 
     // 월 제목 (2024년 1월)
     monthTextColor: "#2d4150",
