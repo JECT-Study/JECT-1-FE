@@ -125,17 +125,17 @@ export default function ScheduleScreen() {
         const dateString = currentDate.format("YYYY-MM-DD");
 
         // 해당 날짜의 마킹 데이터가 없으면 초기화
-        if (!marked[dateString]) marked[dateString] = { periods: [] };
+        if (!marked[dateString]) marked[dateString] = { dots: [] };
 
-        // 현재 날짜에 대한 period 마킹 객체 생성
-        const period = {
-          startingDay: currentDate.isSame(startDate, "day"),
-          endingDay: currentDate.isSame(endDate, "day"),
+        // 현재 날짜에 대한 dot 마킹 객체 생성
+        const dot = {
+          key: `event-${event.id}`,
           color: color,
+          selectedDotColor: color,
         };
 
-        // 현재 날짜의 periods 배열에 생성한 period 추가
-        marked[dateString].periods.push(period);
+        // 현재 날짜의 dots 배열에 생성한 dot 추가
+        marked[dateString].dots.push(dot);
 
         // 다음 날짜로 이동 (하루 증가)
         currentDate = currentDate.add(1, "day");
@@ -144,9 +144,6 @@ export default function ScheduleScreen() {
 
     return marked;
   }, [schedules]);
-
-  const test = getMarkedDates();
-  console.log(test);
 
   const getSelectedDateSchedules = useCallback(
     (selectedDate: string): ScheduleItemType[] => {
@@ -167,6 +164,8 @@ export default function ScheduleScreen() {
   );
 
   const handleDateChange = (dateString: string) => setSelectedDate(dateString);
+
+  console.log("selectedDate", selectedDate);
 
   return (
     <View className="flex-1 bg-[#F1F3F5]">
@@ -191,7 +190,7 @@ export default function ScheduleScreen() {
           theme={getCalendarTheme()}
           firstDay={0}
           markedDates={getMarkedDates()}
-          markingType="multi-period"
+          markingType="multi-dot"
           monthFormat="yyyy. MM"
           disableArrowLeft={visibleMonth <= minAllowedMonth}
           disableArrowRight={visibleMonth >= maxAllowedMonth}
@@ -212,7 +211,7 @@ export default function ScheduleScreen() {
           }}
           onDayPress={(day: DateData) => {
             console.log("Day changed:", day);
-            handleDateChange(day.dateString);
+            setTimeout(() => handleDateChange(day.dateString), 100);
           }}
           onMonthChange={(month: DateData) => {
             console.log("Month changed:", month);
