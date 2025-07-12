@@ -1,5 +1,11 @@
 import { View } from "react-native";
 
-export default function Separator() {
-  return <View className="h-[1px] w-full bg-[#EEE]" />;
+interface Props {
+  color?: string;
+}
+
+export default function Separator({ color = "#EEE" }: Props) {
+  return (
+    <View className={`h-[1px] w-full`} style={{ backgroundColor: color }} />
+  );
 }

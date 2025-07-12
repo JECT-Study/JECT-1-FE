@@ -16,7 +16,7 @@ export default function PostBlock({ info }: { info: infoInterface }) {
   const { like, onPressHeart } = useHeart();
   return (
     <>
-      <View className="my-4 flex flex-row items-center">
+      <View className="my-[18px] flex flex-row items-center">
         {/*TODO : 실제 이미지로 교체 필요.*/}
         <View className="h-[92px] w-[92px] rounded-[4px] bg-gray-200" />
         <View className="ml-[18px] flex-1 justify-center">
@@ -34,7 +34,9 @@ export default function PostBlock({ info }: { info: infoInterface }) {
           <HeartIcon size={32} fill="#F14949" isFill={like} stroke="#FFA7A7" />
         </Pressable>
       </View>
-      <Separator />
+      <View className="px-2">
+        <Separator />
+      </View>
     </>
   );
 }
