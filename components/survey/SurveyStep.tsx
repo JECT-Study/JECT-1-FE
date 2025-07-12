@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Chevron from "@/components/icons/Chevron";
 
-import Percentage from "./Percentage";
+import SurveyStepBar from "./SurveyStepBar";
 export default function SurveyStep({
   question,
   options,
@@ -27,11 +27,8 @@ export default function SurveyStep({
 
   return (
     <SafeAreaView className="w-full flex-1 justify-between">
-      <Percentage current={currentStep} total={total} />
-      <View className="relative h-[60px] items-center justify-center">
-        <Text className="text-[20px] text-[#383535]">
-          {currentStep}/{total}
-        </Text>
+      <View className="h-[60px] items-center justify-center">
+        <SurveyStepBar current={currentStep} total={total} />
         <Pressable
           className="absolute left-4 top-1/2 -translate-y-1/2"
           onPress={() => (onBack ? onBack() : router.back())}
@@ -39,31 +36,31 @@ export default function SurveyStep({
           <Chevron direction="left" />
         </Pressable>
       </View>
+      <View className="flex items-center">
+        <Text className="justify-center text-[15px] text-[#9B9696]">
+          {currentStep}/{total}
+        </Text>
+        <Text className="mb-4 mt-8 text-center text-2xl font-semibold text-gray-800">
+          {question}
+        </Text>
+      </View>
       <View className="flex-1 px-4">
-        {/* 질문 */}
-        <View className="mb-8 flex items-center">
-          <Text className="text-xl font-semibold text-gray-800">
-            {question}
-          </Text>
-        </View>
-
-        {/* 선택지 */}
-        <View className="flex-1">
+        <View className="flex-1 gap-[10px]">
           {options.map((label, index) => (
             <Pressable
               key={index}
               onPress={() => setSelected(index)}
-              className={`mb-3 rounded-lg border-2 p-4 ${
+              className={`rounded-lg py-[14px] ${
                 selected === index
-                  ? "border-[#816BFF]"
-                  : "border-gray-300 bg-white"
+                  ? "border-[2px] border-[#816BFF] bg-[#DFDAFF]"
+                  : "border-[1px] border-[#E8E9EB] bg-white"
               }`}
             >
               <Text
-                className={`text-lg ${
+                className={`text-center text-sm ${
                   selected === index
-                    ? "font-medium text-[#816BFF]"
-                    : "text-gray-700"
+                    ? "font-semibold text-[#3B465A]"
+                    : "text-[#3B465A]"
                 }`}
               >
                 {label}
@@ -71,8 +68,6 @@ export default function SurveyStep({
             </Pressable>
           ))}
         </View>
-
-        {/* Next Button */}
       </View>
       <View className="px-4 py-6">
         <Pressable
