@@ -1,10 +1,9 @@
 import { useFunnel } from "@use-funnel/react-navigation-native";
+import { router } from "expo-router";
 
-import AfterSurvey from "@/components/survey/AfterSurvey";
-import SurveyIntro from "@/components/survey/SurveyIntro";
+import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
-import { router } from "expo-router";
 
 type SurveyResult = {
   step1?: number;
@@ -32,7 +31,7 @@ export default function SurveyScreen() {
   return (
     <funnel.Render
       intro={({ history }) => (
-        <SurveyIntro onNext={() => history.push("step1")} />
+        <SurveyBalloon type="INTRO" onNext={() => history.push("step1")} />
       )}
       step1={({ history, context }) => (
         <SurveyStep
@@ -71,7 +70,7 @@ export default function SurveyScreen() {
         />
       )}
       done={({ context, history }) => (
-        <AfterSurvey context={context} history={history} />
+        <SurveyBalloon type="END" onNext={() => router.push("/my")} />
       )}
     />
   );
