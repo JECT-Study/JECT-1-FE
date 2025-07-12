@@ -8,10 +8,12 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import PostBlock from "@/components/ui/PostBlock";
 import { DUMMY_EVENT_POSTS } from "@/constants/DummyLike";
 import useLikeRefresh from "@/hooks/useLikeRefresh";
+import { useCategorySelected } from "@/stores/useCategoryStore";
 
 export default function Like() {
   const { refresh, onRefresh } = useLikeRefresh();
   const [infodummy, setInfodummy] = useState(DUMMY_EVENT_POSTS);
+  const selected = useCategorySelected();
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
       <CustomHeader
@@ -26,7 +28,11 @@ export default function Like() {
       </View>
       <FlatList
         className="w-full flex-1 px-6 py-2"
-        data={infodummy}
+        data={
+          selected === "all"
+            ? infodummy
+            : infodummy.filter((item) => item.category === selected)
+        }
         renderItem={({ item }) => <PostBlock info={item} />}
         keyExtractor={(item) => item.id as unknown as string}
         onEndReached={() => {
