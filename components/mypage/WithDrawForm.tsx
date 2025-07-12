@@ -2,6 +2,7 @@ import { View, Text, Pressable, TextInput } from "react-native";
 import Animated from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
+import Separator from "@/components/ui/Separator";
 import useWithDrawForm from "@/hooks/useWithDrawForm";
 
 type AccordionProps = {
@@ -19,10 +20,11 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
     onLayoutContent,
     setOtherReason,
     otherReason,
+    checkSubmit,
   } = useWithDrawForm();
   return (
     <>
-      <View className="flex-1">
+      <View className="relative flex-1">
         <View className="mb-4 w-full overflow-hidden rounded-xl border border-[#757575]">
           <Pressable
             onPress={toggle}
@@ -46,17 +48,17 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
               </Svg>
             </Animated.View>
           </Pressable>
-
           <Animated.View style={animatedStyle}>
-            <View onLayout={onLayoutContent} className="bg-white px-4 py-2">
-              {items.map((item) => (
+            <View onLayout={onLayoutContent} className="bg-white pt-2">
+              <Separator color="#757575" />
+              {items.map((item, index) => (
                 <Pressable
                   key={item}
                   onPress={() => {
                     setSelected(item);
                     toggle();
                   }}
-                  className={"mb-1 rounded-md py-4"}
+                  className={`bg-white px-2 py-4 ${index !== items.length - 1 ? "border-b-[1px] border-[#D9D9D9]" : ""}`}
                 >
                   <Text className="text-[14px] font-[400px] leading-[150%] text-[#111111]">
                     {item}
@@ -69,22 +71,25 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
         {selected === "기타" ? (
           <TextInput
             placeholder="회원 탈퇴 이유를 알려주세요."
-            className="h-[158px] rounded-lg border-[1px] border-[#757575] p-4"
+            className="h-[158px] rounded-lg border-[1px] border-[#757575] bg-white p-4"
             onChangeText={setOtherReason}
+            value={otherReason}
             multiline
             textAlignVertical="top"
           />
         ) : null}
-        <Text className="mt-4 text-[14px] font-normal text-[#484848]">
-          소중한 의견을 반영하여
-        </Text>
-        <Text className="text-[14px] font-normal text-[#484848]">
-          더 좋은 서비스로 보답하겠습니다.
-        </Text>
+        <View className="absolute top-[80px] -z-50">
+          <Text className="mt-4 text-[14px] font-normal text-[#484848]">
+            소중한 의견을 반영하여
+          </Text>
+          <Text className="text-[14px] font-normal text-[#484848]">
+            더 좋은 서비스로 보답하겠습니다.
+          </Text>
+        </View>
       </View>
       <Pressable
         className={`w-full rounded-lg py-4 ${
-          selected === null ? "bg-[#D1C9FF]" : "bg-[#816BFF]"
+          checkSubmit() ? "bg-[#816BFF]" : "bg-[#D1C9FF]"
         }`}
         onPress={() => {
           // TODO : 제출 동작

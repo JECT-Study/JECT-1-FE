@@ -36,6 +36,15 @@ export default function useWithDrawForm(defaultOpen = false, duration = 200) {
     };
   });
 
+  const checkSubmit = () => {
+    if (selected === null) return false;
+    if (selected === "기타") {
+      return otherReason.length > 0;
+    } else {
+      return true;
+    }
+  };
+
   return {
     toggle,
     selected,
@@ -45,5 +54,6 @@ export default function useWithDrawForm(defaultOpen = false, duration = 200) {
     onLayoutContent,
     setOtherReason,
     otherReason,
+    checkSubmit,
   };
 }
