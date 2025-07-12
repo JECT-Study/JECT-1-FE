@@ -5,17 +5,22 @@ type Props = {
   color?: string;
 };
 
-export default function Chevron({ direction, color = "#6D6D6D" }: Props) {
-  const pathData = direction === "left" ? "M5 1L1 5L5 9" : "M1 1L5 5L1 9";
-
+export default function Chevron({
+  direction = "left",
+  color = "#222222",
+}: Props) {
+  const pathD = {
+    left: "M16 20L8 12L16 4",
+    right: "M8 4l8 8-8 8",
+  };
   return (
-    <Svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <Path
-        d={pathData}
+        d={pathD[direction]}
         stroke={color}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
     </Svg>
   );

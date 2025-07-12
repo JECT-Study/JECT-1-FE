@@ -13,12 +13,6 @@ type Props = {
   commit?: () => void;
 };
 
-/**
- * isCommit : 제출 버튼이 존재하는지 (확인, 제출 등)
- * isCommit인 경우 왼쪽 버튼은 X
- * isCommit이 아닌경우엔 Chevron
- */
-
 export default function CustomHeader({
   title,
   cancel,
