@@ -52,7 +52,7 @@ export const getCalendarTheme = () => {
     dotColor: primaryColor,
     selectedDotColor: "#ffffff",
     disabledDotColor: disabledColor,
-    dotStyle: { marginTop: 2 },
+    dotStyle: { marginTop: 1 },
 
     // 로딩 인디케이터
     indicatorColor: primaryColor,

@@ -65,24 +65,24 @@ dayjs.extend(timezone);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
-const eventColors = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEAA7",
-  "#DDA0DD",
-  "#98D8C8",
-  "#F7DC6F",
-  "#BB8FCE",
-  "#85C1E9",
-];
+// Multi-Dot 방식에서 사용하던 이벤트 색상 배열
+// const eventColors = [
+//   "#FF6B6B",
+//   "#4ECDC4",
+//   "#45B7D1",
+//   "#96CEB4",
+//   "#FFEAA7",
+//   "#DDA0DD",
+//   "#98D8C8",
+//   "#F7DC6F",
+//   "#BB8FCE",
+//   "#85C1E9",
+// ];
 
 export default function ScheduleScreen() {
-  // 오늘 날짜 기준 설정
-  const today = dayjs().tz("Asia/Seoul"); // 2025-07-09T15:30:00+09:00
-  const kstNow = today.format("YYYY-MM-DD"); // "2025-07-09"
-  const currentMonth = today.month() + 1; // 7 (1-12 범위)
+  const today = dayjs().tz("Asia/Seoul");
+  const kstNow = today.format("YYYY-MM-DD");
+  const currentMonth = today.month() + 1;
 
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string>(kstNow);
@@ -100,8 +100,8 @@ export default function ScheduleScreen() {
   const minDate = today
     .subtract(2, "month")
     .startOf("month")
-    .format("YYYY-MM-DD"); // "2025-05-01"
-  const maxDate = today.add(2, "month").endOf("month").format("YYYY-MM-DD"); // "2025-09-30"
+    .format("YYYY-MM-DD");
+  const maxDate = today.add(2, "month").endOf("month").format("YYYY-MM-DD");
 
   const toggleCalendar = useCallback(() => {
     if (calendarRef.current) calendarRef.current.toggleCalendarPosition();
@@ -111,11 +111,12 @@ export default function ScheduleScreen() {
     const marked: { [key: string]: any } = {};
 
     // 모든 일정(schedules)을 순회하며 캘린더 마킹 데이터 생성
-    schedules.forEach((event, index) => {
+    schedules.forEach((event) => {
       const startDate = dayjs(event.startDate);
       const endDate = dayjs(event.endDate);
 
-      const color = eventColors[index % eventColors.length];
+      // Multi-Dot 방식에서 사용하던 색상 할당
+      // const color = eventColors[index % eventColors.length];
 
       // 시작일부터 종료일까지 하루씩 순회하기 위한 현재 날짜 포인터
       let currentDate = startDate;
@@ -124,18 +125,27 @@ export default function ScheduleScreen() {
       while (currentDate.isSameOrBefore(endDate)) {
         const dateString = currentDate.format("YYYY-MM-DD");
 
-        // 해당 날짜의 마킹 데이터가 없으면 초기화
-        if (!marked[dateString]) marked[dateString] = { dots: [] };
+        // 해당 날짜에 일정이 있음을 표시 (여러 일정이 있어도 dot 1개만)
+        if (!marked[dateString]) {
+          marked[dateString] = {
+            marked: true,
+            dotColor: primaryColor,
+          };
+        }
 
-        // 현재 날짜에 대한 dot 마킹 객체 생성
-        const dot = {
-          key: `event-${event.id}`,
-          color: color,
-          selectedDotColor: color,
-        };
-
-        // 현재 날짜의 dots 배열에 생성한 dot 추가
-        marked[dateString].dots.push(dot);
+        // Multi-Dot 방식 코드
+        // // 해당 날짜의 마킹 데이터가 없으면 초기화
+        // if (!marked[dateString]) marked[dateString] = { dots: [] };
+        //
+        // // 현재 날짜에 대한 dot 마킹 객체 생성
+        // const dot = {
+        //   key: `event-${event.id}`,
+        //   color: color,
+        //   selectedDotColor: color,
+        // };
+        //
+        // // 현재 날짜의 dots 배열에 생성한 dot 추가
+        // marked[dateString].dots.push(dot);
 
         // 다음 날짜로 이동 (하루 증가)
         currentDate = currentDate.add(1, "day");
@@ -165,8 +175,6 @@ export default function ScheduleScreen() {
 
   const handleDateChange = (dateString: string) => setSelectedDate(dateString);
 
-  console.log("selectedDate", selectedDate);
-
   return (
     <View className="flex-1 bg-[#F1F3F5]">
       <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
@@ -190,7 +198,7 @@ export default function ScheduleScreen() {
           theme={getCalendarTheme()}
           firstDay={0}
           markedDates={getMarkedDates()}
-          markingType="multi-dot"
+          markingType="dot" // Multi-Dot 방식: "multi-dot"
           monthFormat="yyyy. MM"
           disableArrowLeft={visibleMonth <= minAllowedMonth}
           disableArrowRight={visibleMonth >= maxAllowedMonth}
