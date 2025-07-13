@@ -1,6 +1,6 @@
 import { create } from "zustand/react";
 
-type EditProfileStore = {
+interface EditProfileStore {
   profileNickname: string;
   profileImageUri: string;
   tempNickname: string;
@@ -13,7 +13,7 @@ type EditProfileStore = {
     applyChanges: () => void;
     cancelChanges: () => void;
   };
-};
+}
 
 const useEditProfileStore = create<EditProfileStore>((set, get) => ({
   profileNickname: "기본닉네임",

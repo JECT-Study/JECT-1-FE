@@ -21,17 +21,17 @@ export default function Terms() {
           <MyPageMenu
             title="서비스 이용약관"
             onPress={() => router.push("/my/terms/service_terms")}
-            chevron={false}
+            chevron={true}
           />
           <MyPageMenu
             title="개인 정보 처리방침"
             onPress={() => console.log("개인정보 처리 방침")}
-            chevron={false}
+            chevron={true}
           />
           <MyPageMenu
             title="위치기반 서비스 이용약관"
             onPress={() => console.log("위치기반 서비스 이용약관")}
-            chevron={false}
+            chevron={true}
           />
         </View>
       </SafeAreaView>
