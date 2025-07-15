@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
@@ -12,6 +14,9 @@ import {
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+
+// dayjs 한국어 로케일 설정
+dayjs.locale("ko");
 
 interface DummyItem {
   id: string;
@@ -46,6 +51,37 @@ const festivalData: DummyItem[] = [
   { id: "6", title: "전주 한옥축제", subtitle: "전주 한옥마을" },
 ];
 
+const weeklyContentData: { [key: string]: DummyItem[] } = {
+  "0": [
+    { id: "sun1", title: "일요일 브런치 마켓", subtitle: "서울 성수동" },
+    { id: "sun2", title: "가족 나들이 축제", subtitle: "경기 용인" },
+  ],
+  "1": [
+    { id: "mon1", title: "월요일 재즈 클럽", subtitle: "서울 홍대" },
+    { id: "mon2", title: "도심 속 힐링", subtitle: "서울 한강공원" },
+  ],
+  "2": [
+    { id: "tue1", title: "화요일 아트마켓", subtitle: "서울 이태원" },
+    { id: "tue2", title: "전통 공예 체험", subtitle: "인사동" },
+  ],
+  "3": [
+    { id: "wed1", title: "수요일 야시장", subtitle: "부산 광안리" },
+    { id: "wed2", title: "중간 쉼표 콘서트", subtitle: "대구 중구" },
+  ],
+  "4": [
+    { id: "thu1", title: "목요일 맥주축제", subtitle: "강남 가로수길" },
+    { id: "thu2", title: "직장인 문화모임", subtitle: "서울 명동" },
+  ],
+  "5": [
+    { id: "fri1", title: "불금 파티", subtitle: "서울 클럽 거리" },
+    { id: "fri2", title: "금요 야경투어", subtitle: "서울 남산타워" },
+  ],
+  "6": [
+    { id: "sat1", title: "토요일 벼룩시장", subtitle: "서울 홍대" },
+    { id: "sat2", title: "주말 캠핑축제", subtitle: "강원 춘천" },
+  ],
+};
+
 const skeletonData = Array.from({ length: 8 }, (_, i) => ({
   id: i.toString(),
 }));
@@ -79,8 +115,61 @@ const Card = ({ item }: { item: DummyItem }) => {
 
 const SCROLL_THRESHOLD = 50;
 
+const getWeekDays = () => {
+  const today = dayjs();
+  const startOfWeek = today.startOf("week");
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = startOfWeek.add(i, "day");
+    return {
+      date: day.format("D"),
+      dayName: day.format("ddd"),
+      dayOfWeek: i,
+      fullDate: day.format("YYYY-MM-DD"),
+      isToday: day.isSame(today, "day"),
+    };
+  });
+};
+
+const DayButton = ({
+  day,
+  isSelected,
+  onPress,
+}: {
+  day: { date: string; dayName: string; dayOfWeek: number; isToday: boolean };
+  isSelected: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    onPress={onPress}
+    className={`mx-1 flex h-16 w-12 items-center justify-center rounded-2xl ${
+      isSelected ? "border-0" : "border border-gray-300 bg-white"
+    }`}
+    style={{
+      backgroundColor: isSelected ? "#816BFF" : "white",
+    }}
+  >
+    <ThemedText
+      className={`text-lg font-semibold ${
+        isSelected ? "text-white" : "text-gray-400"
+      }`}
+    >
+      {day.date}
+    </ThemedText>
+    <ThemedText
+      className={`text-xs ${isSelected ? "text-white" : "text-gray-400"}`}
+    >
+      {day.dayName}
+    </ThemedText>
+  </TouchableOpacity>
+);
+
 export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number>(dayjs().day());
+
+  const weekDays = getWeekDays();
+  const selectedDayContent = weeklyContentData[selectedDay.toString()] || [];
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -192,6 +281,44 @@ export default function HomeScreen() {
 
               <FlatList
                 data={mdPickData}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => <Card item={item} />}
+                keyExtractor={(item) => item.id}
+              />
+            </ThemedView>
+
+            <ThemedView>
+              <View className="mb-3 flex-row items-center justify-between">
+                <ThemedText type="subtitle" className="font-bold text-black">
+                  금주 컨텐츠를 한눈에
+                </ThemedText>
+                <TouchableOpacity>
+                  <ThemedText className="text-sm text-gray-500">
+                    더보기
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+
+              <View className="mb-4">
+                <FlatList
+                  data={weekDays}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 4 }}
+                  renderItem={({ item }) => (
+                    <DayButton
+                      day={item}
+                      isSelected={selectedDay === item.dayOfWeek}
+                      onPress={() => setSelectedDay(item.dayOfWeek)}
+                    />
+                  )}
+                  keyExtractor={(item) => item.dayOfWeek.toString()}
+                />
+              </View>
+
+              <FlatList
+                data={selectedDayContent}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => <Card item={item} />}
