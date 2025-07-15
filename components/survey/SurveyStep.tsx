@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Chevron from "@/components/icons/Chevron";
@@ -26,12 +26,28 @@ export default function SurveyStep({
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <SafeAreaView className="w-full flex-1 justify-between">
+    <SafeAreaView className="w-full flex-1 justify-between bg-white">
       <View className="h-[60px] items-center justify-center">
         <SurveyStepBar current={currentStep} total={total} />
         <Pressable
           className="absolute left-4 top-1/2 -translate-y-1/2"
-          onPress={() => (onBack ? onBack() : router.back())}
+          onPress={() =>
+            Alert.alert(
+              "취향 분석을 그만 두시겠어요?",
+              "선택한 내용은 저장되지 않아요.",
+              [
+                {
+                  text: "계속 진행",
+                  style: "cancel",
+                },
+                {
+                  text: "네, 그만둘게요.",
+                  style: "destructive",
+                  onPress: () => router.back(),
+                },
+              ],
+            )
+          }
         >
           <Chevron direction="left" />
         </Pressable>

@@ -11,6 +11,8 @@ type Props = {
   isCommit: boolean;
   // 확인시 수행할 로직
   commit?: () => void;
+  // seperator 여부
+  separator?: boolean;
 };
 
 export default function CustomHeader({
@@ -18,11 +20,12 @@ export default function CustomHeader({
   cancel,
   isCommit,
   commit,
+  separator,
 }: Props) {
   return (
     <View
       aria-label={`${title} header`}
-      className="relative z-50 flex h-[60px] w-full flex-row items-center justify-between border-b-2 border-gray-100 p-4"
+      className={`relative z-50 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
     >
       <Pressable
         onPress={cancel ? cancel : null}
