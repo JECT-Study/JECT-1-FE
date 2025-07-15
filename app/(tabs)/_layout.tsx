@@ -10,7 +10,10 @@ export default function TabLayout() {
   const pathname = usePathname();
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#ffffff" }}
+      edges={["bottom"]}
+    >
       <Tabs
         screenOptions={{
           headerShown: false,
