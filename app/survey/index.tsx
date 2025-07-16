@@ -49,6 +49,7 @@ export default function SurveyScreen() {
           onBack={() => router.replace("/survey")}
           total={totalQuestions}
           currentStep={1}
+          dividedOptions={true}
         />
       )}
       step2={({ history, context }) => (
