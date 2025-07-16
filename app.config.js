@@ -1,17 +1,20 @@
-export default ({ config }) => ({
-  ...config,
-  name: "JECT-1-FE",
-  slug: "JECT-1-FE",
+import "dotenv/config";
+
+export default {
+  name: "mycode",
+  slug: "mycode",
+  owner: "scorchedrice",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "ject1fe",
+  scheme: "mycode",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+
   ios: {
     supportsTablet: true,
     usesAppleSignIn: true,
-    bundleIdentifier: process.env.bundleIdentifier,
+    bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
     infoPlist: {
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
@@ -20,24 +23,29 @@ export default ({ config }) => ({
       ],
       CFBundleURLTypes: [
         {
-          CFBundleURLSchemes: [`kakao${process.env.KAKAO_NATIVE_APP_KEY}`],
+          CFBundleURLSchemes: [
+            `kakao${process.env.MYCODE_KAKAO_NATIVE_APP_KEY}`,
+          ],
         },
       ],
     },
   },
+
   android: {
+    package: process.env.MYCODE_PACKAGE,
+    edgeToEdgeEnabled: true,
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
-    edgeToEdgeEnabled: true,
-    package: process.env.package,
   },
+
   web: {
     bundler: "metro",
     output: "static",
     favicon: "./assets/images/favicon.png",
   },
+
   plugins: [
     "expo-router",
     [
@@ -62,7 +70,7 @@ export default ({ config }) => ({
     [
       "@react-native-kakao/core",
       {
-        nativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
+        nativeAppKey: process.env.MYCODE_KAKAO_NATIVE_APP_KEY,
         android: {
           authCodeHandlerActivity: true,
         },
@@ -80,11 +88,16 @@ export default ({ config }) => ({
       },
     ],
   ],
+
   experiments: {
     typedRoutes: true,
   },
+
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
-    kakaoNativeAppKey: process.env.KAKAO_NATIVE_APP_KEY,
+    kakaoNativeAppKey: process.env.MYCODE_KAKAO_NATIVE_APP_KEY,
+    eas: {
+      projectId: "d7358463-cb75-4255-acbd-d31bfcad90b2",
+    },
   },
-});
+};
