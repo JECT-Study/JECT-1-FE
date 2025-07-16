@@ -44,7 +44,7 @@ export default function SurveyStep({
         <Text className="justify-center text-[15px] text-[#9B9696]">
           {currentStep}/{total}
         </Text>
-        <Text className="mb-4 mt-8 text-center text-2xl font-semibold text-gray-800">
+        <Text className="text-gray800 mb-4 mt-8 text-center text-2xl font-semibold">
           {question}
         </Text>
       </View>
@@ -60,17 +60,17 @@ export default function SurveyStep({
                       <Pressable
                         key={globalIndex}
                         onPress={() => setSelected(globalIndex)}
-                        className={`flex-1 rounded-lg py-[14px] ${
+                        className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
                           selected === globalIndex
-                            ? "border-[2px] border-[#816BFF] bg-[#DFDAFF]"
-                            : "border-[1px] border-[#E8E9EB] bg-white"
+                            ? "border-main bg-sub border-[2px]"
+                            : "bg-gray100"
                         }`}
                       >
                         <Text
-                          className={`text-center text-sm ${
+                          className={`text-center text-[16px] ${
                             selected === globalIndex
-                              ? "font-semibold text-[#3B465A]"
-                              : "text-[#3B465A]"
+                              ? "text-main font-semibold"
+                              : "text-gray600"
                           }`}
                         >
                           {label}
@@ -78,25 +78,26 @@ export default function SurveyStep({
                       </Pressable>
                     );
                   })}
-                  {/* 짝수 맞추기 (홀수개 처리용) */}
-                  {row.length === 1 && <View className="flex-1" />}
+                  {row.length === 1 && (
+                    <View className="ml-[20px] flex-1" /> // 홀수로 남는 경우 칸 수정
+                  )}
                 </View>
               ))
             : options.map((label, index) => (
                 <Pressable
                   key={index}
                   onPress={() => setSelected(index)}
-                  className={`rounded-lg py-[14px] ${
+                  className={`h-[58px] items-center justify-center rounded-lg p-[10px] ${
                     selected === index
-                      ? "border-[2px] border-[#816BFF] bg-[#DFDAFF]"
-                      : "border-[1px] border-[#E8E9EB] bg-white"
+                      ? "border-main bg-sub border-[2px]"
+                      : "bg-gray100"
                   }`}
                 >
                   <Text
-                    className={`text-center text-sm ${
+                    className={`text-center text-[16px] ${
                       selected === index
-                        ? "font-semibold text-[#3B465A]"
-                        : "text-[#3B465A]"
+                        ? "text-main font-semibold"
+                        : "text-gray600"
                     }`}
                   >
                     {label}
@@ -108,14 +109,14 @@ export default function SurveyStep({
       <View className="px-4 py-6">
         <Pressable
           className={`h-[47px] w-full items-center justify-center rounded-[6px] ${
-            selected === null ? "bg-gray-300" : "bg-[#816BFF]"
+            selected === null ? "bg-gray300" : "bg-main"
           }`}
           disabled={selected === null}
           onPress={() => selected !== null && onNext(selected)}
         >
           <Text
             className={`text-center text-lg font-semibold ${
-              selected === null ? "text-gray-500" : "text-white"
+              selected === null ? "text-gray500" : "text-white"
             }`}
           >
             다음으로
