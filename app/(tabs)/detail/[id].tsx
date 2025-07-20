@@ -1,4 +1,5 @@
 import { shareFeedTemplate } from "@react-native-kakao/share";
+import * as Clipboard from "expo-clipboard";
 import { Stack, useRouter } from "expo-router";
 import {
   Animated,
@@ -53,6 +54,15 @@ export default function DetailScreen() {
 
   const handleGoBack = () => {
     router.push(ROUTES.HOME);
+  };
+
+  const handleCopyAddress = async () => {
+    try {
+      await Clipboard.setStringAsync("경기도 양평군 청운면 용두로 170");
+      console.log("주소가 복사되었습니다.");
+    } catch (error) {
+      console.error("복사 오류:", error);
+    }
   };
 
   // 스크롤에 따른 어두운 오버레이 투명도
@@ -228,10 +238,14 @@ export default function DetailScreen() {
                     <Text className="text-sm text-gray-700">
                       경기도 양평군 청운면 용두로 170{" "}
                     </Text>
-                    <View className="flex-row items-center">
+                    <Pressable
+                      onPress={handleCopyAddress}
+                      className="flex-row items-center"
+                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                    >
                       <CopyIcon size={14} />
                       <Text className="ml-1 text-xs text-blue-600">복사</Text>
-                    </View>
+                    </Pressable>
                   </View>
                 </View>
 
