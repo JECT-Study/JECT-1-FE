@@ -20,6 +20,8 @@
     "@expo/react-native-action-sheet": "^4.1.1",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-kakao/core": "^2.4.0",
+    "@react-native-kakao/share": "^2.4.0",
+    "@react-native-kakao/social": "^2.4.0",
     "@react-native-kakao/user": "^2.4.0",
     "@react-native-picker/picker": "^2.11.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
