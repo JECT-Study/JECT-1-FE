@@ -55,6 +55,7 @@ export default ({ config }) => ({
         android: {
           extraMavenRepos: [
             "https://devrepo.kakao.com/nexus/content/groups/public/",
+            "https://repository.map.naver.com/archive/maven",
           ],
         },
       },
@@ -77,6 +78,12 @@ export default ({ config }) => ({
       {
         photosPermission: "마이코드가 당신의 사진(앱)에 접근하려합니다.",
         cameraPermission: "마이코드가 당신의 카메라(앱)에 접근하려합니다.",
+      },
+    ],
+    [
+      "@mj-studio/react-native-naver-map",
+      {
+        client_id: process.env.NAVER_MAP_CLIENT_ID,
       },
     ],
   ],

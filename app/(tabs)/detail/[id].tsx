@@ -1,3 +1,7 @@
+import {
+  NaverMapMarkerOverlay,
+  NaverMapView,
+} from "@mj-studio/react-native-naver-map";
 import { shareFeedTemplate } from "@react-native-kakao/share";
 import * as Clipboard from "expo-clipboard";
 import { Stack, useRouter } from "expo-router";
@@ -15,6 +19,7 @@ import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
+import LocationMarkerIcon from "@/components/icons/LocationMarkerIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import { ROUTES } from "@/constants/Routes";
@@ -294,8 +299,27 @@ export default function DetailScreen() {
                   위치
                 </Text>
 
-                <View className="mb-3 h-48 items-center justify-center rounded-lg bg-gray-100">
-                  <Text className="text-gray-500">지도 영역</Text>
+                <View className="mb-3 h-48 overflow-hidden rounded-lg">
+                  <NaverMapView
+                    style={{ width: "100%", height: "100%" }}
+                    initialCamera={{
+                      latitude: 37.566535,
+                      longitude: 126.9779692,
+                      zoom: 15,
+                    }}
+                    isShowLocationButton={false}
+                    isShowZoomControls={false}
+                  >
+                    <NaverMapMarkerOverlay
+                      latitude={37.566535}
+                      longitude={126.9779692}
+                      width={30}
+                      height={34}
+                      anchor={{ x: 0.5, y: 1 }}
+                    >
+                      <LocationMarkerIcon width={30} height={34} />
+                    </NaverMapMarkerOverlay>
+                  </NaverMapView>
                 </View>
 
                 <View className="mb-3 flex-row items-center">
