@@ -12,6 +12,7 @@ import {
   ExpandableCalendar,
   LocaleConfig,
 } from "react-native-calendars";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import Chevron from "@/components/icons/Chevron";
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
@@ -176,7 +177,7 @@ export default function ScheduleScreen() {
   const handleDateChange = (dateString: string) => setSelectedDate(dateString);
 
   return (
-    <View className="flex-1 bg-[#F1F3F5]">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor={backgroundColor} />
       <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
         <Text className="text-center text-lg font-medium text-black">
@@ -254,6 +255,6 @@ export default function ScheduleScreen() {
           initialNumToRender={10}
         />
       </CalendarProvider>
-    </View>
+    </SafeAreaView>
   );
 }
