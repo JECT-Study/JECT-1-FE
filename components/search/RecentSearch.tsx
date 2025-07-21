@@ -1,10 +1,11 @@
 // 최근 검색어 관련 로직이 담겨있는 컴포넌트
 import { useState } from "react";
 
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 
 import RecentSearchListButton from "@/components/search/RecentSearchListButton";
 import RecentSearchStatus from "@/components/search/RecentSearchStatus";
+import { setState } from "@vitest/expect";
 
 type Props = {
   textInput: string;
@@ -25,11 +26,19 @@ export default function RecentSearch({ textInput, setSearchText }: Props) {
   const handleDelete = (keyword: string) => {
     setRecentSearchData((prev) => prev.filter((item) => item !== keyword));
   };
+  const handleDeleteAll = () => {
+    setRecentSearchData([]);
+  };
 
   if (textInput.length === 0 && recentSearchData.length > 0) {
     return (
       <View>
-        <Text className="mb-5 p-6 text-[20px]">최근검색어</Text>
+        <View className="mb-5 flex flex-row items-center justify-between p-6">
+          <Text className="text-[20px]">최근검색어</Text>
+          <Pressable onPress={() => handleDeleteAll()}>
+            <Text className="text-[14px] text-[#8F8F8F]">전체삭제</Text>
+          </Pressable>
+        </View>
         {/*TODO key값은 추후 서버로 부터 오는 unique id값을 활용*/}
         <ScrollView
           horizontal
