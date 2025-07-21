@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
   NaverMapMarkerOverlay,
   NaverMapView,
@@ -6,10 +8,10 @@ import { shareFeedTemplate } from "@react-native-kakao/share";
 import * as Clipboard from "expo-clipboard";
 import { Stack, useRouter } from "expo-router";
 import {
-  Animated,
   Dimensions,
   Image,
   Pressable,
+  ScrollView,
   StatusBar,
   Text,
   View,
@@ -32,9 +34,11 @@ function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
 }
 
 export default function DetailScreen() {
+  const [scrollY, setScrollY] = useState<number>(0);
+
   const router = useRouter();
 
-  const scrollY = new Animated.Value(0);
+  const showHeaderBackground = scrollY > 150;
 
   const handleKakaoShare = async () => {
     try {
@@ -70,19 +74,10 @@ export default function DetailScreen() {
     }
   };
 
-  // 스크롤에 따른 어두운 오버레이 투명도
-  const overlayOpacity = scrollY.interpolate({
-    inputRange: [0, 300],
-    outputRange: [0, 0.5],
-    extrapolate: "clamp",
-  });
-
-  // 스크롤에 따른 정보 영역 위치
-  const contentTranslateY = scrollY.interpolate({
-    inputRange: [0, 300],
-    outputRange: [0, 120],
-    extrapolate: "clamp",
-  });
+  const handleScroll = (event: any) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    setScrollY(currentScrollY);
+  };
 
   return (
     <>
@@ -93,76 +88,62 @@ export default function DetailScreen() {
       />
       <View className="flex-1 bg-white">
         <StatusBar
-          barStyle="light-content"
+          barStyle={showHeaderBackground ? "dark-content" : "light-content"}
           backgroundColor="transparent"
           translucent
         />
 
-        {/* 상단 이미지 영역 */}
+        {/* 상단 고정 헤더 */}
         <View
-          className="absolute left-0 right-0 top-0 z-10"
+          className="absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-4 pt-[60px]"
           style={{
-            height: IMAGE_HEIGHT,
+            backgroundColor: showHeaderBackground ? "#ffffff" : "transparent",
           }}
         >
-          <Image
-            source={require("@/assets/images/detail-dummy.png")}
-            className="w-full"
-            style={{
-              height: IMAGE_HEIGHT,
-              resizeMode: "cover",
-            }}
-          />
-
-          {/* 오버레이 */}
-          <Animated.View
-            className="absolute inset-0 bg-black"
-            style={{
-              opacity: overlayOpacity,
-            }}
-          />
-
-          {/* 태그들 */}
-          <View className="absolute bottom-14 left-4 flex-row gap-2">
-            <View className="rounded-full bg-[#E0FFEB] px-3 py-1">
-              <Text className="text-sm text-[#22A04C]">주말한정</Text>
-            </View>
-            <View className="rounded-full bg-[#E9F2FF] px-3 py-1">
-              <Text className="text-sm text-[#4D87FF]">인원제한</Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="absolute left-4 top-20 z-50">
           <Pressable
             onPress={handleGoBack}
             hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
           >
-            <BackArrow color="#fff" />
+            <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
           </Pressable>
         </View>
 
-        {/* 스크롤 가능한 정보 영역 */}
-        <Animated.ScrollView
-          className="z-20 flex-1"
-          style={{
-            transform: [{ translateY: contentTranslateY }],
-          }}
-          contentContainerStyle={{
-            paddingTop: IMAGE_HEIGHT - 30,
-          }}
+        {/* 전체 스크롤 영역 */}
+        <ScrollView
+          className="flex-1"
           showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false },
-          )}
+          onScroll={handleScroll}
           scrollEventThrottle={16}
         >
+          {/* 상단 이미지 영역 */}
           <View
-            className="rounded-t-3xl bg-white pb-40 pt-6"
-            style={{ minHeight: SCREEN_HEIGHT }}
+            style={{
+              height: IMAGE_HEIGHT,
+            }}
           >
+            <Image
+              source={require("@/assets/images/detail-dummy.png")}
+              className="w-full"
+              style={{
+                height: IMAGE_HEIGHT,
+                resizeMode: "cover",
+              }}
+            />
+
+            {/* 태그들 */}
+            <View className="absolute bottom-10 left-4 flex-row gap-2">
+              <View className="rounded-full bg-[#E0FFEB] px-3 py-1">
+                <Text className="text-sm text-[#22A04C]">조용한쉼</Text>
+              </View>
+              <View className="rounded-full bg-[#E9F2FF] px-3 py-1">
+                <Text className="text-sm text-[#4D87FF]">한적하게</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 정보 영역 */}
+          <View className="mt-[-20px] rounded-t-2xl bg-white py-6">
             {/* 제목 섹션 */}
             <View className="mb-3 px-5">
               <View className="mb-6 flex-row items-center justify-between">
@@ -341,7 +322,7 @@ export default function DetailScreen() {
               </View>
             </View>
           </View>
-        </Animated.ScrollView>
+        </ScrollView>
       </View>
     </>
   );
