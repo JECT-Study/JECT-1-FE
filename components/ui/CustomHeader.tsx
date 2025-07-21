@@ -11,24 +11,21 @@ type Props = {
   isCommit: boolean;
   // 확인시 수행할 로직
   commit?: () => void;
+  // seperator 여부
+  separator?: boolean;
 };
-
-/**
- * isCommit : 제출 버튼이 존재하는지 (확인, 제출 등)
- * isCommit인 경우 왼쪽 버튼은 X
- * isCommit이 아닌경우엔 Chevron
- */
 
 export default function CustomHeader({
   title,
   cancel,
   isCommit,
   commit,
+  separator,
 }: Props) {
   return (
     <View
       aria-label={`${title} header`}
-      className="relative flex h-[60px] w-full flex-row items-center justify-between border-b-2 border-gray-100 p-4"
+      className={`relative z-50 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
     >
       <Pressable
         onPress={cancel ? cancel : null}
