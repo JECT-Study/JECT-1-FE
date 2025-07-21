@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
   NaverMapMarkerOverlay,
@@ -6,7 +6,7 @@ import {
 } from "@mj-studio/react-native-naver-map";
 import { shareFeedTemplate } from "@react-native-kakao/share";
 import * as Clipboard from "expo-clipboard";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import {
   Dimensions,
   Image,
@@ -16,6 +16,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
@@ -24,7 +25,6 @@ import LocationIcon from "@/components/icons/LocationIcon";
 import LocationMarkerIcon from "@/components/icons/LocationMarkerIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
-import { ROUTES } from "@/constants/Routes";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.4;
@@ -35,10 +35,17 @@ function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
 
 export default function DetailScreen() {
   const [scrollY, setScrollY] = useState<number>(0);
+  const [mapKey, setMapKey] = useState<number>(0);
 
   const router = useRouter();
 
   const showHeaderBackground = scrollY > 150;
+
+  useFocusEffect(
+    useCallback(() => {
+      setMapKey((prev) => prev + 1);
+    }, []),
+  );
 
   const handleKakaoShare = async () => {
     try {
@@ -62,7 +69,7 @@ export default function DetailScreen() {
   };
 
   const handleGoBack = () => {
-    router.push(ROUTES.HOME);
+    router.back();
   };
 
   const handleCopyAddress = async () => {
@@ -86,7 +93,7 @@ export default function DetailScreen() {
           headerShown: false,
         }}
       />
-      <View className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
         <StatusBar
           barStyle={showHeaderBackground ? "dark-content" : "light-content"}
           backgroundColor="transparent"
@@ -282,6 +289,7 @@ export default function DetailScreen() {
 
                 <View className="mb-3 h-48 overflow-hidden rounded-lg">
                   <NaverMapView
+                    key={mapKey} // 지도 리셋을 위한 key
                     style={{ width: "100%", height: "100%" }}
                     initialCamera={{
                       latitude: 37.566535,
@@ -323,7 +331,7 @@ export default function DetailScreen() {
             </View>
           </View>
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </>
   );
 }

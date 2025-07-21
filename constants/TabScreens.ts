@@ -29,5 +29,4 @@ export const TAB_SCREENS = [
   { name: "my/terms", href: null },
   { name: "my/edit_profile", href: null },
   { name: "my/like", href: null },
-  { name: "detail/[id]", href: null },
 ];

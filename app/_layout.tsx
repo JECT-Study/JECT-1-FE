@@ -38,6 +38,12 @@ export default function RootLayout() {
               options={{ headerShown: false }}
             />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="detail/[id]"
+              options={{
+                headerShown: false,
+              }}
+            />
             <Stack.Screen name="+not-found" />
             <Stack.Screen
               name="my/withdrawal"
