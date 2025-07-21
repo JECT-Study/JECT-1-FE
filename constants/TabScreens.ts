@@ -26,6 +26,7 @@ export const TAB_SCREENS = [
     activePage: "my",
   },
   // 탭 바에 표시되지 않을 화면들
+  { name: "detail/[id]", href: null },
   { name: "my/terms", href: null },
   { name: "my/edit_profile", href: null },
   { name: "my/like", href: null },

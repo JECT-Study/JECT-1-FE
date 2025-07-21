@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
   NaverMapMarkerOverlay,
@@ -6,7 +6,7 @@ import {
 } from "@mj-studio/react-native-naver-map";
 import { shareFeedTemplate } from "@react-native-kakao/share";
 import * as Clipboard from "expo-clipboard";
-import { Stack, useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Dimensions,
   Image,
@@ -17,7 +17,6 @@ import {
   View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
@@ -85,13 +84,19 @@ export default function DetailScreen() {
   const [scrollY, setScrollY] = useState<number>(0);
   const [mapKey, setMapKey] = useState<number>(0);
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
   const router = useRouter();
 
   const showHeaderBackground = scrollY > 150;
 
   useFocusEffect(
     useCallback(() => {
+      // 지도 키 초기화
       setMapKey((prev) => prev + 1);
+      // 스크롤 위치 초기화
+      setScrollY(0);
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     }, []),
   );
 
@@ -136,12 +141,7 @@ export default function DetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
+      <View className="flex-1 bg-white">
         <StatusBar
           barStyle={showHeaderBackground ? "dark-content" : "light-content"}
           backgroundColor="transparent"
@@ -166,6 +166,7 @@ export default function DetailScreen() {
 
         {/* 전체 스크롤 영역 */}
         <ScrollView
+          ref={scrollViewRef}
           className="flex-1"
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
@@ -368,7 +369,7 @@ export default function DetailScreen() {
             </View>
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </>
   );
 }

@@ -16,7 +16,8 @@ export default function TabLayout() {
       // activeGroup이 정의된 경우, 해당 그룹 경로로 시작하는지 확인
       return pathname?.startsWith(`/${screen.activePage}`);
     } else if (screen.name === "index") {
-      return pathname === ROUTES.HOME;
+      // 홈 탭은 홈 페이지이거나 detail 페이지에 있을 때 활성화
+      return pathname === ROUTES.HOME || pathname?.includes("/detail/");
     } else {
       // activeGroup이 없는 경우, 해당 탭 경로와 정확히 일치하는지 확인
       return pathname === `/${screen.name}`;

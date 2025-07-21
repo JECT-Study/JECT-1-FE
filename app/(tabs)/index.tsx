@@ -94,7 +94,7 @@ const Card = ({ item }: { item: DummyItem }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/detail/${item.id}`);
+    router.push(`/(tabs)/detail/${item.id}`);
   };
 
   return (
