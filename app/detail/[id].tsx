@@ -16,6 +16,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Carousel from "react-native-reanimated-carousel";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
@@ -31,6 +32,53 @@ const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.4;
 
 function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
   return <View className={`w-full ${height} ${bg}`} />;
+}
+
+function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const carouselData = Array(5).fill(
+    require("@/assets/images/detail-dummy.png"),
+  );
+
+  const renderCarouselItem = ({ item }: { item: any }) => (
+    <Image
+      source={item}
+      className="w-full"
+      style={{
+        height: imageHeight,
+        resizeMode: "cover",
+      }}
+    />
+  );
+
+  return (
+    <View
+      style={{
+        height: imageHeight,
+      }}
+    >
+      <Carousel
+        width={Dimensions.get("window").width}
+        height={imageHeight}
+        data={carouselData}
+        renderItem={renderCarouselItem}
+        loop={true}
+        scrollAnimationDuration={1000}
+        onSnapToItem={(index) => setCurrentIndex(index)}
+      />
+
+      <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
+        {carouselData.map((_, index) => (
+          <View
+            key={index}
+            className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
+              index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
+            }`}
+          />
+        ))}
+      </View>
+    </View>
+  );
 }
 
 export default function DetailScreen() {
@@ -124,19 +172,8 @@ export default function DetailScreen() {
           scrollEventThrottle={16}
         >
           {/* 상단 이미지 영역 */}
-          <View
-            style={{
-              height: IMAGE_HEIGHT,
-            }}
-          >
-            <Image
-              source={require("@/assets/images/detail-dummy.png")}
-              className="w-full"
-              style={{
-                height: IMAGE_HEIGHT,
-                resizeMode: "cover",
-              }}
-            />
+          <View>
+            <DetailImageCarousel imageHeight={IMAGE_HEIGHT} />
 
             {/* 태그들 */}
             <View className="absolute bottom-10 left-4 flex-row gap-2">
