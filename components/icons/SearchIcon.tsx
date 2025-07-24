@@ -1,34 +1,29 @@
-import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
+import React from "react";
+
+import Svg, { Path } from "react-native-svg";
 
 interface SearchIconProps {
+  width?: number;
+  height?: number;
   color?: string;
-  size?: number;
 }
 
-export default function SearchIcon({
-  color = "#9CA3AF",
-  size = 24,
-}: SearchIconProps) {
+export const SearchIcon: React.FC<SearchIconProps> = ({
+  width = 20,
+  height = 21,
+  color = "#6C4DFF",
+}) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 25 24" fill="none">
-      <G clipPath="url(#clip0_335_3804)">
-        <Path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M11.3102 17.1122C7.83024 17.1122 5.00023 14.2822 5.00023 10.8022C5.00023 7.32219 7.83024 4.49219 11.3102 4.49219C14.7902 4.49219 17.6202 7.32219 17.6202 10.8022C17.6202 14.2822 14.7902 17.1122 11.3102 17.1122ZM22.1302 20.5722L17.3302 15.7722C18.4402 14.4222 19.1102 12.6922 19.1102 10.8022C19.1102 6.49219 15.6202 2.99219 11.3002 2.99219C6.98023 2.99219 3.49023 6.48219 3.49023 10.8022C3.49023 15.1222 6.98023 18.6122 11.3002 18.6122C13.1902 18.6122 14.9202 17.9422 16.2702 16.8322L21.0702 21.6322C21.2202 21.7822 21.4102 21.8522 21.6002 21.8522C21.7902 21.8522 21.9802 21.7822 22.1302 21.6322C22.4202 21.3422 22.4202 20.8622 22.1302 20.5722Z"
-          fill={color}
-        />
-      </G>
-      <Defs>
-        <ClipPath id="clip0_335_3804">
-          <Rect
-            width="24"
-            height="24"
-            fill="white"
-            transform="translate(0.5)"
-          />
-        </ClipPath>
-      </Defs>
+    <Svg width={width} height={height} viewBox="0 0 20 21" fill="none">
+      <Path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.29415 15.4735C4.60331 15.4735 1.60185 12.4724 1.60185 8.78208C1.60185 5.09173 4.60331 2.09067 8.29415 2.09067C11.985 2.09067 14.9864 5.09173 14.9864 8.78208C14.9864 12.4724 11.985 15.4735 8.29415 15.4735ZM19.7697 19.1426L14.6789 14.0525C15.8561 12.6209 16.5667 10.7863 16.5667 8.78208C16.5667 4.21156 12.8653 0.5 8.28354 0.5C3.70181 0.5 0.000366211 4.20095 0.000366211 8.78208C0.000366211 13.3632 3.70181 17.0642 8.28354 17.0642C10.2881 17.0642 12.1229 16.3537 13.5547 15.1766L18.6455 20.2667C18.8046 20.4258 19.0061 20.5 19.2076 20.5C19.4091 20.5 19.6106 20.4258 19.7697 20.2667C20.0773 19.9592 20.0773 19.4502 19.7697 19.1426Z"
+        fill={color}
+      />
     </Svg>
   );
-}
+};
+
+// 기존 코드와의 호환성을 위한 default export
+export default SearchIcon;
