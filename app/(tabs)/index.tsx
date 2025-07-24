@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   FlatList,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -30,13 +31,91 @@ interface DummyItem {
   subtitle: string;
 }
 
-const customContentData: DummyItem[] = [
-  { id: "1", title: "벚꽃 축제 2024", subtitle: "서울 여의도" },
-  { id: "2", title: "음식 페스티벌", subtitle: "부산 해운대" },
-  { id: "3", title: "재즈 콘서트", subtitle: "대구 수성구" },
-  { id: "4", title: "아트 마켓", subtitle: "광주 동구" },
-  { id: "5", title: "문화 축제", subtitle: "인천 중구" },
-  { id: "6", title: "야간 마켓", subtitle: "대전 유성구" },
+interface CustomContentItem {
+  contentId: number;
+  title: string;
+  image: string;
+  contentType: string;
+  address: string;
+  longitude: number;
+  latitude: number;
+  startDate: string;
+  endDate: string;
+}
+
+const customContentData: CustomContentItem[] = [
+  {
+    contentId: 0,
+    title: "벚꽃 축제",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "서울 여의도",
+    longitude: 126.925,
+    latitude: 37.5301,
+    startDate: "2025-07-05",
+    endDate: "2025-07-06",
+  },
+  {
+    contentId: 1,
+    title: "음식 페스티벌",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "부산 해운대",
+    longitude: 129.0756,
+    latitude: 35.1595,
+    startDate: "2025-07-07",
+    endDate: "2025-07-08",
+  },
+  {
+    contentId: 2,
+    title: "재즈 콘서트",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "대구 수성구",
+    longitude: 128.6014,
+    latitude: 35.8714,
+    startDate: "2025-07-09",
+    endDate: "2025-07-09",
+  },
+  {
+    contentId: 3,
+    title: "아트 마켓",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "광주 동구",
+    longitude: 126.8526,
+    latitude: 35.1595,
+    startDate: "2025-07-10",
+    endDate: "2025-07-11",
+  },
+  {
+    contentId: 4,
+    title: "문화 축제",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "인천 중구",
+    longitude: 126.7052,
+    latitude: 37.4563,
+    startDate: "2025-07-12",
+    endDate: "2025-07-13",
+  },
+  {
+    contentId: 5,
+    title: "야간 마켓",
+    image:
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    contentType: "EXHIBITION",
+    address: "대전 유성구",
+    longitude: 127.3845,
+    latitude: 36.3504,
+    startDate: "2025-07-14",
+    endDate: "2025-07-15",
+  },
 ];
 
 const mdPickData: DummyItem[] = [
@@ -88,28 +167,40 @@ const weeklyContentData: { [key: string]: DummyItem[] } = {
   ],
 };
 
-const skeletonData = Array.from({ length: 8 }, (_, i) => ({
-  id: i.toString(),
-}));
-
-const Card = ({ item }: { item: DummyItem }) => {
+const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
 
-  const handlePress = () => {
-    router.push(`/(tabs)/detail/${item.id}`);
-  };
+  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
 
   return (
-    <TouchableOpacity className="mr-4" onPress={handlePress}>
-      <View className="mb-2 h-32 w-40 rounded-lg bg-gray-400" />
-      <Text className="mb-1 w-36 font-medium text-black" numberOfLines={1}>
-        {item.title}
-      </Text>
-      <Text className="w-32 text-sm text-gray-600" numberOfLines={1}>
-        {item.subtitle}
-      </Text>
-    </TouchableOpacity>
+    <Pressable
+      className="flex-row border border-blue-500"
+      onPress={handlePress}
+    >
+      <Image
+        source={{ uri: item.image }}
+        className="h-[111px] w-[111px] rounded-[10px]"
+        resizeMode="cover"
+      />
+      <View className="ml-3.5 flex-1">
+        <Text className="mb-1 text-base font-semibold text-[#424242]">
+          {item.title}
+        </Text>
+        <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
+        <Text className="text-sm text-[#707070]">
+          {item.startDate} ~ {item.endDate}
+        </Text>
+      </View>
+    </Pressable>
   );
+};
+
+const chunkArray = (array: any[], chunkSize: number): any[][] => {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
 };
 
 const SCROLL_THRESHOLD = 30;
@@ -161,32 +252,26 @@ const DayButton = ({
   </TouchableOpacity>
 );
 
+const categoryConfig = [
+  { id: "PERFORMANCE", iconType: "paint", label: "공연" },
+  { id: "EXHIBITION", iconType: "palette", label: "전시" },
+  { id: "FESTIVAL", iconType: "celebration", label: "축제" },
+  { id: "EVENT", iconType: "food", label: "행사" },
+] as const;
+
+type CategoryType = (typeof categoryConfig)[number]["id"];
+
 export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [selectedDay, setSelectedDay] = useState<number>(dayjs().day());
-  const router = useRouter();
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryType>("PERFORMANCE");
 
-  const categoryData = [
-    {
-      id: "performance",
-      icon: <PaintIcon width={32} height={32} />,
-      label: "공연",
-    },
-    {
-      id: "exhibition",
-      icon: <PaletteIcon width={32} height={29} />,
-      label: "전시",
-    },
-    {
-      id: "festival",
-      icon: <CelebrationIcon width={48} height={48} />,
-      label: "축제",
-    },
-    { id: "event", icon: <FoodIcon width={30} height={30} />, label: "행사" },
-  ];
+  const router = useRouter();
 
   const weekDays = getWeekDays();
   const selectedDayContent = weeklyContentData[selectedDay.toString()] || [];
+  const chunkedCustomContentData = chunkArray(customContentData, 3);
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -236,7 +321,7 @@ export default function HomeScreen() {
           locations={[0.0683, 0.9503]}
         >
           <View className="h-48 flex-row items-end justify-center px-[18px] pb-11">
-            <View className="w-full flex-row items-center gap-x-3">
+            <View className="w-full flex-row items-center gap-x-2">
               <LogoIcon width={35} height={32} />
               <Pressable
                 className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
@@ -254,13 +339,21 @@ export default function HomeScreen() {
         <View className="mt-[-20px] flex-1 rounded-t-3xl border border-red-500 bg-white">
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
-              {categoryData.map((item) => (
-                <View className="" key={item.id}>
-                  <View
-                    key={item.id}
-                    className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]"
-                  >
-                    {item.icon}
+              {categoryConfig.map((item) => (
+                <View className="gap-y-[7px]" key={item.id}>
+                  <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
+                    {item.iconType === "paint" && (
+                      <PaintIcon width={32} height={32} />
+                    )}
+                    {item.iconType === "palette" && (
+                      <PaletteIcon width={32} height={29} />
+                    )}
+                    {item.iconType === "celebration" && (
+                      <CelebrationIcon width={48} height={48} />
+                    )}
+                    {item.iconType === "food" && (
+                      <FoodIcon width={30} height={30} />
+                    )}
                   </View>
                   <Text className="text-center text-sm text-black">
                     {item.label}
@@ -270,36 +363,57 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="flex-1 gap-y-8">
-            <View>
-              <View className="mb-3 flex-row items-center justify-between">
-                <Text className="text-lg font-bold text-black">
-                  맞춤 컨텐츠
-                </Text>
-              </View>
+          <View className="gap-y-[34px]">
+            <View className="border border-blue-500 px-[18px] py-2.5">
+              <Text className="text-xl font-semibold text-black">
+                OO님을 위한 맞춤 콘텐츠
+              </Text>
 
-              <View className="mb-3">
-                <FlatList
-                  data={skeletonData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  renderItem={() => (
-                    <View className="mr-2 h-8 w-16 rounded-full bg-gray-300" />
-                  )}
-                  keyExtractor={(item) => item.id}
-                />
+              <View className="mb-5 mt-3">
+                <View className="flex-row gap-x-2.5">
+                  {categoryConfig.map((category) => {
+                    const isSelected = selectedCategory === category.id;
+                    return (
+                      <Pressable
+                        key={category.id}
+                        className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
+                          isSelected ? "bg-[#6C4DFF]" : "bg-white"
+                        }`}
+                        onPress={() => {
+                          setSelectedCategory(category.id);
+                          console.log(`${category.label} 카테고리 선택됨`);
+                        }}
+                      >
+                        <Text
+                          className={`text-sm ${
+                            isSelected ? "text-white" : "text-[#6C4DFF]"
+                          }`}
+                        >
+                          {category.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
 
               <FlatList
-                data={customContentData}
+                data={chunkedCustomContentData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <Card item={item} />}
-                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View className="w-[310px] flex-1 gap-y-[15.5px]">
+                    {item.map((cardItem) => (
+                      <Card key={cardItem.id} item={cardItem} />
+                    ))}
+                  </View>
+                )}
+                keyExtractor={(_, index) => index.toString()}
+                ItemSeparatorComponent={() => <View className="w-3.5" />}
               />
             </View>
 
-            <View>
+            <View className="border border-green-500">
               <View className="mb-3 flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <Text className="text-lg font-bold text-black">
@@ -312,16 +426,16 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
 
-              <FlatList
+              {/* <FlatList
                 data={mdPickData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => <Card item={item} />}
                 keyExtractor={(item) => item.id}
-              />
+              /> */}
             </View>
 
-            <View>
+            <View className="border border-yellow-500">
               <View className="mb-3 flex-row items-center justify-between">
                 <Text className="text-lg font-bold text-black">
                   금주 컨텐츠를 한눈에
@@ -348,16 +462,16 @@ export default function HomeScreen() {
                 />
               </View>
 
-              <FlatList
+              {/* <FlatList
                 data={selectedDayContent}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => <Card item={item} />}
                 keyExtractor={(item) => item.id}
-              />
+              /> */}
             </View>
 
-            <View>
+            <View className="border border-purple-500">
               <View className="mb-3 flex-row items-center justify-between">
                 <Text className="text-lg font-bold text-black">
                   이런 축제 어때요?
@@ -367,13 +481,13 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
 
-              <FlatList
+              {/* <FlatList
                 data={festivalData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => <Card item={item} />}
                 keyExtractor={(item) => item.id}
-              />
+              /> */}
             </View>
           </View>
         </View>
