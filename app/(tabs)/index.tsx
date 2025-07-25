@@ -53,8 +53,8 @@ const customContentData: CustomContentItem[] = [
     address: "서울 여의도",
     longitude: 126.925,
     latitude: 37.5301,
-    startDate: "2025-07-05",
-    endDate: "2025-07-06",
+    startDate: "2025-07-20",
+    endDate: "2025-07-30",
   },
   {
     contentId: 1,
@@ -65,8 +65,8 @@ const customContentData: CustomContentItem[] = [
     address: "부산 해운대",
     longitude: 129.0756,
     latitude: 35.1595,
-    startDate: "2025-07-07",
-    endDate: "2025-07-08",
+    startDate: "2025-07-22",
+    endDate: "2025-07-23",
   },
   {
     contentId: 2,
@@ -77,8 +77,8 @@ const customContentData: CustomContentItem[] = [
     address: "대구 수성구",
     longitude: 128.6014,
     latitude: 35.8714,
-    startDate: "2025-07-09",
-    endDate: "2025-07-09",
+    startDate: "2025-07-25",
+    endDate: "2025-07-26",
   },
   {
     contentId: 3,
@@ -89,8 +89,8 @@ const customContentData: CustomContentItem[] = [
     address: "광주 동구",
     longitude: 126.8526,
     latitude: 35.1595,
-    startDate: "2025-07-10",
-    endDate: "2025-07-11",
+    startDate: "2025-07-27",
+    endDate: "2025-07-28",
   },
   {
     contentId: 4,
@@ -101,8 +101,8 @@ const customContentData: CustomContentItem[] = [
     address: "인천 중구",
     longitude: 126.7052,
     latitude: 37.4563,
-    startDate: "2025-07-12",
-    endDate: "2025-07-13",
+    startDate: "2025-07-23",
+    endDate: "2025-07-24",
   },
   {
     contentId: 5,
@@ -113,50 +113,10 @@ const customContentData: CustomContentItem[] = [
     address: "대전 유성구",
     longitude: 127.3845,
     latitude: 36.3504,
-    startDate: "2025-07-14",
-    endDate: "2025-07-15",
+    startDate: "2025-07-23",
+    endDate: "2025-07-24",
   },
 ];
-
-const festivalData: DummyItem[] = [
-  { id: "1", title: "서울 불꽃축제", subtitle: "한강 여의도" },
-  { id: "2", title: "부산 바다축제", subtitle: "해운대 해변" },
-  { id: "3", title: "제주 유채꽃축제", subtitle: "제주 서귀포" },
-  { id: "4", title: "경주 벚꽃축제", subtitle: "경주 보문단지" },
-  { id: "5", title: "강릉 커피축제", subtitle: "강릉 안목해변" },
-  { id: "6", title: "전주 한옥축제", subtitle: "전주 한옥마을" },
-];
-
-const weeklyContentData: { [key: string]: DummyItem[] } = {
-  "0": [
-    { id: "sun1", title: "일요일 브런치 마켓", subtitle: "서울 성수동" },
-    { id: "sun2", title: "가족 나들이 축제", subtitle: "경기 용인" },
-  ],
-  "1": [
-    { id: "mon1", title: "월요일 재즈 클럽", subtitle: "서울 홍대" },
-    { id: "mon2", title: "도심 속 힐링", subtitle: "서울 한강공원" },
-  ],
-  "2": [
-    { id: "tue1", title: "화요일 아트마켓", subtitle: "서울 이태원" },
-    { id: "tue2", title: "전통 공예 체험", subtitle: "인사동" },
-  ],
-  "3": [
-    { id: "wed1", title: "수요일 야시장", subtitle: "부산 광안리" },
-    { id: "wed2", title: "중간 쉼표 콘서트", subtitle: "대구 중구" },
-  ],
-  "4": [
-    { id: "thu1", title: "목요일 맥주축제", subtitle: "강남 가로수길" },
-    { id: "thu2", title: "직장인 문화모임", subtitle: "서울 명동" },
-  ],
-  "5": [
-    { id: "fri1", title: "불금 파티", subtitle: "서울 클럽 거리" },
-    { id: "fri2", title: "금요 야경투어", subtitle: "서울 남산타워" },
-  ],
-  "6": [
-    { id: "sat1", title: "토요일 벼룩시장", subtitle: "서울 홍대" },
-    { id: "sat2", title: "주말 캠핑축제", subtitle: "강원 춘천" },
-  ],
-};
 
 const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
@@ -198,7 +158,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
     >
       <Image
         source={{ uri: item.image }}
-        className="h-[154px] w-[154px] rounded-[10px]"
+        className="h-[154px] w-[154px] rounded-[14px]"
         resizeMode="cover"
       />
       <View className="mt-2">
@@ -210,6 +170,36 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
         </Text>
         <Text className="text-xs text-[#9E9E9E]" numberOfLines={1}>
           {item.address}
+        </Text>
+      </View>
+    </Pressable>
+  );
+};
+
+const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
+  const router = useRouter();
+
+  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+
+  return (
+    <Pressable
+      className="flex-row border border-blue-500"
+      onPress={handlePress}
+    >
+      <Image
+        source={{ uri: item.image }}
+        className="h-[90px] w-[120px] rounded-lg"
+        resizeMode="cover"
+      />
+      <View className="ml-3.5 flex-1">
+        <Text className="mb-1 text-base font-semibold text-[#424242]">
+          {item.title}
+        </Text>
+        <Text className="text-sm font-normal text-[#9E9E9E]">
+          {item.address}
+        </Text>
+        <Text className="text-sm font-normal text-[#707070]">
+          {item.startDate} ~ {item.endDate}
         </Text>
       </View>
     </Pressable>
@@ -228,18 +218,40 @@ const SCROLL_THRESHOLD = 30;
 
 const getWeekDays = () => {
   const today = dayjs();
-  const startOfWeek = today.startOf("week");
+  const startOfWeek = today.startOf("week").add(1, "day"); // 월요일부터 시작
 
-  return Array.from({ length: 7 }, (_, i) => {
+  // 이번 주의 모든 날짜 생성 (월요일부터 일요일까지)
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
     const day = startOfWeek.add(i, "day");
     return {
+      dayOfIndex: i,
       date: day.format("D"),
       dayName: day.format("ddd"),
-      dayOfWeek: i,
       fullDate: day.format("YYYY-MM-DD"),
       isToday: day.isSame(today, "day"),
     };
   });
+
+  // 오늘 날짜 찾기
+  const todayIndex = weekDays.findIndex((day) => day.isToday);
+
+  if (todayIndex === -1) {
+    // 오늘이 이번 주에 없으면 기본 순서 반환
+    return weekDays.map((day, index) => ({ ...day, dayOfIndex: index }));
+  }
+
+  // 오늘을 첫 번째로, 나머지를 순서대로 배치
+  const reorderedDays = [
+    weekDays[todayIndex],
+    ...weekDays.slice(0, todayIndex), // 오늘 이전 날짜들
+    ...weekDays.slice(todayIndex + 1), // 오늘 이후 날짜들
+  ];
+
+  // dayOfIndex를 새로운 순서에 맞게 재설정
+  return reorderedDays.map((day, index) => ({
+    ...day,
+    dayOfIndex: index,
+  }));
 };
 
 const categoryConfig = [
@@ -253,15 +265,38 @@ type CategoryType = (typeof categoryConfig)[number]["id"];
 
 export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [selectedDay, setSelectedDay] = useState<number>(dayjs().day());
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryType>("PERFORMANCE");
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
 
   const router = useRouter();
 
   const weekDays = getWeekDays();
-  const selectedDayContent = weeklyContentData[selectedDay.toString()] || [];
+
+  // 선택된 날짜에 해당하는 데이터 필터링
+  const getFilteredContentBySelectedDay = () => {
+    const selectedDayData = weekDays.find(
+      (day) => day.dayOfIndex === selectedDayIndex,
+    );
+    if (!selectedDayData) return [];
+
+    const selectedDate = dayjs(selectedDayData.fullDate);
+
+    // 선택한 날짜가 이벤트의 startDate와 endDate 사이에 있는지 확인
+    return customContentData.filter((item) => {
+      const startDate = dayjs(item.startDate);
+      const endDate = dayjs(item.endDate);
+
+      return (
+        selectedDate.isSameOrAfter(startDate, "day") &&
+        selectedDate.isSameOrBefore(endDate, "day")
+      );
+    });
+  };
+
+  const filteredCustomContentData = getFilteredContentBySelectedDay();
   const chunkedCustomContentData = chunkArray(customContentData, 3);
+  const chunkedFilteredContentData = chunkArray(filteredCustomContentData, 3);
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -438,16 +473,16 @@ export default function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
                   <Pressable
-                    onPress={() => setSelectedDay(item.dayOfWeek)}
                     className={`flex h-16 w-12 items-center justify-center rounded-2xl ${
-                      selectedDay === item.dayOfWeek
+                      selectedDayIndex === item.dayOfIndex
                         ? "border-0 bg-[#6C4DFF]"
                         : "border border-[#ECECEC] bg-white"
                     }`}
+                    onPress={() => setSelectedDayIndex(item.dayOfIndex)}
                   >
                     <Text
                       className={`text-lg font-medium ${
-                        selectedDay === item.dayOfWeek
+                        selectedDayIndex === item.dayOfIndex
                           ? "text-white"
                           : "text-[#9E9E9E]"
                       }`}
@@ -455,23 +490,33 @@ export default function HomeScreen() {
                       {item.date}
                     </Text>
                     <Text
-                      className={`text-sm font-normal ${selectedDay === item.dayOfWeek ? "text-white" : "text-[#9E9E9E]"}`}
+                      className={`text-sm font-normal ${selectedDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
                     >
                       {item.dayName}
                     </Text>
                   </Pressable>
                 )}
-                keyExtractor={(item) => item.dayOfWeek.toString()}
+                keyExtractor={(item) => item.dayOfIndex.toString()}
                 ItemSeparatorComponent={() => <View className="w-2" />}
               />
 
-              {/* <FlatList
-                data={selectedDayContent}
+              <FlatList
+                data={chunkedFilteredContentData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <Card item={item} />}
-                keyExtractor={(item) => item.id}
-              /> */}
+                renderItem={({ item }) => (
+                  <View className="w-[285px] flex-1 gap-y-[15.5px]">
+                    {item.map((cardItem) => (
+                      <WeeklyCard
+                        key={cardItem.contentId.toString()}
+                        item={cardItem}
+                      />
+                    ))}
+                  </View>
+                )}
+                keyExtractor={(_, index) => index.toString()}
+                ItemSeparatorComponent={() => <View className="w-3.5" />}
+              />
             </View>
 
             <View className="border border-purple-500">
