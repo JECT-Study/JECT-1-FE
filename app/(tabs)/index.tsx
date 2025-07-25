@@ -242,37 +242,6 @@ const getWeekDays = () => {
   });
 };
 
-const DayButton = ({
-  day,
-  isSelected,
-  onPress,
-}: {
-  day: { date: string; dayName: string; dayOfWeek: number; isToday: boolean };
-  isSelected: boolean;
-  onPress: () => void;
-}) => (
-  <TouchableOpacity
-    onPress={onPress}
-    className={`mx-1 flex h-16 w-12 items-center justify-center rounded-2xl ${
-      isSelected ? "border-0" : "border border-gray-300 bg-white"
-    }`}
-    style={{
-      backgroundColor: isSelected ? "#816BFF" : "white",
-    }}
-  >
-    <Text
-      className={`text-lg font-semibold ${
-        isSelected ? "text-white" : "text-gray-400"
-      }`}
-    >
-      {day.date}
-    </Text>
-    <Text className={`text-xs ${isSelected ? "text-white" : "text-gray-400"}`}>
-      {day.dayName}
-    </Text>
-  </TouchableOpacity>
-);
-
 const categoryConfig = [
   { id: "PERFORMANCE", iconType: "paint", label: "공연" },
   { id: "EXHIBITION", iconType: "palette", label: "전시" },
@@ -307,6 +276,7 @@ export default function HomeScreen() {
     <View className="flex-1 bg-white">
       <StatusBar style={isScrolled ? "dark" : "light"} />
 
+      {/* 스크롤 시 보이는 헤더 */}
       {isScrolled && (
         <View
           className="absolute left-0 right-0 top-0 z-10 flex h-40 justify-end bg-white p-[18px]"
@@ -335,6 +305,7 @@ export default function HomeScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
+        {/* 기본 헤더 */}
         <LinearGradient
           colors={["#816BFF", "#816BFF"]}
           start={{ x: 0, y: 0 }}
@@ -358,6 +329,7 @@ export default function HomeScreen() {
         </LinearGradient>
 
         <View className="mt-[-20px] flex-1 rounded-t-3xl border border-red-500 bg-white">
+          {/* 카테고리 버튼 */}
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
@@ -385,6 +357,7 @@ export default function HomeScreen() {
           </View>
 
           <View className="gap-y-[34px]">
+            {/* 맞춤 콘텐츠 */}
             <View className="border border-blue-500 px-[18px] py-2.5">
               <Text className="text-xl font-semibold text-black">
                 OO님을 위한 맞춤 콘텐츠
@@ -437,9 +410,10 @@ export default function HomeScreen() {
               />
             </View>
 
+            {/* 이번달 핫한 축제 */}
             <View className="border border-green-500 px-[18px] py-2.5">
               <Text className="mb-[18px] text-xl font-semibold text-[#424242]">
-                MD픽 추천 컨텐츠🔥
+                이번달 핫한 축제 🔥
               </Text>
 
               <FlatList
@@ -452,32 +426,44 @@ export default function HomeScreen() {
               />
             </View>
 
-            <View className="border border-yellow-500">
-              <View className="mb-3 flex-row items-center justify-between">
-                <Text className="text-lg font-bold text-black">
-                  금주 컨텐츠를 한눈에
-                </Text>
-                <TouchableOpacity>
-                  <Text className="text-sm text-gray-500">더보기</Text>
-                </TouchableOpacity>
-              </View>
+            {/* 금주 콘텐츠 */}
+            <View className="flex gap-y-[18px] border border-yellow-500 px-[18px] py-2.5">
+              <Text className="text-xl font-semibold text-black">
+                금주 콘텐츠를 한눈에👀
+              </Text>
 
-              <View className="mb-4">
-                <FlatList
-                  data={weekDays}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 4 }}
-                  renderItem={({ item }) => (
-                    <DayButton
-                      day={item}
-                      isSelected={selectedDay === item.dayOfWeek}
-                      onPress={() => setSelectedDay(item.dayOfWeek)}
-                    />
-                  )}
-                  keyExtractor={(item) => item.dayOfWeek.toString()}
-                />
-              </View>
+              <FlatList
+                data={weekDays}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <Pressable
+                    onPress={() => setSelectedDay(item.dayOfWeek)}
+                    className={`flex h-16 w-12 items-center justify-center rounded-2xl ${
+                      selectedDay === item.dayOfWeek
+                        ? "border-0 bg-[#6C4DFF]"
+                        : "border border-[#ECECEC] bg-white"
+                    }`}
+                  >
+                    <Text
+                      className={`text-lg font-medium ${
+                        selectedDay === item.dayOfWeek
+                          ? "text-white"
+                          : "text-[#9E9E9E]"
+                      }`}
+                    >
+                      {item.date}
+                    </Text>
+                    <Text
+                      className={`text-sm font-normal ${selectedDay === item.dayOfWeek ? "text-white" : "text-[#9E9E9E]"}`}
+                    >
+                      {item.dayName}
+                    </Text>
+                  </Pressable>
+                )}
+                keyExtractor={(item) => item.dayOfWeek.toString()}
+                ItemSeparatorComponent={() => <View className="w-2" />}
+              />
 
               {/* <FlatList
                 data={selectedDayContent}
