@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -17,6 +18,7 @@ import {
 import { CelebrationIcon } from "@/components/icons/CelebrationIcon";
 import ChevronRight from "@/components/icons/ChevronRight";
 import { FoodIcon } from "@/components/icons/FoodIcon";
+import LockIcon from "@/components/icons/LockIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PaintIcon } from "@/components/icons/PaintIcon";
 import { PaletteIcon } from "@/components/icons/PaletteIcon";
@@ -287,6 +289,7 @@ export default function HomeScreen() {
     useState<CategoryType>("FESTIVAL");
   const [selectedWeeklyDateIndex, setSelectedWeeklyDateIndex] =
     useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
   const router = useRouter();
 
@@ -459,23 +462,72 @@ export default function HomeScreen() {
                 })}
               </View>
 
-              <FlatList
-                data={chunkedFilteredCategoryData}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <View className="w-[310px] flex-1 gap-y-[15.5px]">
-                    {item.map((cardItem) => (
-                      <Card
-                        key={cardItem.contentId.toString()}
-                        item={cardItem}
-                      />
-                    ))}
-                  </View>
+              <View className="relative">
+                <FlatList
+                  data={chunkedFilteredCategoryData}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <View className="w-[310px] flex-1 gap-y-[15.5px]">
+                      {item.map((cardItem) => (
+                        <Card
+                          key={cardItem.contentId.toString()}
+                          item={cardItem}
+                        />
+                      ))}
+                    </View>
+                  )}
+                  keyExtractor={(_, index) => index.toString()}
+                  ItemSeparatorComponent={() => <View className="w-3.5" />}
+                />
+
+                {/* 로그인하지 않은 경우 오버레이 */}
+                {!isLoggedIn && (
+                  <BlurView
+                    intensity={8}
+                    className="absolute inset-0 m-[-10px] flex items-center justify-center"
+                  >
+                    <View className="absolute inset-0 bg-white/80" />
+                    <View className="items-center gap-y-2.5">
+                      <LockIcon />
+                      <View>
+                        <Text className="text-center text-lg font-medium text-[#212121]">
+                          회원가입하고
+                        </Text>
+                        <Text className="text-center text-lg font-medium text-[#212121]">
+                          맞춤 컨텐츠를 확인해보세요!
+                        </Text>
+                      </View>
+                      <Pressable onPress={() => setIsLoggedIn(true)}>
+                        <LinearGradient
+                          colors={["#7F69FE", "#6B52FB"]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          locations={[0.0073, 0.9927]}
+                          style={{
+                            borderRadius: 20,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <Text className="font-base text-sm text-white">
+                            회원가입하기
+                          </Text>
+                          <ChevronRight
+                            width={10}
+                            height={10}
+                            color="#FFFFFF"
+                          />
+                        </LinearGradient>
+                      </Pressable>
+                    </View>
+                  </BlurView>
                 )}
-                keyExtractor={(_, index) => index.toString()}
-                ItemSeparatorComponent={() => <View className="w-3.5" />}
-              />
+              </View>
             </View>
 
             {/* 이번달 핫한 축제 */}
