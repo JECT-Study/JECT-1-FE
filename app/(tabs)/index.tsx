@@ -118,15 +118,6 @@ const customContentData: CustomContentItem[] = [
   },
 ];
 
-const mdPickData: DummyItem[] = [
-  { id: "1", title: "HOT 가을 축제", subtitle: "전국 인기 축제" },
-  { id: "2", title: "맛집 투어", subtitle: "미식가 추천" },
-  { id: "3", title: "야경 명소", subtitle: "로맨틱 스팟" },
-  { id: "4", title: "체험 활동", subtitle: "가족 여행" },
-  { id: "5", title: "힐링 여행", subtitle: "휴양지 추천" },
-  { id: "6", title: "문화 체험", subtitle: "역사 탐방" },
-];
-
 const festivalData: DummyItem[] = [
   { id: "1", title: "서울 불꽃축제", subtitle: "한강 여의도" },
   { id: "2", title: "부산 바다축제", subtitle: "해운대 해변" },
@@ -189,6 +180,36 @@ const Card = ({ item }: { item: CustomContentItem }) => {
         <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
         <Text className="text-sm text-[#707070]">
           {item.startDate} ~ {item.endDate}
+        </Text>
+      </View>
+    </Pressable>
+  );
+};
+
+const HotCard = ({ item }: { item: CustomContentItem }) => {
+  const router = useRouter();
+
+  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+
+  return (
+    <Pressable
+      className="w-[154px] border border-blue-500"
+      onPress={handlePress}
+    >
+      <Image
+        source={{ uri: item.image }}
+        className="h-[154px] w-[154px] rounded-[10px]"
+        resizeMode="cover"
+      />
+      <View className="mt-2">
+        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
+          <Text className="text-sm font-medium text-[#6C4DFF]">축제</Text>
+        </View>
+        <Text className="mb-1.5 text-base font-semibold text-[#424242]">
+          {item.title}
+        </Text>
+        <Text className="text-xs text-[#9E9E9E]" numberOfLines={1}>
+          {item.address}
         </Text>
       </View>
     </Pressable>
@@ -404,7 +425,10 @@ export default function HomeScreen() {
                 renderItem={({ item }) => (
                   <View className="w-[310px] flex-1 gap-y-[15.5px]">
                     {item.map((cardItem) => (
-                      <Card key={cardItem.id} item={cardItem} />
+                      <Card
+                        key={cardItem.contentId.toString()}
+                        item={cardItem}
+                      />
                     ))}
                   </View>
                 )}
@@ -413,26 +437,19 @@ export default function HomeScreen() {
               />
             </View>
 
-            <View className="border border-green-500">
-              <View className="mb-3 flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <Text className="text-lg font-bold text-black">
-                    MD픽 추천 컨텐츠
-                  </Text>
-                  <Text className="ml-1 text-orange-500">🔥</Text>
-                </View>
-                <TouchableOpacity>
-                  <Text className="text-sm text-gray-500">더보기</Text>
-                </TouchableOpacity>
-              </View>
+            <View className="border border-green-500 px-[18px] py-2.5">
+              <Text className="mb-[18px] text-xl font-semibold text-[#424242]">
+                MD픽 추천 컨텐츠🔥
+              </Text>
 
-              {/* <FlatList
-                data={mdPickData}
+              <FlatList
+                data={customContentData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <Card item={item} />}
-                keyExtractor={(item) => item.id}
-              /> */}
+                renderItem={({ item }) => <HotCard item={item} />}
+                keyExtractor={(item) => item.contentId.toString()}
+                ItemSeparatorComponent={() => <View className="w-3.5" />}
+              />
             </View>
 
             <View className="border border-yellow-500">
