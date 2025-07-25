@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { CelebrationIcon } from "@/components/icons/CelebrationIcon";
+import ChevronRight from "@/components/icons/ChevronRight";
 import { FoodIcon } from "@/components/icons/FoodIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PaintIcon } from "@/components/icons/PaintIcon";
@@ -307,6 +308,10 @@ export default function HomeScreen() {
     router.push("/(tabs)/search");
   };
 
+  const handleSchedulePress = () => {
+    router.push("/(tabs)/schedule");
+  };
+
   return (
     <View className="flex-1 bg-white">
       <StatusBar style={isScrolled ? "dark" : "light"} />
@@ -517,6 +522,18 @@ export default function HomeScreen() {
                 keyExtractor={(_, index) => index.toString()}
                 ItemSeparatorComponent={() => <View className="w-3.5" />}
               />
+
+              <Pressable
+                className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
+                onPress={handleSchedulePress}
+              >
+                <View className="flex-row items-center gap-x-1.5">
+                  <Text className="text-[15px] font-normal text-[#6C4DFF]">
+                    더보기
+                  </Text>
+                  <ChevronRight />
+                </View>
+              </Pressable>
             </View>
 
             <View className="border border-purple-500">
