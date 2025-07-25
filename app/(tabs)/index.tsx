@@ -11,7 +11,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -26,12 +25,6 @@ import { SearchIcon } from "@/components/icons/SearchIcon";
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
 
-interface DummyItem {
-  id: string;
-  title: string;
-  subtitle: string;
-}
-
 interface CustomContentItem {
   contentId: number;
   title: string;
@@ -44,13 +37,22 @@ interface CustomContentItem {
   endDate: string;
 }
 
+type CategoryType = (typeof categoryConfig)[number]["id"];
+
+const categoryConfig = [
+  { id: "PERFORMANCE", iconType: "paint", label: "공연" },
+  { id: "EXHIBITION", iconType: "palette", label: "전시" },
+  { id: "FESTIVAL", iconType: "celebration", label: "축제" },
+  { id: "EVENT", iconType: "food", label: "행사" },
+] as const;
+
 const customContentData: CustomContentItem[] = [
   {
     contentId: 0,
     title: "벚꽃 축제",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
+    contentType: "FESTIVAL",
     address: "서울 여의도",
     longitude: 126.925,
     latitude: 37.5301,
@@ -62,7 +64,7 @@ const customContentData: CustomContentItem[] = [
     title: "음식 페스티벌",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
+    contentType: "FESTIVAL",
     address: "부산 해운대",
     longitude: 129.0756,
     latitude: 35.1595,
@@ -74,7 +76,7 @@ const customContentData: CustomContentItem[] = [
     title: "재즈 콘서트",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
+    contentType: "PERFORMANCE",
     address: "대구 수성구",
     longitude: 128.6014,
     latitude: 35.8714,
@@ -98,7 +100,7 @@ const customContentData: CustomContentItem[] = [
     title: "문화 축제",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
+    contentType: "FESTIVAL",
     address: "인천 중구",
     longitude: 126.7052,
     latitude: 37.4563,
@@ -110,7 +112,7 @@ const customContentData: CustomContentItem[] = [
     title: "야간 마켓",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
+    contentType: "EVENT",
     address: "대전 유성구",
     longitude: 127.3845,
     latitude: 36.3504,
@@ -124,11 +126,10 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 
   const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
 
+  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
+
   return (
-    <Pressable
-      className="flex-row border border-blue-500"
-      onPress={handlePress}
-    >
+    <Pressable className="flex-row" onPress={handlePress}>
       <Image
         source={{ uri: item.image }}
         className="h-[111px] w-[111px] rounded-[10px]"
@@ -140,7 +141,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
         </Text>
         <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
         <Text className="text-sm text-[#707070]">
-          {item.startDate} ~ {item.endDate}
+          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
       </View>
     </Pressable>
@@ -153,10 +154,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
   const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
 
   return (
-    <Pressable
-      className="w-[154px] border border-blue-500"
-      onPress={handlePress}
-    >
+    <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
         source={{ uri: item.image }}
         className="h-[154px] w-[154px] rounded-[14px]"
@@ -182,11 +180,10 @@ const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
 
   const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
 
+  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
+
   return (
-    <Pressable
-      className="flex-row border border-blue-500"
-      onPress={handlePress}
-    >
+    <Pressable className="flex-row" onPress={handlePress}>
       <Image
         source={{ uri: item.image }}
         className="h-[90px] w-[120px] rounded-lg"
@@ -200,12 +197,43 @@ const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
           {item.address}
         </Text>
         <Text className="text-sm font-normal text-[#707070]">
-          {item.startDate} ~ {item.endDate}
+          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
       </View>
     </Pressable>
   );
 };
+
+const MoreCard = ({ item }: { item: CustomContentItem }) => {
+  const router = useRouter();
+
+  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+
+  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
+
+  return (
+    <Pressable className="w-[154px]" onPress={handlePress}>
+      <Image
+        source={{ uri: item.image }}
+        className="h-[92px] w-full rounded-[14px]"
+        resizeMode="cover"
+      />
+      <View className="mt-2">
+        <Text className="text-base font-semibold text-[#424242]">
+          {item.title}
+        </Text>
+        <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
+          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
+        </Text>
+        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
+          <Text className="text-sm font-medium text-[#6C4DFF]">축제</Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+};
+
+const SCROLL_THRESHOLD = 30;
 
 const chunkArray = (array: any[], chunkSize: number): any[][] => {
   const chunks = [];
@@ -214,8 +242,6 @@ const chunkArray = (array: any[], chunkSize: number): any[][] => {
   }
   return chunks;
 };
-
-const SCROLL_THRESHOLD = 30;
 
 const getWeekDays = () => {
   const today = dayjs();
@@ -255,29 +281,28 @@ const getWeekDays = () => {
   }));
 };
 
-const categoryConfig = [
-  { id: "PERFORMANCE", iconType: "paint", label: "공연" },
-  { id: "EXHIBITION", iconType: "palette", label: "전시" },
-  { id: "FESTIVAL", iconType: "celebration", label: "축제" },
-  { id: "EVENT", iconType: "food", label: "행사" },
-] as const;
-
-type CategoryType = (typeof categoryConfig)[number]["id"];
-
 export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryType>("PERFORMANCE");
-  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
+  const [selectedCustomContentCategory, setSelectedCustomContentCategory] =
+    useState<CategoryType>("FESTIVAL");
+  const [selectedWeeklyDateIndex, setSelectedWeeklyDateIndex] =
+    useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
 
   const router = useRouter();
 
   const weekDays = getWeekDays();
 
+  // 선택된 카테고리에 해당하는 데이터 필터링
+  const getFilteredContentByCategory = () => {
+    return customContentData.filter(
+      (item) => item.contentType === selectedCustomContentCategory,
+    );
+  };
+
   // 선택된 날짜에 해당하는 데이터 필터링
   const getFilteredContentBySelectedDay = () => {
     const selectedDayData = weekDays.find(
-      (day) => day.dayOfIndex === selectedDayIndex,
+      (day) => day.dayOfIndex === selectedWeeklyDateIndex,
     );
     if (!selectedDayData) return [];
 
@@ -295,8 +320,12 @@ export default function HomeScreen() {
     });
   };
 
+  const filteredCustomContentByCategory = getFilteredContentByCategory();
   const filteredCustomContentData = getFilteredContentBySelectedDay();
-  const chunkedCustomContentData = chunkArray(customContentData, 3);
+  const chunkedFilteredCategoryData = chunkArray(
+    filteredCustomContentByCategory,
+    3,
+  );
   const chunkedFilteredContentData = chunkArray(filteredCustomContentData, 3);
 
   const handleScroll = (event: any) => {
@@ -368,7 +397,7 @@ export default function HomeScreen() {
           </View>
         </LinearGradient>
 
-        <View className="mt-[-20px] flex-1 rounded-t-3xl border border-red-500 bg-white">
+        <View className="mb-10 mt-[-20px] flex-1 rounded-t-3xl bg-white">
           {/* 카테고리 버튼 */}
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
@@ -398,41 +427,40 @@ export default function HomeScreen() {
 
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
-            <View className="border border-blue-500 px-[18px] py-2.5">
+            <View className="px-[18px] py-2.5">
               <Text className="text-xl font-semibold text-black">
                 OO님을 위한 맞춤 콘텐츠
               </Text>
 
-              <View className="mb-5 mt-3">
-                <View className="flex-row gap-x-2.5">
-                  {categoryConfig.map((category) => {
-                    const isSelected = selectedCategory === category.id;
-                    return (
-                      <Pressable
-                        key={category.id}
-                        className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
-                          isSelected ? "bg-[#6C4DFF]" : "bg-white"
+              <View className="mb-5 mt-3 flex-row gap-x-2.5">
+                {categoryConfig.map((category) => {
+                  const isSelected =
+                    selectedCustomContentCategory === category.id;
+                  return (
+                    <Pressable
+                      key={category.id}
+                      className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
+                        isSelected ? "bg-[#6C4DFF]" : "bg-white"
+                      }`}
+                      onPress={() => {
+                        setSelectedCustomContentCategory(category.id);
+                        console.log(`${category.label} 카테고리 선택됨`);
+                      }}
+                    >
+                      <Text
+                        className={`text-sm ${
+                          isSelected ? "text-white" : "text-[#6C4DFF]"
                         }`}
-                        onPress={() => {
-                          setSelectedCategory(category.id);
-                          console.log(`${category.label} 카테고리 선택됨`);
-                        }}
                       >
-                        <Text
-                          className={`text-sm ${
-                            isSelected ? "text-white" : "text-[#6C4DFF]"
-                          }`}
-                        >
-                          {category.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                        {category.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
 
               <FlatList
-                data={chunkedCustomContentData}
+                data={chunkedFilteredCategoryData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
@@ -451,7 +479,7 @@ export default function HomeScreen() {
             </View>
 
             {/* 이번달 핫한 축제 */}
-            <View className="border border-green-500 px-[18px] py-2.5">
+            <View className="px-[18px] py-2.5">
               <Text className="mb-[18px] text-xl font-semibold text-[#424242]">
                 이번달 핫한 축제 🔥
               </Text>
@@ -467,7 +495,7 @@ export default function HomeScreen() {
             </View>
 
             {/* 금주 콘텐츠 */}
-            <View className="flex gap-y-[18px] border border-yellow-500 px-[18px] py-2.5">
+            <View className="flex gap-y-[18px] px-[18px] py-2.5">
               <Text className="text-xl font-semibold text-black">
                 금주 콘텐츠를 한눈에👀
               </Text>
@@ -478,16 +506,16 @@ export default function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
                   <Pressable
-                    className={`flex h-16 w-12 items-center justify-center rounded-2xl ${
-                      selectedDayIndex === item.dayOfIndex
+                    className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
+                      selectedWeeklyDateIndex === item.dayOfIndex
                         ? "border-0 bg-[#6C4DFF]"
                         : "border border-[#ECECEC] bg-white"
                     }`}
-                    onPress={() => setSelectedDayIndex(item.dayOfIndex)}
+                    onPress={() => setSelectedWeeklyDateIndex(item.dayOfIndex)}
                   >
                     <Text
                       className={`text-lg font-medium ${
-                        selectedDayIndex === item.dayOfIndex
+                        selectedWeeklyDateIndex === item.dayOfIndex
                           ? "text-white"
                           : "text-[#9E9E9E]"
                       }`}
@@ -495,7 +523,7 @@ export default function HomeScreen() {
                       {item.date}
                     </Text>
                     <Text
-                      className={`text-sm font-normal ${selectedDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
+                      className={`text-sm font-normal ${selectedWeeklyDateIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
                     >
                       {item.dayName}
                     </Text>
@@ -536,23 +564,31 @@ export default function HomeScreen() {
               </Pressable>
             </View>
 
-            <View className="border border-purple-500">
-              <View className="mb-3 flex-row items-center justify-between">
-                <Text className="text-lg font-bold text-black">
+            {/* 이런 축제 어때요? */}
+            <View className="px-[18px] py-2.5">
+              <View className="mb-[18px] flex-row items-center justify-between">
+                <Text className="text-xl font-semibold text-[#424242]">
                   이런 축제 어때요?
                 </Text>
-                <TouchableOpacity>
-                  <Text className="text-sm text-gray-500">더보기</Text>
-                </TouchableOpacity>
+                <Pressable
+                  className="flex-row items-center gap-x-1.5"
+                  onPress={handleSearchPress}
+                >
+                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                    더보기
+                  </Text>
+                  <ChevronRight width={10} height={10} color="#9E9E9E" />
+                </Pressable>
               </View>
 
-              {/* <FlatList
-                data={festivalData}
+              <FlatList
+                data={customContentData}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <Card item={item} />}
-                keyExtractor={(item) => item.id}
-              /> */}
+                renderItem={({ item }) => <MoreCard item={item} />}
+                keyExtractor={(item) => item.contentId.toString()}
+                ItemSeparatorComponent={() => <View className="w-3.5" />}
+              />
             </View>
           </View>
         </View>
