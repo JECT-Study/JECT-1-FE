@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -39,7 +39,7 @@ interface CustomContentItem {
   endDate: string;
 }
 
-type CategoryType = (typeof categoryConfig)[number]["id"] | "ALL";
+type CategoryType = (typeof categoryConfig)[number]["id"];
 
 const categoryConfig = [
   { id: "PERFORMANCE", iconType: "paint", label: "공연" },
@@ -54,7 +54,7 @@ const customContentData: CustomContentItem[] = [
     title: "벚꽃 축제",
     image:
       "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "FESTIVAL",
+    contentType: "PERFORMANCE",
     address: "서울 여의도",
     longitude: 126.925,
     latitude: 37.5301,
@@ -286,7 +286,7 @@ const getWeekDays = () => {
 export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [selectedCustomContentCategory, setSelectedCustomContentCategory] =
-    useState<CategoryType>("ALL");
+    useState<CategoryType>("PERFORMANCE");
   const [selectedWeeklyDateIndex, setSelectedWeeklyDateIndex] =
     useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
@@ -295,20 +295,8 @@ export default function HomeScreen() {
 
   const weekDays = getWeekDays();
 
-  // 로그인 상태 변화에 따라 기본 카테고리 설정
-  useEffect(() => {
-    if (isLoggedIn) {
-      setSelectedCustomContentCategory("PERFORMANCE");
-    } else {
-      setSelectedCustomContentCategory("ALL");
-    }
-  }, [isLoggedIn]);
-
   // 선택된 카테고리에 해당하는 데이터 필터링
   const getFilteredContentByCategory = () => {
-    if (selectedCustomContentCategory === "ALL") {
-      return customContentData;
-    }
     return customContentData.filter(
       (item) => item.contentType === selectedCustomContentCategory,
     );
@@ -448,28 +436,6 @@ export default function HomeScreen() {
               </Text>
 
               <View className="mb-5 mt-3 flex-row gap-x-2.5">
-                {!isLoggedIn && (
-                  <Pressable
-                    key="ALL"
-                    disabled={false}
-                    className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
-                      selectedCustomContentCategory === "ALL"
-                        ? "bg-[#6C4DFF]"
-                        : "bg-white"
-                    }`}
-                    onPress={() => setSelectedCustomContentCategory("ALL")}
-                  >
-                    <Text
-                      className={`text-sm ${
-                        selectedCustomContentCategory === "ALL"
-                          ? "text-white"
-                          : "text-[#6C4DFF]"
-                      }`}
-                    >
-                      전체
-                    </Text>
-                  </Pressable>
-                )}
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedCustomContentCategory === category.id;
