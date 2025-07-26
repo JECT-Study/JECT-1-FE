@@ -26,15 +26,13 @@ import LocationMarkerIcon from "@/components/icons/LocationMarkerIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.4;
-
 function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
   return <View className={`w-full ${height} ${bg}`} />;
 }
 
 function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+
   const carouselData = Array(5).fill(
     require("@/assets/images/detail-dummy.png"),
   );
@@ -79,6 +77,8 @@ function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
     </View>
   );
 }
+
+const IMAGE_HEIGHT = 350;
 
 export default function DetailScreen() {
   const [scrollY, setScrollY] = useState<number>(0);

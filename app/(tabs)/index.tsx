@@ -126,7 +126,7 @@ const customContentData: CustomContentItem[] = [
 const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+  const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
@@ -153,7 +153,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 const HotCard = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+  const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
@@ -180,7 +180,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
 const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+  const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
@@ -209,7 +209,7 @@ const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
 const MoreCard = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/(tabs)/detail/${item.contentId}`);
+  const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
