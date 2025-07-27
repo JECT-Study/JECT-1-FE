@@ -1,6 +1,8 @@
-import { SafeAreaView, Text } from "react-native";
-import CustomHeader from "@/components/ui/CustomHeader";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native";
+
+import SearchResult from "@/components/search/SearchResult";
+import CustomHeader from "@/components/ui/CustomHeader";
 
 export default function SearchScreen() {
   return (
@@ -10,6 +12,7 @@ export default function SearchScreen() {
         isCommit={false}
         cancel={() => router.back()}
       />
+      <SearchResult></SearchResult>
     </SafeAreaView>
   );
 }
