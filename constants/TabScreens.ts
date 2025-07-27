@@ -10,7 +10,7 @@ export const TAB_SCREENS = [
     Icon: HomeIcon,
   },
   {
-    name: "search",
+    name: "search_tab",
     title: "검색",
     Icon: SearchIcon,
   },
