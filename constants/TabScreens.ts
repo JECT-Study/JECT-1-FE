@@ -16,12 +16,12 @@ export const TAB_SCREENS = [
   },
   {
     name: "schedule",
-    title: "일정 별 컨텐츠",
+    title: "일정",
     Icon: ScheduleIcon,
   },
   {
     name: "my/index",
-    title: "마이페이지",
+    title: "마이",
     Icon: MyIcon,
     activePage: "my",
   },

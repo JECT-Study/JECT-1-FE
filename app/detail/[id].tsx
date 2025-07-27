@@ -33,9 +33,9 @@ function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
 function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const carouselData = Array(5).fill(
-    require("@/assets/images/detail-dummy.png"),
-  );
+  const carouselData = Array(5).fill({
+    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+  });
 
   const renderCarouselItem = ({ item }: { item: any }) => (
     <Image

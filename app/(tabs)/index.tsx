@@ -22,7 +22,7 @@ import LockIcon from "@/components/icons/LockIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PaintIcon } from "@/components/icons/PaintIcon";
 import { PaletteIcon } from "@/components/icons/PaletteIcon";
-import { SearchIcon } from "@/components/icons/SearchIcon";
+import SearchIcon from "@/components/icons/SearchIcon";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
@@ -364,7 +364,7 @@ export default function HomeScreen() {
             className="h-11 flex-row items-center gap-x-3 rounded-full border border-[#6B51FB] bg-white px-[18px] py-3"
             onPress={handleSearchPress}
           >
-            <SearchIcon width={18} height={19} />
+            <SearchIcon size={24} color="#6B51FB" />
             <Text className="text-[#6E6E6E]">
               6월에 안가면 손해! 고창 수박 축제
             </Text>
@@ -394,7 +394,7 @@ export default function HomeScreen() {
                 <Text className="text-[#6E6E6E]">
                   6월에 안가면 손해! 고창 수박 축제
                 </Text>
-                <SearchIcon width={18} height={19} />
+                <SearchIcon size={24} color="#6B51FB" />
               </Pressable>
             </View>
           </View>
