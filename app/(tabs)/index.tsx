@@ -9,7 +9,10 @@ import { StatusBar } from "expo-status-bar";
 import {
   FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -235,7 +238,7 @@ const MoreCard = ({ item }: { item: CustomContentItem }) => {
   );
 };
 
-const SCROLL_THRESHOLD = 30;
+const SCROLL_THRESHOLD = -45;
 
 const chunkArray = (array: any[], chunkSize: number): any[][] => {
   const chunks = [];
@@ -289,11 +292,24 @@ export default function HomeScreen() {
     useState<CategoryType>("PERFORMANCE");
   const [selectedWeeklyDateIndex, setSelectedWeeklyDateIndex] =
     useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [scrollBackgroundColor, setScrollBackgroundColor] =
+    useState<string>("#816BFF");
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
   const router = useRouter();
 
   const weekDays = getWeekDays();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    // TODO 데이터 새로고침 로직
+    setTimeout(() => {
+      setRefreshing(false);
+      console.log("데이터 새로고침");
+    }, 1000);
+  };
 
   // 선택된 카테고리에 해당하는 데이터 필터링
   const getFilteredContentByCategory = () => {
@@ -331,18 +347,23 @@ export default function HomeScreen() {
   );
   const chunkedFilteredContentData = chunkArray(filteredCustomContentData, 3);
 
-  const handleScroll = (event: any) => {
-    const scrollY = event.nativeEvent.contentOffset.y;
-    setIsScrolled(scrollY > SCROLL_THRESHOLD);
+  const handleScrollStateChange = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const { contentOffset } = e.nativeEvent;
+    // 현재 스크롤 위치 (Y축)
+    const currentScrollY = contentOffset.y;
+
+    // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
+    setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
+    // 스크롤 위치에 따라 배경색 변경 (0 기준으로 색상 변경)
+    const backgroundColor = currentScrollY <= 0 ? "#816BFF" : "#FFFFFF";
+    setScrollBackgroundColor(backgroundColor);
   };
 
-  const handleSearchPress = () => {
-    router.push("/(tabs)/search");
-  };
+  const handleSearchPress = () => router.push("/(tabs)/search");
 
-  const handleSchedulePress = () => {
-    router.push("/(tabs)/schedule");
-  };
+  const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
     <View className="flex-1 bg-white">
@@ -351,7 +372,7 @@ export default function HomeScreen() {
       {/* 스크롤 시 보이는 헤더 */}
       {isScrolled && (
         <View
-          className="absolute left-0 right-0 top-0 z-10 flex h-40 justify-end bg-white p-[18px]"
+          className="absolute left-0 right-0 top-0 z-10 flex h-36 justify-end bg-white p-[18px]"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -374,8 +395,19 @@ export default function HomeScreen() {
 
       <ScrollView
         className="flex-1"
-        onScroll={handleScroll}
+        style={{ backgroundColor: scrollBackgroundColor }}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScrollStateChange}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#FFFFFF"
+            colors={["#FFFFFF"]}
+          />
+        }
       >
         {/* 기본 헤더 */}
         <LinearGradient
@@ -384,7 +416,7 @@ export default function HomeScreen() {
           end={{ x: 0.2, y: 1 }}
           locations={[0.0683, 0.9503]}
         >
-          <View className="h-48 flex-row items-end justify-center px-[18px] pb-11">
+          <View className="h-28 flex-row items-end justify-center px-[18px] pb-11">
             <View className="w-full flex-row items-center gap-x-2">
               <LogoIcon width={35} height={32} />
               <Pressable
@@ -400,7 +432,7 @@ export default function HomeScreen() {
           </View>
         </LinearGradient>
 
-        <View className="mb-10 mt-[-20px] flex-1 rounded-t-3xl bg-white">
+        <View className="mt-[-20px] flex-1 rounded-t-3xl bg-white pb-6">
           {/* 카테고리 버튼 */}
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
