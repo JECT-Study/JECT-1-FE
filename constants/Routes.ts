@@ -1,5 +1,6 @@
 export const ROUTES = {
   HOME: "/",
+  SURVEY: "/survey",
   SEARCH: "/search",
   SCHEDULE: "/schedule",
   DETAIL: "/detail",

@@ -29,5 +29,8 @@ export default function usePageNavigation() {
     goPlan() {
       router.push(ROUTES.MY.PLAN);
     },
+    goSurvey() {
+      router.push(ROUTES.SURVEY);
+    },
   };
 }
