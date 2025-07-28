@@ -6,12 +6,12 @@ import * as Progress from "react-native-progress";
 
 import FilterSection from "@/components/search/SearchFilter";
 import { SearchResultUrl } from "@/constants/ApiUrls";
-import { Categories } from "@/constants/Categories";
-import { Regions } from "@/constants/Regions";
+import { Categories, CategoriesObject } from "@/constants/Categories";
+import { Regions, RegionsObject } from "@/constants/Regions";
 import { SearchResultIndexResponse } from "@/interfaces/search.interfaces";
 
 const MOCK_DATA: Record<string, SearchResultIndexResponse[]> = {
-  공연: [
+  PERFORMANCE: [
     {
       id: 1,
       title: "뮤지컬 위키드",
@@ -27,7 +27,7 @@ const MOCK_DATA: Record<string, SearchResultIndexResponse[]> = {
       thumbnailUrl: "https://example.com/show2.jpg",
     },
   ],
-  전시: [
+  EXHIBITION: [
     {
       id: 3,
       title: "모네와 친구들",
@@ -36,7 +36,7 @@ const MOCK_DATA: Record<string, SearchResultIndexResponse[]> = {
       thumbnailUrl: "https://example.com/exhibit1.jpg",
     },
   ],
-  축제: [
+  FESTIVAL: [
     {
       id: 4,
       title: "부산 바다축제",
@@ -45,7 +45,7 @@ const MOCK_DATA: Record<string, SearchResultIndexResponse[]> = {
       thumbnailUrl: "https://example.com/festival1.jpg",
     },
   ],
-  행사: [
+  EVENT: [
     {
       id: 5,
       title: "2025 스타트업 밋업",
@@ -109,17 +109,15 @@ export default function SearchResult() {
         options={Categories}
         selected={selectedCategories}
         onChange={setSelectedCategories}
+        mappingObject={CategoriesObject}
       />
       <FilterSection
         title="지역"
         options={Regions}
         selected={selectedRegions}
         onChange={setSelectedRegions}
+        mappingObject={RegionsObject}
       />
-      <Text className="text-gray-800">
-        선택된 카테고리: {selectedCategories}
-      </Text>
-      <Text className="mt-1 text-gray-800">선택된 지역: {selectedRegions}</Text>
       <FlatList
         className="mt-6 px-[18px]"
         data={results}
@@ -159,9 +157,11 @@ export default function SearchResult() {
               <Progress.Circle size={30} indeterminate={true} />
             </View>
           ) : (
-            <Text className="text-center text-gray500">
-              검색 결과가 없습니다.
-            </Text>
+            <View className="min-h-[300px] flex-1 items-center justify-center">
+              <Text className="text-center text-gray500">
+                검색 결과가 없습니다.
+              </Text>
+            </View>
           )
         }
       />

@@ -1,20 +1,21 @@
-// components/FilterSection.tsx
 import { View, Text, ScrollView, Pressable } from "react-native";
 
-type Props = {
+type FilterSectionProps<T extends string> = {
   title: string;
-  options: string[];
-  selected: string;
-  onChange: (values: string) => void;
+  options: T[];
+  selected: T | "";
+  onChange: (value: T | "") => void;
+  mappingObject: Record<T, string>;
 };
 
-export default function FilterSection({
+export default function FilterSection<T extends string>({
   title,
   options,
   selected,
   onChange,
-}: Props) {
-  const toggleOption = (option: string) => {
+  mappingObject,
+}: FilterSectionProps<T>) {
+  const toggleOption = (option: T) => {
     onChange(option);
   };
 
@@ -29,13 +30,13 @@ export default function FilterSection({
       >
         <Pressable
           className={`mr-2 flex h-8 items-center justify-center rounded-[20px] px-3 ${
-            selected.length === 0 ? "bg-main" : "bg-gray-200"
+            selected === "" ? "bg-main" : "bg-gray-200"
           }`}
           onPress={() => onChange("")}
         >
           <Text
             className={`text-[14px] ${
-              selected.length === 0 ? "text-white" : "text-gray600"
+              selected === "" ? "text-white" : "text-gray600"
             }`}
           >
             전체
@@ -43,7 +44,7 @@ export default function FilterSection({
         </Pressable>
 
         {options.map((option) => {
-          const isSelected = selected.includes(option);
+          const isSelected = selected === option;
           return (
             <Pressable
               key={option}
@@ -57,7 +58,7 @@ export default function FilterSection({
                   isSelected ? "text-white" : "text-gray600"
                 }`}
               >
-                {option}
+                {mappingObject[option]}
               </Text>
             </Pressable>
           );
