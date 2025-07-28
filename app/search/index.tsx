@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { router } from "expo-router";
 import { Pressable, SafeAreaView, TextInput, View } from "react-native";
 
 import Chevron from "@/components/icons/Chevron";
@@ -12,7 +13,9 @@ export default function SearchScreen() {
   return (
     <SafeAreaView className="w-full flex-1 bg-white">
       <View className="flex flex-row items-center p-6">
-        <Chevron direction={"left"} />
+        <Pressable onPress={() => router.back()}>
+          <Chevron direction={"left"} />
+        </Pressable>
         <View className="ml-3 flex h-11 flex-1 flex-row items-center rounded-full border-[1.2px] border-[#6B51FB] p-3">
           {searchText.length === 0 ? <SearchIcon color="#6B51FB" /> : null}
           <TextInput

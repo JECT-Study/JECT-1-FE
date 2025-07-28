@@ -61,6 +61,10 @@ export default function RootLayout() {
                   name="my/terms/service_terms"
                   options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                  name="search/index"
+                  options={{ headerShown: false }}
+                />
               </Stack>
             </View>
           </View>
