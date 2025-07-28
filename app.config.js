@@ -98,7 +98,7 @@ export default {
     kakaoNativeAppKey: process.env.MYCODE_KAKAO_NATIVE_APP_KEY,
     BACKEND_URL: process.env.MYCODE_BACKEND_URL,
     eas: {
-      projectId: "d7358463-cb75-4255-acbd-d31bfcad90b2",
+      projectId: process.env.MYCODE_EAS_PROJECT_ID,
     },
   },
 };
