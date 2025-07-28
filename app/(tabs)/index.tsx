@@ -55,6 +55,16 @@ interface WeeklyContentItem {
   endDate: string;
 }
 
+interface CategoryContentItem {
+  contentId: number;
+  title: string;
+  image: string | null;
+  longitude: number;
+  latitude: number;
+  startDate: string;
+  endDate: string;
+}
+
 type CategoryType = (typeof categoryConfig)[number]["id"];
 
 const categoryConfig = [
@@ -63,81 +73,6 @@ const categoryConfig = [
   { id: "FESTIVAL", iconType: "celebration", label: "축제" },
   { id: "EVENT", iconType: "food", label: "행사" },
 ] as const;
-
-const customContentData: CustomContentItem[] = [
-  {
-    contentId: 0,
-    title: "벚꽃 축제",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "PERFORMANCE",
-    address: "서울 여의도",
-    longitude: 126.925,
-    latitude: 37.5301,
-    startDate: "2025-07-20",
-    endDate: "2025-07-30",
-  },
-  {
-    contentId: 1,
-    title: "음식 페스티벌",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "FESTIVAL",
-    address: "부산 해운대",
-    longitude: 129.0756,
-    latitude: 35.1595,
-    startDate: "2025-07-22",
-    endDate: "2025-07-23",
-  },
-  {
-    contentId: 2,
-    title: "재즈 콘서트",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "PERFORMANCE",
-    address: "대구 수성구",
-    longitude: 128.6014,
-    latitude: 35.8714,
-    startDate: "2025-07-25",
-    endDate: "2025-07-26",
-  },
-  {
-    contentId: 3,
-    title: "아트 마켓",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EXHIBITION",
-    address: "광주 동구",
-    longitude: 126.8526,
-    latitude: 35.1595,
-    startDate: "2025-07-27",
-    endDate: "2025-07-28",
-  },
-  {
-    contentId: 4,
-    title: "문화 축제",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "FESTIVAL",
-    address: "인천 중구",
-    longitude: 126.7052,
-    latitude: 37.4563,
-    startDate: "2025-07-23",
-    endDate: "2025-07-24",
-  },
-  {
-    contentId: 5,
-    title: "야간 마켓",
-    image:
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-    contentType: "EVENT",
-    address: "대전 유성구",
-    longitude: 127.3845,
-    latitude: 36.3504,
-    startDate: "2025-07-23",
-    endDate: "2025-07-24",
-  },
-];
 
 const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
@@ -244,7 +179,7 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   );
 };
 
-const MoreCard = ({ item }: { item: CustomContentItem }) => {
+const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   const router = useRouter();
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
@@ -254,7 +189,11 @@ const MoreCard = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={{ uri: item.image }}
+        source={{
+          uri:
+            item.image ||
+            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+        }}
         className="h-[92px] w-full rounded-[14px]"
         resizeMode="cover"
       />
@@ -266,7 +205,9 @@ const MoreCard = ({ item }: { item: CustomContentItem }) => {
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
         <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
-          <Text className="text-sm font-medium text-[#6C4DFF]">축제</Text>
+          <Text className="text-sm font-medium text-[#6C4DFF]">
+            경기 남양주시
+          </Text>
         </View>
       </View>
     </Pressable>
@@ -322,29 +263,30 @@ const getWeekDays = () => {
 };
 
 export default function HomeScreen() {
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [selectedCustomContentCategory, setSelectedCustomContentCategory] =
-    useState<CategoryType>("PERFORMANCE");
-  const [selectedWeeklyDateIndex, setSelectedWeeklyDateIndex] =
-    useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
-  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [scrollBackgroundColor, setScrollBackgroundColor] =
     useState<string>("#816BFF");
-
+  const [selectedRecommendationsCategory, setSelectedRecommendationsCategory] =
+    useState<CategoryType>("PERFORMANCE");
+  const [selectedWeekDayIndex, setSelectedWeekDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
   const [recommendationsData, setRecommendationsData] = useState<
     CustomContentItem[]
   >([]);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] =
-    useState<boolean>(false);
   const [hotFestivalData, setHotFestivalData] = useState<CustomContentItem[]>(
     [],
   );
+  const [weekDayData, setWeekDayData] = useState<WeeklyContentItem[]>([]);
+  const [categoryContentData, setCategoryContentData] = useState<
+    CategoryContentItem[]
+  >([]);
+
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState<boolean>(false);
   const [isLoadingHotFestival, setIsLoadingHotFestival] =
     useState<boolean>(false);
-  const [weeklyContentData, setWeeklyContentData] = useState<
-    WeeklyContentItem[]
-  >([]);
-  const [isLoadingWeeklyContent, setIsLoadingWeeklyContent] =
+  const [isLoadingWeekDay, setIsLoadingWeekDay] = useState<boolean>(false);
+  const [isLoadingCategoryContent, setIsLoadingCategoryContent] =
     useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
@@ -352,6 +294,9 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const weekDays = getWeekDays();
+
+  const chunkedRecommendationsData = chunkArray(recommendationsData, 3);
+  const chunkedFilteredContentData = chunkArray(weekDayData, 3);
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType) => {
@@ -398,7 +343,7 @@ export default function HomeScreen() {
 
   const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
     try {
-      setIsLoadingWeeklyContent(true);
+      setIsLoadingWeekDay(true);
       const weekDays = getWeekDays();
       const selectedDayData = weekDays.find(
         (day) => day.dayOfIndex === dateIndex,
@@ -410,50 +355,73 @@ export default function HomeScreen() {
       );
 
       if (response.data.isSuccess && response.data.result) {
-        setWeeklyContentData(response.data.result);
+        setWeekDayData(response.data.result);
         console.log("금주 콘텐츠 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
-      setWeeklyContentData([]);
+      setWeekDayData([]);
     } finally {
-      setIsLoadingWeeklyContent(false);
+      setIsLoadingWeekDay(false);
     }
   }, []);
 
-  // 초기 API 호출 및 카테고리 변경 시 API 호출
+  const fetchCategoryContentData = useCallback(async () => {
+    try {
+      setIsLoadingCategoryContent(true);
+      const response = await axios.get(
+        `${BACKEND_URL}/home/category?category=PERFORMANCE`,
+      );
+
+      if (response.data.isSuccess && response.data.result) {
+        setCategoryContentData(response.data.result);
+        console.log("카테고리 콘텐츠 데이터 패칭");
+      }
+    } catch (error) {
+      console.error(error);
+      setCategoryContentData([]);
+    } finally {
+      setIsLoadingCategoryContent(false);
+    }
+  }, []);
+
+  // 초기 API 호출
   useEffect(() => {
     Promise.all([
       fetchRecommendationsByCategory("PERFORMANCE"),
       fetchHotFestivalData(),
       fetchWeeklyContentData(0),
+      fetchCategoryContentData(),
     ]);
   }, [
     fetchRecommendationsByCategory,
     fetchHotFestivalData,
     fetchWeeklyContentData,
+    fetchCategoryContentData,
   ]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
-      fetchRecommendationsByCategory(selectedCustomContentCategory),
+      fetchRecommendationsByCategory(selectedRecommendationsCategory),
       fetchHotFestivalData(),
-      fetchWeeklyContentData(selectedWeeklyDateIndex),
+      fetchWeeklyContentData(selectedWeekDayIndex),
+      fetchCategoryContentData(),
     ]);
     setRefreshing(false);
   }, [
-    selectedCustomContentCategory,
-    selectedWeeklyDateIndex,
+    selectedRecommendationsCategory,
+    selectedWeekDayIndex,
     fetchRecommendationsByCategory,
     fetchHotFestivalData,
     fetchWeeklyContentData,
+    fetchCategoryContentData,
   ]);
 
   // 카테고리 버튼 클릭 핸들러
   const handleCategoryButtonPress = useCallback(
     (categoryId: CategoryType) => {
-      setSelectedCustomContentCategory(categoryId);
+      setSelectedRecommendationsCategory(categoryId);
       fetchRecommendationsByCategory(categoryId);
     },
     [fetchRecommendationsByCategory],
@@ -462,14 +430,11 @@ export default function HomeScreen() {
   // 날짜 버튼 클릭 핸들러
   const handleDateButtonPress = useCallback(
     (dayOfIndex: number) => {
-      setSelectedWeeklyDateIndex(dayOfIndex);
+      setSelectedWeekDayIndex(dayOfIndex);
       fetchWeeklyContentData(dayOfIndex);
     },
     [fetchWeeklyContentData],
   );
-
-  const chunkedFilteredCategoryData = chunkArray(recommendationsData, 3);
-  const chunkedFilteredContentData = chunkArray(weeklyContentData, 3);
 
   const handleScrollStateChange = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -594,7 +559,7 @@ export default function HomeScreen() {
               <View className="mb-5 mt-3 flex-row gap-x-2.5">
                 {categoryConfig.map((category) => {
                   const isSelected =
-                    selectedCustomContentCategory === category.id;
+                    selectedRecommendationsCategory === category.id;
                   const isDisabled = !isLoggedIn;
 
                   return (
@@ -629,7 +594,7 @@ export default function HomeScreen() {
                   </View>
                 ) : (
                   <FlatList
-                    data={chunkedFilteredCategoryData}
+                    data={chunkedRecommendationsData}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item }) => (
@@ -733,7 +698,7 @@ export default function HomeScreen() {
                 renderItem={({ item }) => (
                   <Pressable
                     className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
-                      selectedWeeklyDateIndex === item.dayOfIndex
+                      selectedWeekDayIndex === item.dayOfIndex
                         ? "border-0 bg-[#6C4DFF]"
                         : "border border-[#ECECEC] bg-white"
                     }`}
@@ -741,7 +706,7 @@ export default function HomeScreen() {
                   >
                     <Text
                       className={`text-lg font-medium ${
-                        selectedWeeklyDateIndex === item.dayOfIndex
+                        selectedWeekDayIndex === item.dayOfIndex
                           ? "text-white"
                           : "text-[#9E9E9E]"
                       }`}
@@ -749,7 +714,7 @@ export default function HomeScreen() {
                       {item.date}
                     </Text>
                     <Text
-                      className={`text-sm font-normal ${selectedWeeklyDateIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
+                      className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
                     >
                       {item.dayName}
                     </Text>
@@ -759,7 +724,7 @@ export default function HomeScreen() {
                 ItemSeparatorComponent={() => <View className="w-2" />}
               />
 
-              {isLoadingWeeklyContent ? (
+              {isLoadingWeekDay ? (
                 <View className="h-[270px] w-full items-center justify-center">
                   <Text className="text-[#9E9E9E]">
                     금주 콘텐츠를 불러오는 중...
@@ -815,14 +780,22 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
 
-              <FlatList
-                data={customContentData}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <MoreCard item={item} />}
-                keyExtractor={(item) => item.contentId.toString()}
-                ItemSeparatorComponent={() => <View className="w-3.5" />}
-              />
+              {isLoadingCategoryContent ? (
+                <View className="h-[154px] w-full items-center justify-center">
+                  <Text className="text-[#9E9E9E]">
+                    카테고리 콘텐츠를 불러오는 중...
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={categoryContentData}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => <MoreCard item={item} />}
+                  keyExtractor={(item) => item.contentId.toString()}
+                  ItemSeparatorComponent={() => <View className="w-3.5" />}
+                />
+              )}
             </View>
           </View>
         </View>
