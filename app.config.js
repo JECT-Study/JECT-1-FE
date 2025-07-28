@@ -28,6 +28,7 @@ export default {
           ],
         },
       ],
+      NSAppTransportSecurity: { NSAllowsArbitraryLoads: true },
     },
   },
 
@@ -64,6 +65,7 @@ export default {
           extraMavenRepos: [
             "https://devrepo.kakao.com/nexus/content/groups/public/",
           ],
+          usesCleartextTraffic: true,
         },
       },
     ],
