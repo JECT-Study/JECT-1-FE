@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 import axios, { AxiosError } from "axios";
-import { View, Text, ScrollView, Pressable, FlatList } from "react-native";
+import { router } from "expo-router";
+import { View, Text, Pressable, FlatList } from "react-native";
 import * as Progress from "react-native-progress";
 
 import FilterSection from "@/components/search/SearchFilter";
@@ -135,7 +136,7 @@ export default function SearchResult() {
         renderItem={({ item }) => (
           <Pressable
             className="flex w-[48%] items-center"
-            onPress={() => console.log(`${item.id} 상세 페이지로 연결`)}
+            onPress={() => router.push(`/(tabs)/detail/${item.id}`)}
           >
             <View className="min-h-[164px] min-w-[164px] items-center justify-center rounded-[11px] bg-gray300">
               {/* 실제 이미지를 사용할 경우 Image 컴포넌트로 교체 */}
