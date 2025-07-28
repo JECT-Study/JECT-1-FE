@@ -166,16 +166,30 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
+  // contentType에 따른 라벨 매핑
+  const getContentTypeLabel = (contentType: string) => {
+    const categoryItem = categoryConfig.find(
+      (config) => config.id === contentType,
+    );
+    return categoryItem ? categoryItem.label : "기타";
+  };
+
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={{ uri: item.image }}
+        source={{
+          uri:
+            item.image ||
+            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+        }}
         className="h-[154px] w-[154px] rounded-[14px]"
         resizeMode="cover"
       />
       <View className="mt-2">
         <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
-          <Text className="text-sm font-medium text-[#6C4DFF]">축제</Text>
+          <Text className="text-sm font-medium text-[#6C4DFF]">
+            {getContentTypeLabel(item.contentType)}
+          </Text>
         </View>
         <Text className="mb-1.5 text-base font-semibold text-[#424242]">
           {item.title}
@@ -309,6 +323,11 @@ export default function HomeScreen() {
   >([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState<boolean>(false);
+  const [hotFestivalData, setHotFestivalData] = useState<CustomContentItem[]>(
+    [],
+  );
+  const [isLoadingHotFestival, setIsLoadingHotFestival] =
+    useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
@@ -337,21 +356,42 @@ export default function HomeScreen() {
     }
   };
 
+  // 핫한 축제 데이터 호출 함수
+  const fetchHotFestivalData = async () => {
+    try {
+      setIsLoadingHotFestival(true);
+      const response = await axios.get(
+        `${BACKEND_URL}/home/festival/hot?category=PERFORMANCE`,
+      );
+
+      if (response.data.isSuccess && response.data.result) {
+        setHotFestivalData(response.data.result);
+        console.log("핫한 축제 데이터 패칭");
+      }
+    } catch (error) {
+      console.error(error);
+      setHotFestivalData([]);
+    } finally {
+      setIsLoadingHotFestival(false);
+    }
+  };
+
   // 초기 API 호출 및 카테고리 변경 시 API 호출
   useEffect(() => {
-    fetchRecommendationsByCategory(selectedCustomContentCategory);
+    Promise.all([
+      fetchRecommendationsByCategory(selectedCustomContentCategory),
+      fetchHotFestivalData(),
+    ]);
   }, [selectedCustomContentCategory]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     // 현재 선택된 카테고리로 데이터 새로고침
-    await fetchRecommendationsByCategory(selectedCustomContentCategory);
+    await Promise.all([
+      fetchRecommendationsByCategory(selectedCustomContentCategory),
+      fetchHotFestivalData(),
+    ]);
     setRefreshing(false);
-  };
-
-  // 선택된 카테고리에 해당하는 데이터 필터링 (API 데이터 사용)
-  const getFilteredContentByCategory = () => {
-    return recommendationsData; // API에서 이미 카테고리별로 필터링된 데이터가 옴
   };
 
   // 선택된 날짜에 해당하는 데이터 필터링
@@ -375,12 +415,8 @@ export default function HomeScreen() {
     });
   };
 
-  const filteredCustomContentByCategory = getFilteredContentByCategory();
   const filteredCustomContentData = getFilteredContentBySelectedDay();
-  const chunkedFilteredCategoryData = chunkArray(
-    filteredCustomContentByCategory,
-    3,
-  );
+  const chunkedFilteredCategoryData = chunkArray(recommendationsData, 3);
   const chunkedFilteredContentData = chunkArray(filteredCustomContentData, 3);
 
   const handleScrollStateChange = (
@@ -615,14 +651,22 @@ export default function HomeScreen() {
                 이번달 핫한 축제 🔥
               </Text>
 
-              <FlatList
-                data={customContentData}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => <HotCard item={item} />}
-                keyExtractor={(item) => item.contentId.toString()}
-                ItemSeparatorComponent={() => <View className="w-3.5" />}
-              />
+              {isLoadingHotFestival ? (
+                <View className="h-[154px] w-full items-center justify-center">
+                  <Text className="text-[#9E9E9E]">
+                    핫한 축제 데이터를 불러오는 중...
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={hotFestivalData}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => <HotCard item={item} />}
+                  keyExtractor={(item) => item.contentId.toString()}
+                  ItemSeparatorComponent={() => <View className="w-3.5" />}
+                />
+              )}
             </View>
 
             {/* 금주 콘텐츠 */}
