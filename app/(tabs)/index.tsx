@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
+import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -29,6 +31,8 @@ import SearchIcon from "@/components/icons/SearchIcon";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
+
+const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL || "";
 
 interface CustomContentItem {
   contentId: number;
@@ -136,7 +140,11 @@ const Card = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={{ uri: item.image }}
+        source={{
+          uri:
+            item.image ||
+            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+        }}
         className="h-[111px] w-[111px] rounded-[10px]"
         resizeMode="cover"
       />
@@ -296,26 +304,54 @@ export default function HomeScreen() {
   const [scrollBackgroundColor, setScrollBackgroundColor] =
     useState<string>("#816BFF");
 
+  const [recommendationsData, setRecommendationsData] = useState<
+    CustomContentItem[]
+  >([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] =
+    useState<boolean>(false);
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
   const router = useRouter();
 
   const weekDays = getWeekDays();
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    // TODO 데이터 새로고침 로직
-    setTimeout(() => {
-      setRefreshing(false);
-      console.log("데이터 새로고침");
-    }, 1000);
+  const fetchRecommendationsByCategory = async (category: CategoryType) => {
+    try {
+      setIsLoadingRecommendations(true);
+      const response = await axios.get(
+        `${BACKEND_URL}/home/recommendations?category=${category}`,
+      );
+
+      if (response.data.isSuccess && response.data.result) {
+        setRecommendationsData(response.data.result);
+        console.log("데이터 패칭");
+      }
+    } catch (error) {
+      console.error(error);
+
+      // 에러 시 빈 배열로 설정
+      setRecommendationsData([]);
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
   };
 
-  // 선택된 카테고리에 해당하는 데이터 필터링
+  // 초기 API 호출 및 카테고리 변경 시 API 호출
+  useEffect(() => {
+    fetchRecommendationsByCategory(selectedCustomContentCategory);
+  }, [selectedCustomContentCategory]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // 현재 선택된 카테고리로 데이터 새로고침
+    await fetchRecommendationsByCategory(selectedCustomContentCategory);
+    setRefreshing(false);
+  };
+
+  // 선택된 카테고리에 해당하는 데이터 필터링 (API 데이터 사용)
   const getFilteredContentByCategory = () => {
-    return customContentData.filter(
-      (item) => item.contentType === selectedCustomContentCategory,
-    );
+    return recommendationsData; // API에서 이미 카테고리별로 필터링된 데이터가 옴
   };
 
   // 선택된 날짜에 해당하는 데이터 필터링
@@ -498,23 +534,31 @@ export default function HomeScreen() {
               </View>
 
               <View className="relative">
-                <FlatList
-                  data={chunkedFilteredCategoryData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  renderItem={({ item }) => (
-                    <View className="w-[310px] flex-1 gap-y-[15.5px]">
-                      {item.map((cardItem) => (
-                        <Card
-                          key={cardItem.contentId.toString()}
-                          item={cardItem}
-                        />
-                      ))}
-                    </View>
-                  )}
-                  keyExtractor={(_, index) => index.toString()}
-                  ItemSeparatorComponent={() => <View className="w-3.5" />}
-                />
+                {isLoadingRecommendations ? (
+                  <View className="h-[333px] w-full items-center justify-center">
+                    <Text className="text-[#9E9E9E]">
+                      데이터를 불러오는 중...
+                    </Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={chunkedFilteredCategoryData}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                      <View className="w-[310px] flex-1 gap-y-[15.5px]">
+                        {item.map((cardItem) => (
+                          <Card
+                            key={cardItem.contentId.toString()}
+                            item={cardItem}
+                          />
+                        ))}
+                      </View>
+                    )}
+                    keyExtractor={(_, index) => index.toString()}
+                    ItemSeparatorComponent={() => <View className="w-3.5" />}
+                  />
+                )}
 
                 {/* 로그인하지 않은 경우 오버레이 */}
                 {!isLoggedIn && (
