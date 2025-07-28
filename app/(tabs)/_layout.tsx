@@ -4,13 +4,31 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/HapticTab";
 import { TabColors } from "@/constants/Colors";
+import { ROUTES } from "@/constants/Routes";
 import { TAB_SCREENS } from "@/constants/TabScreens";
 
 export default function TabLayout() {
   const pathname = usePathname();
 
+  // 탭 활성화 상태를 판별하는 함수
+  const isTabActive = (screen: { activePage?: string; name: string }) => {
+    if (screen.activePage) {
+      // activeGroup이 정의된 경우, 해당 그룹 경로로 시작하는지 확인
+      return pathname?.startsWith(`/${screen.activePage}`);
+    } else if (screen.name === "index") {
+      // 홈 탭은 홈 페이지이거나 detail 페이지에 있을 때 활성화
+      return pathname === ROUTES.HOME || pathname?.includes("/detail/");
+    } else {
+      // activeGroup이 없는 경우, 해당 탭 경로와 정확히 일치하는지 확인
+      return pathname === `/${screen.name}`;
+    }
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#ffffff" }}
+      edges={["bottom"]}
+    >
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -49,28 +67,14 @@ export default function TabLayout() {
               options={{
                 title: screen.title,
                 tabBarIcon: ({ size }) => {
-                  let isActive = false;
-                  if (screen.activePage) {
-                    // activeGroup이 정의된 경우, 해당 그룹 경로로 시작하는지 확인
-                    isActive = pathname?.startsWith(`/${screen.activePage}`);
-                  } else {
-                    // activeGroup이 없는 경우, 해당 탭 경로와 정확히 일치하는지 확인
-                    isActive = pathname === `/${screen.name}`;
-                  }
+                  const isActive = isTabActive(screen);
                   const color = isActive
                     ? TabColors.active
                     : TabColors.inactive;
                   return <screen.Icon color={color} size={size} />;
                 },
                 tabBarLabel: ({ focused }) => {
-                  let isActive = false;
-                  if (screen.activePage) {
-                    // activeGroup이 정의된 경우, 해당 그룹 경로로 시작하는지 확인
-                    isActive = pathname?.startsWith(`/${screen.activePage}`);
-                  } else {
-                    // activeGroup이 없는 경우, focused 상태를 따름
-                    isActive = focused;
-                  }
+                  const isActive = isTabActive(screen);
                   const color = isActive
                     ? TabColors.active
                     : TabColors.inactive;

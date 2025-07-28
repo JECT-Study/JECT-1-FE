@@ -2,6 +2,7 @@ export const ROUTES = {
   HOME: "/",
   SEARCH: "/search",
   SCHEDULE: "/schedule",
+  DETAIL: "/detail",
   MY: {
     LIKE: "/my/like",
     INDEX: "/my",
