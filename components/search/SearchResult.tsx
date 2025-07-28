@@ -134,21 +134,23 @@ export default function SearchResult() {
         }}
         renderItem={({ item }) => (
           <Pressable
-            className="w-[48%]"
+            className="flex w-[48%] items-center"
             onPress={() => console.log(`${item.id} 상세 페이지로 연결`)}
           >
-            <View className="h-[164px] w-full items-center justify-center rounded-[11px] bg-gray300">
+            <View className="min-h-[164px] min-w-[164px] items-center justify-center rounded-[11px] bg-gray300">
               {/* 실제 이미지를 사용할 경우 Image 컴포넌트로 교체 */}
               <Text className="px-2 text-center text-[10px] text-gray600">
                 {item.thumbnailUrl}
               </Text>
             </View>
-            <Text className="mt-2 text-[16px] font-semibold leading-[1.3] text-gray800">
-              {item.title}
-            </Text>
-            <Text className="text-[13px] font-normal text-gray500">
-              {item.address}
-            </Text>
+            <View className="w-[164px] justify-start">
+              <Text className="mt-2 text-[16px] font-semibold leading-[1.3] text-gray800">
+                {item.title}
+              </Text>
+              <Text className="text-[13px] font-normal text-gray500">
+                {item.address}
+              </Text>
+            </View>
           </Pressable>
         )}
         ListEmptyComponent={
