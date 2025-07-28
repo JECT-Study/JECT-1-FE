@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import axios from "axios";
 import dayjs from "dayjs";
@@ -42,6 +42,15 @@ interface CustomContentItem {
   address: string;
   longitude: number;
   latitude: number;
+  startDate: string;
+  endDate: string;
+}
+
+interface WeeklyContentItem {
+  contentId: number;
+  title: string;
+  image: string | null;
+  address: string;
   startDate: string;
   endDate: string;
 }
@@ -202,7 +211,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
   );
 };
 
-const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
+const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   const router = useRouter();
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
@@ -212,7 +221,11 @@ const WeeklyCard = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={{ uri: item.image }}
+        source={{
+          uri:
+            item.image ||
+            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+        }}
         className="h-[90px] w-[120px] rounded-lg"
         resizeMode="cover"
       />
@@ -262,7 +275,7 @@ const MoreCard = ({ item }: { item: CustomContentItem }) => {
 
 const SCROLL_THRESHOLD = -45;
 
-const chunkArray = (array: any[], chunkSize: number): any[][] => {
+const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];
   for (let i = 0; i < array.length; i += chunkSize) {
     chunks.push(array.slice(i, i + chunkSize));
@@ -328,6 +341,11 @@ export default function HomeScreen() {
   );
   const [isLoadingHotFestival, setIsLoadingHotFestival] =
     useState<boolean>(false);
+  const [weeklyContentData, setWeeklyContentData] = useState<
+    WeeklyContentItem[]
+  >([]);
+  const [isLoadingWeeklyContent, setIsLoadingWeeklyContent] =
+    useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
@@ -335,29 +353,31 @@ export default function HomeScreen() {
 
   const weekDays = getWeekDays();
 
-  const fetchRecommendationsByCategory = async (category: CategoryType) => {
-    try {
-      setIsLoadingRecommendations(true);
-      const response = await axios.get(
-        `${BACKEND_URL}/home/recommendations?category=${category}`,
-      );
+  const fetchRecommendationsByCategory = useCallback(
+    async (category: CategoryType) => {
+      try {
+        setIsLoadingRecommendations(true);
+        const response = await axios.get(
+          `${BACKEND_URL}/home/recommendations?category=${category}`,
+        );
 
-      if (response.data.isSuccess && response.data.result) {
-        setRecommendationsData(response.data.result);
-        console.log("데이터 패칭");
+        if (response.data.isSuccess && response.data.result) {
+          setRecommendationsData(response.data.result);
+          console.log("데이터 패칭");
+        }
+      } catch (error) {
+        console.error(error);
+
+        // 에러 시 빈 배열로 설정
+        setRecommendationsData([]);
+      } finally {
+        setIsLoadingRecommendations(false);
       }
-    } catch (error) {
-      console.error(error);
+    },
+    [],
+  );
 
-      // 에러 시 빈 배열로 설정
-      setRecommendationsData([]);
-    } finally {
-      setIsLoadingRecommendations(false);
-    }
-  };
-
-  // 핫한 축제 데이터 호출 함수
-  const fetchHotFestivalData = async () => {
+  const fetchHotFestivalData = useCallback(async () => {
     try {
       setIsLoadingHotFestival(true);
       const response = await axios.get(
@@ -374,50 +394,82 @@ export default function HomeScreen() {
     } finally {
       setIsLoadingHotFestival(false);
     }
-  };
+  }, []);
+
+  const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
+    try {
+      setIsLoadingWeeklyContent(true);
+      const weekDays = getWeekDays();
+      const selectedDayData = weekDays.find(
+        (day) => day.dayOfIndex === dateIndex,
+      );
+      if (!selectedDayData) return;
+
+      const response = await axios.get(
+        `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
+      );
+
+      if (response.data.isSuccess && response.data.result) {
+        setWeeklyContentData(response.data.result);
+        console.log("금주 콘텐츠 데이터 패칭");
+      }
+    } catch (error) {
+      console.error(error);
+      setWeeklyContentData([]);
+    } finally {
+      setIsLoadingWeeklyContent(false);
+    }
+  }, []);
 
   // 초기 API 호출 및 카테고리 변경 시 API 호출
   useEffect(() => {
     Promise.all([
-      fetchRecommendationsByCategory(selectedCustomContentCategory),
+      fetchRecommendationsByCategory("PERFORMANCE"),
       fetchHotFestivalData(),
+      fetchWeeklyContentData(0),
     ]);
-  }, [selectedCustomContentCategory]);
+  }, [
+    fetchRecommendationsByCategory,
+    fetchHotFestivalData,
+    fetchWeeklyContentData,
+  ]);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // 현재 선택된 카테고리로 데이터 새로고침
     await Promise.all([
       fetchRecommendationsByCategory(selectedCustomContentCategory),
       fetchHotFestivalData(),
+      fetchWeeklyContentData(selectedWeeklyDateIndex),
     ]);
     setRefreshing(false);
-  };
+  }, [
+    selectedCustomContentCategory,
+    selectedWeeklyDateIndex,
+    fetchRecommendationsByCategory,
+    fetchHotFestivalData,
+    fetchWeeklyContentData,
+  ]);
 
-  // 선택된 날짜에 해당하는 데이터 필터링
-  const getFilteredContentBySelectedDay = () => {
-    const selectedDayData = weekDays.find(
-      (day) => day.dayOfIndex === selectedWeeklyDateIndex,
-    );
-    if (!selectedDayData) return [];
+  // 카테고리 버튼 클릭 핸들러
+  const handleCategoryButtonPress = useCallback(
+    (categoryId: CategoryType) => {
+      setSelectedCustomContentCategory(categoryId);
+      fetchRecommendationsByCategory(categoryId);
+    },
+    [fetchRecommendationsByCategory],
+  );
 
-    const selectedDate = dayjs(selectedDayData.fullDate);
+  // 날짜 버튼 클릭 핸들러
+  const handleDateButtonPress = useCallback(
+    (dayOfIndex: number) => {
+      setSelectedWeeklyDateIndex(dayOfIndex);
+      fetchWeeklyContentData(dayOfIndex);
+    },
+    [fetchWeeklyContentData],
+  );
 
-    // 선택한 날짜가 이벤트의 startDate와 endDate 사이에 있는지 확인
-    return customContentData.filter((item) => {
-      const startDate = dayjs(item.startDate);
-      const endDate = dayjs(item.endDate);
-
-      return (
-        selectedDate.isSameOrAfter(startDate, "day") &&
-        selectedDate.isSameOrBefore(endDate, "day")
-      );
-    });
-  };
-
-  const filteredCustomContentData = getFilteredContentBySelectedDay();
   const chunkedFilteredCategoryData = chunkArray(recommendationsData, 3);
-  const chunkedFilteredContentData = chunkArray(filteredCustomContentData, 3);
+  const chunkedFilteredContentData = chunkArray(weeklyContentData, 3);
 
   const handleScrollStateChange = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -553,8 +605,7 @@ export default function HomeScreen() {
                         isSelected ? "bg-[#6C4DFF]" : "bg-white"
                       }`}
                       onPress={() => {
-                        if (!isDisabled)
-                          setSelectedCustomContentCategory(category.id);
+                        if (!isDisabled) handleCategoryButtonPress(category.id);
                       }}
                     >
                       <Text
@@ -686,7 +737,7 @@ export default function HomeScreen() {
                         ? "border-0 bg-[#6C4DFF]"
                         : "border border-[#ECECEC] bg-white"
                     }`}
-                    onPress={() => setSelectedWeeklyDateIndex(item.dayOfIndex)}
+                    onPress={() => handleDateButtonPress(item.dayOfIndex)}
                   >
                     <Text
                       className={`text-lg font-medium ${
@@ -708,23 +759,31 @@ export default function HomeScreen() {
                 ItemSeparatorComponent={() => <View className="w-2" />}
               />
 
-              <FlatList
-                data={chunkedFilteredContentData}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <View className="w-[285px] flex-1 gap-y-[15.5px]">
-                    {item.map((cardItem) => (
-                      <WeeklyCard
-                        key={cardItem.contentId.toString()}
-                        item={cardItem}
-                      />
-                    ))}
-                  </View>
-                )}
-                keyExtractor={(_, index) => index.toString()}
-                ItemSeparatorComponent={() => <View className="w-3.5" />}
-              />
+              {isLoadingWeeklyContent ? (
+                <View className="h-[270px] w-full items-center justify-center">
+                  <Text className="text-[#9E9E9E]">
+                    금주 콘텐츠를 불러오는 중...
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={chunkedFilteredContentData}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <View className="w-[285px] flex-1 gap-y-[15.5px]">
+                      {item.map((cardItem) => (
+                        <WeeklyCard
+                          key={cardItem.contentId.toString()}
+                          item={cardItem}
+                        />
+                      ))}
+                    </View>
+                  )}
+                  keyExtractor={(_, index) => index.toString()}
+                  ItemSeparatorComponent={() => <View className="w-3.5" />}
+                />
+              )}
 
               <Pressable
                 className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
