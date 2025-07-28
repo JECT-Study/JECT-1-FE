@@ -4,8 +4,8 @@ import { View, Text, ScrollView, Pressable } from "react-native";
 type Props = {
   title: string;
   options: string[];
-  selected: string[];
-  onChange: (values: string[]) => void;
+  selected: string;
+  onChange: (values: string) => void;
 };
 
 export default function FilterSection({
@@ -15,11 +15,7 @@ export default function FilterSection({
   onChange,
 }: Props) {
   const toggleOption = (option: string) => {
-    onChange(
-      selected.includes(option)
-        ? selected.filter((item) => item !== option)
-        : [...selected, option],
-    );
+    onChange(option);
   };
 
   return (
@@ -35,7 +31,7 @@ export default function FilterSection({
           className={`mr-2 flex h-8 items-center justify-center rounded-[20px] px-3 ${
             selected.length === 0 ? "bg-main" : "bg-gray-200"
           }`}
-          onPress={() => onChange([])}
+          onPress={() => onChange("")}
         >
           <Text
             className={`text-[14px] ${
