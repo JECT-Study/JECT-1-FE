@@ -11,8 +11,9 @@ export default function SearchScreen() {
         title="검색"
         isCommit={false}
         cancel={() => router.back()}
+        separator={true}
       />
-      <SearchResult></SearchResult>
+      <SearchResult />
     </SafeAreaView>
   );
 }

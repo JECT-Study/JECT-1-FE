@@ -10,6 +10,7 @@ import { Regions } from "@/constants/Regions";
 import { SearchResultIndexResponse } from "@/interfaces/search.interfaces";
 
 export default function SearchResult() {
+  // TODO : 카테고리 및 지역선택 중복 불가능한지.
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
