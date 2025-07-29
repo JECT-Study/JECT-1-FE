@@ -17,11 +17,12 @@ export default function SocialLoginButtons() {
         style={{ height: 282, width: "100%" }}
         pointerEvents="none"
       />
-      <View className="bg-black">
-        <KakaoLogin />
-        <View className="m-2" />
-        <AppleLogin />
-        <View className="m-4" />
+      <View className="bg-[#010101]">
+        <View className="w-full items-center">
+          <KakaoLogin />
+          <View className="my-2" />
+          <AppleLogin />
+        </View>
         <Pressable
           onPress={() => router.push("/(tabs)")}
           className="mt-4 flex-row items-center justify-center"

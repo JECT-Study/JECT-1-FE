@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
 import { FlatList, RefreshControl, SafeAreaView, View } from "react-native";
 
 import LikeFilter from "@/components/mypage/LikeFilter";
 import CustomHeader from "@/components/ui/CustomHeader";
 import PostBlock from "@/components/ui/PostBlock";
+import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { DUMMY_EVENT_POSTS } from "@/constants/DummyLike";
 import useLikeRefresh from "@/hooks/useLikeRefresh";
 import { useCategorySelected } from "@/stores/useCategoryStore";
@@ -14,6 +16,29 @@ export default function Like() {
   const { refresh, onRefresh } = useLikeRefresh();
   const [infodummy, setInfodummy] = useState(DUMMY_EVENT_POSTS);
   const selected = useCategorySelected();
+
+  // TODO : api test
+  useEffect(() => {
+    const fetchResult = async () => {
+      try {
+        const params = {
+          page: "0",
+          limit: "10",
+          // category: "FESTIVAL",
+        };
+        const url = `${UsersFavoriteUrl}?${new URLSearchParams(params).toString()}`;
+        console.log("요청 주소 ", url); // ← 실제 주소 로그
+
+        const response = await axios.get(UsersFavoriteUrl, { params });
+        console.log("api response", response);
+      } catch (e) {
+        const axiosError = e as AxiosError;
+        alert(`${axiosError.message}`);
+      }
+    };
+    fetchResult();
+  }, []);
+
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
       <CustomHeader

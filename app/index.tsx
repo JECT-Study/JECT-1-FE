@@ -5,7 +5,7 @@ import SocialLoginButtons from "@/components/login/SocialLoginButtons";
 
 export default function Login() {
   return (
-    <View className="flex-1 items-center bg-black px-4">
+    <View className="flex-1 items-center bg-black">
       <LoginCardSlider />
       <View className="items-center">
         <Text className="text-[34px] font-semibold text-white">마이코드</Text>

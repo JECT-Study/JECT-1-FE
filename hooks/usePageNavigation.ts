@@ -26,5 +26,11 @@ export default function usePageNavigation() {
     goSchedule() {
       router.push(ROUTES.SCHEDULE);
     },
+    goPlan() {
+      router.push(ROUTES.MY.PLAN);
+    },
+    goSurvey() {
+      router.push(ROUTES.SURVEY);
+    },
   };
 }
