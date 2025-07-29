@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   NativeScrollEvent,
@@ -37,14 +38,11 @@ const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL || "";
 /**
  * 최소 로딩 시간을 보장하는 유틸 함수
  * @param startTime 시작 시간 (Date.now()로 기록된 값)
- * @param minDuration 최소 지속 시간 (밀리초, 기본값: 500ms)
  */
-const ensureMinLoadingTime = async (
-  startTime: number,
-  minDuration: number = 500,
-): Promise<void> => {
-  const elapsedTime = Date.now() - startTime;
-  const remainingTime = Math.max(0, minDuration - elapsedTime);
+const ensureMinLoadingTime = async (startTime: number): Promise<void> => {
+  const minDuration = 300; // 최소 로딩 시간 200ms
+  const elapsedTime = Date.now() - startTime; // 경과 시간 계산
+  const remainingTime = Math.max(0, minDuration - elapsedTime); // 남은 시간 계산
 
   if (remainingTime > 0) {
     await new Promise((resolve) => setTimeout(resolve, remainingTime));
@@ -336,8 +334,8 @@ export default function HomeScreen() {
         // 에러 시 빈 배열로 설정
         setRecommendationsData([]);
       } finally {
-        // 최소 0.5초 보장
-        await ensureMinLoadingTime(startTime, 200);
+        // 최소 0.2초 보장
+        await ensureMinLoadingTime(startTime);
         setIsLoadingRecommendations(false);
       }
     },
@@ -362,8 +360,8 @@ export default function HomeScreen() {
       console.error(error);
       setHotFestivalData([]);
     } finally {
-      // 최소 0.5초 보장
-      await ensureMinLoadingTime(startTime, 500);
+      // 최소 0.2초 보장
+      await ensureMinLoadingTime(startTime);
       setIsLoadingHotFestival(false);
     }
   }, []);
@@ -379,8 +377,8 @@ export default function HomeScreen() {
         (day) => day.dayOfIndex === dateIndex,
       );
       if (!selectedDayData) {
-        // early return시에도 최소 0.5초 보장
-        await ensureMinLoadingTime(startTime, 200);
+        // early return시에도 최소 0.2초 보장
+        await ensureMinLoadingTime(startTime);
         setIsLoadingWeekDay(false);
         return;
       }
@@ -397,8 +395,8 @@ export default function HomeScreen() {
       console.error(error);
       setWeekDayData([]);
     } finally {
-      // 최소 0.5초 보장
-      await ensureMinLoadingTime(startTime, 200);
+      // 최소 0.2초 보장
+      await ensureMinLoadingTime(startTime);
       setIsLoadingWeekDay(false);
     }
   }, []);
@@ -421,8 +419,8 @@ export default function HomeScreen() {
       console.error(error);
       setCategoryContentData([]);
     } finally {
-      // 최소 0.5초 보장
-      await ensureMinLoadingTime(startTime, 200);
+      // 최소 0.2초 보장
+      await ensureMinLoadingTime(startTime);
       setIsLoadingCategoryContent(false);
     }
   }, []);
@@ -630,9 +628,7 @@ export default function HomeScreen() {
               <View className="relative">
                 {isLoadingRecommendations ? (
                   <View className="h-[333px] w-full items-center justify-center">
-                    <Text className="text-[#9E9E9E]">
-                      데이터를 불러오는 중...
-                    </Text>
+                    <ActivityIndicator size="large" color="#6C4DFF" />
                   </View>
                 ) : (
                   <FlatList
@@ -711,9 +707,7 @@ export default function HomeScreen() {
 
               {isLoadingHotFestival ? (
                 <View className="h-[154px] w-full items-center justify-center">
-                  <Text className="text-[#9E9E9E]">
-                    핫한 축제 데이터를 불러오는 중...
-                  </Text>
+                  <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
                 <FlatList
@@ -768,9 +762,7 @@ export default function HomeScreen() {
 
               {isLoadingWeekDay ? (
                 <View className="h-[270px] w-full items-center justify-center">
-                  <Text className="text-[#9E9E9E]">
-                    금주 콘텐츠를 불러오는 중...
-                  </Text>
+                  <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
                 <FlatList
@@ -824,9 +816,7 @@ export default function HomeScreen() {
 
               {isLoadingCategoryContent ? (
                 <View className="h-[154px] w-full items-center justify-center">
-                  <Text className="text-[#9E9E9E]">
-                    카테고리 콘텐츠를 불러오는 중...
-                  </Text>
+                  <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
                 <FlatList
