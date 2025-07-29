@@ -5,7 +5,6 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -75,15 +74,4 @@ export default function RootLayout() {
   );
 }
 
-let AppEntryPoint = RootLayout;
-
-if (
-  Constants.expoConfig?.extra?.storybookEnabled &&
-  Constants.expoConfig.extra.storybookEnabled === "true"
-) {
-  try {
-    AppEntryPoint = require("../.rnstorybook").default;
-  } catch (e) {
-    console.warn("Storybook entry not found, skipping...");
-  }
-}
+// let AppEntryPoint = RootLayout;

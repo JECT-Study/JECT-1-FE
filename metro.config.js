@@ -1,11 +1,10 @@
-const path = require("path");
+// const path = require("path");
 
-const withStorybook = require("@storybook/react-native/metro/withStorybook");
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
-// const {
-//   wrapWithReanimatedMetroConfig,
-// } = require("react-native-reanimated/metro-config");
+const {
+  wrapWithReanimatedMetroConfig,
+} = require("react-native-reanimated/metro-config");
 
 // 기본 Expo 설정 불러오기
 let config = getDefaultConfig(__dirname);
@@ -15,9 +14,4 @@ config = withNativeWind(config, {
   input: "./global.css", // ✅ 웹에서만 사용됨
 });
 
-// Reanimated 설정 적용 (마지막에 wrap!)
-// module.exports = wrapWithReanimatedMetroConfig(config);
-module.exports = withStorybook(config, {
-  enabled: process.env.STORYBOOK === "true",
-  configPath: path.resolve(__dirname, "./.rnstorybook"),
-});
+module.exports = wrapWithReanimatedMetroConfig(config);

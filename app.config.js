@@ -103,7 +103,6 @@ export default {
   },
 
   extra: {
-    storybookEnabled: process.env.STORYBOOK,
     kakaoNativeAppKey: process.env.MYCODE_KAKAO_NATIVE_APP_KEY,
     BACKEND_URL: process.env.MYCODE_BACKEND_URL,
     NAVER_MAP_CLIENT_ID: process.env.NAVER_MAP_CLIENT_ID,
