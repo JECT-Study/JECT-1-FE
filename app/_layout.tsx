@@ -77,6 +77,13 @@ export default function RootLayout() {
 
 let AppEntryPoint = RootLayout;
 
-if (Constants.expoConfig!.extra!.storybookEnabled === "true") {
-  AppEntryPoint = require("../.rnstorybook").default;
+if (
+  Constants.expoConfig?.extra?.storybookEnabled &&
+  Constants.expoConfig.extra.storybookEnabled === "true"
+) {
+  try {
+    AppEntryPoint = require("../.rnstorybook").default;
+  } catch (e) {
+    console.warn("Storybook entry not found, skipping...");
+  }
 }
