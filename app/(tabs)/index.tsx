@@ -34,6 +34,23 @@ dayjs.locale("ko");
 
 const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL || "";
 
+/**
+ * 최소 로딩 시간을 보장하는 유틸 함수
+ * @param startTime 시작 시간 (Date.now()로 기록된 값)
+ * @param minDuration 최소 지속 시간 (밀리초, 기본값: 500ms)
+ */
+const ensureMinLoadingTime = async (
+  startTime: number,
+  minDuration: number = 500,
+): Promise<void> => {
+  const elapsedTime = Date.now() - startTime;
+  const remainingTime = Math.max(0, minDuration - elapsedTime);
+
+  if (remainingTime > 0) {
+    await new Promise((resolve) => setTimeout(resolve, remainingTime));
+  }
+};
+
 interface CustomContentItem {
   contentId: number;
   title: string;
@@ -300,8 +317,11 @@ export default function HomeScreen() {
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType) => {
+      const startTime = Date.now();
+
       try {
         setIsLoadingRecommendations(true);
+
         const response = await axios.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
         );
@@ -316,6 +336,8 @@ export default function HomeScreen() {
         // 에러 시 빈 배열로 설정
         setRecommendationsData([]);
       } finally {
+        // 최소 0.5초 보장
+        await ensureMinLoadingTime(startTime, 200);
         setIsLoadingRecommendations(false);
       }
     },
@@ -323,8 +345,11 @@ export default function HomeScreen() {
   );
 
   const fetchHotFestivalData = useCallback(async () => {
+    const startTime = Date.now();
+
     try {
       setIsLoadingHotFestival(true);
+
       const response = await axios.get(
         `${BACKEND_URL}/home/festival/hot?category=PERFORMANCE`,
       );
@@ -337,18 +362,28 @@ export default function HomeScreen() {
       console.error(error);
       setHotFestivalData([]);
     } finally {
+      // 최소 0.5초 보장
+      await ensureMinLoadingTime(startTime, 500);
       setIsLoadingHotFestival(false);
     }
   }, []);
 
   const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
+    const startTime = Date.now();
+
     try {
       setIsLoadingWeekDay(true);
+
       const weekDays = getWeekDays();
       const selectedDayData = weekDays.find(
         (day) => day.dayOfIndex === dateIndex,
       );
-      if (!selectedDayData) return;
+      if (!selectedDayData) {
+        // early return시에도 최소 0.5초 보장
+        await ensureMinLoadingTime(startTime, 200);
+        setIsLoadingWeekDay(false);
+        return;
+      }
 
       const response = await axios.get(
         `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
@@ -362,13 +397,18 @@ export default function HomeScreen() {
       console.error(error);
       setWeekDayData([]);
     } finally {
+      // 최소 0.5초 보장
+      await ensureMinLoadingTime(startTime, 200);
       setIsLoadingWeekDay(false);
     }
   }, []);
 
   const fetchCategoryContentData = useCallback(async () => {
+    const startTime = Date.now();
+
     try {
       setIsLoadingCategoryContent(true);
+
       const response = await axios.get(
         `${BACKEND_URL}/home/category?category=PERFORMANCE`,
       );
@@ -381,6 +421,8 @@ export default function HomeScreen() {
       console.error(error);
       setCategoryContentData([]);
     } finally {
+      // 최소 0.5초 보장
+      await ensureMinLoadingTime(startTime, 200);
       setIsLoadingCategoryContent(false);
     }
   }, []);
