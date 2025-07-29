@@ -9,7 +9,7 @@ export default function AppleLogin() {
   return (
     <Pressable
       onPress={handlePress}
-      className="flex-row items-center justify-center gap-2 rounded-xl bg-white px-6 py-4 active:opacity-80"
+      className="mx-auto w-full max-w-[500px] flex-row items-center justify-center gap-2 rounded-xl bg-white px-6 py-4 active:opacity-80"
     >
       <AppleIcon size={20} color="black" />
       <Text className="text-black">Apple로 시작하기</Text>

@@ -10,7 +10,7 @@ export const TAB_SCREENS = [
     Icon: HomeIcon,
   },
   {
-    name: "search",
+    name: "search_tab",
     title: "검색",
     Icon: SearchIcon,
   },
@@ -29,4 +29,5 @@ export const TAB_SCREENS = [
   { name: "my/terms", href: null },
   { name: "my/edit_profile", href: null },
   { name: "my/like", href: null },
+  { name: "my/plan", href: null },
 ];

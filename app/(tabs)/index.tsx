@@ -490,7 +490,7 @@ export default function HomeScreen() {
     setScrollBackgroundColor(backgroundColor);
   };
 
-  const handleSearchPress = () => router.push("/(tabs)/search");
+  const handleSearchPress = () => router.push("/(tabs)/search_tab");
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 

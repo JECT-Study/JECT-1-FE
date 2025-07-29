@@ -1,9 +1,5 @@
 import { useCallback, useRef, useState } from "react";
 
-import {
-  NaverMapMarkerOverlay,
-  NaverMapView,
-} from "@mj-studio/react-native-naver-map";
 import { shareFeedTemplate } from "@react-native-kakao/share";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -22,9 +18,9 @@ import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
-import LocationMarkerIcon from "@/components/icons/LocationMarkerIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
+import NaverMap from "@/components/map/NaverMap";
 
 function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
   return <View className={`w-full ${height} ${bg}`} />;
@@ -325,29 +321,8 @@ export default function DetailScreen() {
                   위치
                 </Text>
 
-                <View className="mb-3 h-48 overflow-hidden rounded-lg">
-                  <NaverMapView
-                    key={mapKey} // 지도 리셋을 위한 key
-                    style={{ width: "100%", height: "100%" }}
-                    initialCamera={{
-                      latitude: 37.566535,
-                      longitude: 126.9779692,
-                      zoom: 15,
-                    }}
-                    isShowLocationButton={false}
-                    isShowZoomControls={false}
-                  >
-                    <NaverMapMarkerOverlay
-                      latitude={37.566535}
-                      longitude={126.9779692}
-                      width={30}
-                      height={34}
-                      anchor={{ x: 0.5, y: 1 }}
-                    >
-                      <LocationMarkerIcon width={30} height={34} />
-                    </NaverMapMarkerOverlay>
-                  </NaverMapView>
-                </View>
+                {/*네이버지도 컴포넌트*/}
+                <NaverMap mapKey={mapKey} />
 
                 <View className="mb-3 flex-row items-center">
                   <LocationIcon size={16} />

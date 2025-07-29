@@ -6,11 +6,11 @@ import HeartIcon from "@/components/icons/HeartIcon";
 import usePageNavigation from "@/hooks/usePageNavigation";
 
 export default function MyMenus() {
-  const { goLike } = usePageNavigation();
+  const { goLike, goPlan, goSurvey } = usePageNavigation();
   return (
     <View className="mx-6 my-4 flex flex-row items-center justify-center rounded-md bg-[#F2F3F6]">
       <Pressable
-        onPress={() => console.log("Pressable")}
+        onPress={() => goPlan()}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
         <DiaryIcon />
@@ -26,7 +26,7 @@ export default function MyMenus() {
       </Pressable>
       <View aria-label="seperator" className="h-[20px] w-[1px] bg-[#DDDFE6]" />
       <Pressable
-        onPress={() => console.log("Pressable")}
+        onPress={() => goSurvey()}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
         <CalendarEditIcon />
