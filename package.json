@@ -13,7 +13,8 @@
     "storybook-generate": "sb-rn-get-stories",
     "storybook:ios": "STORYBOOK_ENABLED='true' expo start --ios",
     "storybook:android": "STORYBOOK_ENABLED='true' expo start --android",
-    "update-login-images": "node scripts/generate-login-images.mjs"
+    "update-login-images": "node scripts/generate-login-images.mjs",
+    "build": "npx expo export --platform web --output-dir dist"
   },
   "dependencies": {
     "@animatereactnative/marquee": "^0.5.2",
@@ -85,6 +86,7 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.4.1",
+    "expo-cli": "^6.3.12",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
     "react-native-svg": "^15.12.0",
