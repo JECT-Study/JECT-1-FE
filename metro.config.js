@@ -18,6 +18,6 @@ config = withNativeWind(config, {
 // Reanimated 설정 적용 (마지막에 wrap!)
 // module.exports = wrapWithReanimatedMetroConfig(config);
 module.exports = withStorybook(config, {
-  enabled: true,
+  enabled: process.env.STORYBOOK === "true",
   configPath: path.resolve(__dirname, "./.rnstorybook"),
 });
