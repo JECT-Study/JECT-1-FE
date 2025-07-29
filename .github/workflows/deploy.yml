@@ -25,7 +25,7 @@ jobs:
           destination-github-username: scorchedrice
           destination-repository-name: mycode
           user-email: ${{ secrets.EMAIL }}
-          commit-message: ${{ github.event.commits[0].message }}
+          commit-message: ${{ github.event.head_commit.message || 'auto deploy' }}
           target-branch: main
       - name: Test get variable exported by push-to-another-repository
         run: echo $DESTINATION_CLONED_DIRECTORY
