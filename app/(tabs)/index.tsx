@@ -130,8 +130,8 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
         resizeMode="cover"
       />
       <View className="mt-2">
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
-          <Text className="text-sm font-medium text-[#6C4DFF]">
+        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
+          <Text className="text-sm font-medium text-[#707070]">
             {getContentTypeLabel(item.contentType)}
           </Text>
         </View>
@@ -204,8 +204,8 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#6C4DFF] bg-white px-3">
-          <Text className="text-sm font-medium text-[#6C4DFF]">
+        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
+          <Text className="text-sm font-medium text-[#707070]">
             경기 남양주시
           </Text>
         </View>
@@ -598,7 +598,7 @@ export default function HomeScreen() {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item }) => (
-                      <View className="w-[310px] flex-1 gap-y-[15.5px]">
+                      <View className="w-[287px] flex-1 gap-y-[15.5px]">
                         {item.map((cardItem) => (
                           <Card
                             key={cardItem.contentId.toString()}
