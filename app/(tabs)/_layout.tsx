@@ -3,9 +3,14 @@ import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/HapticTab";
-import { TabColors } from "@/constants/Colors";
 import { ROUTES } from "@/constants/Routes";
 import { TAB_SCREENS } from "@/constants/TabScreens";
+
+const TabColors = {
+  active: "#6C4DFF",
+  inactive: "#424242",
+  inactiveText: "#767676",
+};
 
 export default function TabLayout() {
   const pathname = usePathname();
@@ -16,8 +21,8 @@ export default function TabLayout() {
       // activeGroup이 정의된 경우, 해당 그룹 경로로 시작하는지 확인
       return pathname?.startsWith(`/${screen.activePage}`);
     } else if (screen.name === "index") {
-      // 홈 탭은 홈 페이지이거나 detail 페이지에 있을 때 활성화
-      return pathname === ROUTES.HOME || pathname?.includes("/detail/");
+      // 홈 페이지에 있을 때 활성화
+      return pathname === ROUTES.HOME;
     } else {
       // activeGroup이 없는 경우, 해당 탭 경로와 정확히 일치하는지 확인
       return pathname === `/${screen.name}`;
@@ -25,10 +30,7 @@ export default function TabLayout() {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#ffffff" }}
-      edges={["bottom"]}
-    >
+    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -37,6 +39,13 @@ export default function TabLayout() {
             paddingBottom: 10,
             paddingTop: 5,
             height: 60,
+            backgroundColor: "white",
+            borderTopWidth: 0, // 기존 border 제거
+            shadowColor: "#575757",
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 4, // Android를 위한 shadow
           },
           tabBarIconStyle: {
             marginBottom: 3,
@@ -71,13 +80,30 @@ export default function TabLayout() {
                   const color = isActive
                     ? TabColors.active
                     : TabColors.inactive;
-                  return <screen.Icon color={color} size={size} />;
+                  const iconSize = 28; // 아이콘 크기를 28로 고정
+
+                  // 홈, 일정, 마이페이지 아이콘의 경우 isActive prop 추가
+                  if (
+                    screen.name === "index" ||
+                    screen.name === "schedule" ||
+                    screen.name === "my/index"
+                  ) {
+                    return (
+                      <screen.Icon
+                        color={color}
+                        size={iconSize}
+                        isActive={isActive}
+                      />
+                    );
+                  }
+
+                  return <screen.Icon color={color} size={iconSize} />;
                 },
                 tabBarLabel: ({ focused }) => {
                   const isActive = isTabActive(screen);
                   const color = isActive
                     ? TabColors.active
-                    : TabColors.inactive;
+                    : TabColors.inactiveText;
                   return (
                     <Text
                       style={{

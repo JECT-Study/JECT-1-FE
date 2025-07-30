@@ -44,7 +44,7 @@ export default function SurveyStep({
         <Text className="justify-center text-[15px] text-[#9B9696]">
           {currentStep}/{total}
         </Text>
-        <Text className="text-gray800 mb-4 mt-8 text-center text-2xl font-semibold">
+        <Text className="mb-4 mt-8 text-center text-2xl font-semibold text-gray800">
           {question}
         </Text>
       </View>
@@ -62,14 +62,14 @@ export default function SurveyStep({
                         onPress={() => setSelected(globalIndex)}
                         className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
                           selected === globalIndex
-                            ? "border-main bg-sub border-[2px]"
+                            ? "border-[2px] border-main bg-sub"
                             : "bg-gray100"
                         }`}
                       >
                         <Text
                           className={`text-center text-[16px] ${
                             selected === globalIndex
-                              ? "text-main font-semibold"
+                              ? "font-semibold text-main"
                               : "text-gray600"
                           }`}
                         >
@@ -89,14 +89,14 @@ export default function SurveyStep({
                   onPress={() => setSelected(index)}
                   className={`h-[58px] items-center justify-center rounded-lg p-[10px] ${
                     selected === index
-                      ? "border-main bg-sub border-[2px]"
+                      ? "border-[2px] border-main bg-sub"
                       : "bg-gray100"
                   }`}
                 >
                   <Text
                     className={`text-center text-[16px] ${
                       selected === index
-                        ? "text-main font-semibold"
+                        ? "font-semibold text-main"
                         : "text-gray600"
                     }`}
                   >
