@@ -7,13 +7,10 @@ import { BlurView } from "expo-blur";
 import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -21,13 +18,13 @@ import {
   View,
 } from "react-native";
 
-import { CelebrationIcon } from "@/components/icons/CelebrationIcon";
 import ChevronRight from "@/components/icons/ChevronRight";
-import { FoodIcon } from "@/components/icons/FoodIcon";
+import { EventIcon } from "@/components/icons/EventIcon";
+import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
+import { FestivalIcon } from "@/components/icons/FestivalIcon";
 import LockIcon from "@/components/icons/LockIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
-import { PaintIcon } from "@/components/icons/PaintIcon";
-import { PaletteIcon } from "@/components/icons/PaletteIcon";
+import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 
 // dayjs 한국어 로케일 설정
@@ -83,10 +80,10 @@ interface CategoryContentItem {
 type CategoryType = (typeof categoryConfig)[number]["id"];
 
 const categoryConfig = [
-  { id: "PERFORMANCE", iconType: "paint", label: "공연" },
-  { id: "EXHIBITION", iconType: "palette", label: "전시" },
-  { id: "FESTIVAL", iconType: "celebration", label: "축제" },
-  { id: "EVENT", iconType: "food", label: "행사" },
+  { id: "PERFORMANCE", iconType: "performance", label: "공연" },
+  { id: "EXHIBITION", iconType: "exhibition", label: "전시" },
+  { id: "FESTIVAL", iconType: "festival", label: "축제" },
+  { id: "EVENT", iconType: "event", label: "행사" },
 ] as const;
 
 const Card = ({ item }: { item: CustomContentItem }) => {
@@ -229,7 +226,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   );
 };
 
-const SCROLL_THRESHOLD = -45;
+// const SCROLL_THRESHOLD = 20;
 
 const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];
@@ -278,8 +275,6 @@ const getWeekDays = () => {
 };
 
 export default function HomeScreen() {
-  const [scrollBackgroundColor, setScrollBackgroundColor] =
-    useState<string>("#816BFF");
   const [selectedRecommendationsCategory, setSelectedRecommendationsCategory] =
     useState<CategoryType>("PERFORMANCE");
   const [selectedWeekDayIndex, setSelectedWeekDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
@@ -294,7 +289,6 @@ export default function HomeScreen() {
     CategoryContentItem[]
   >([]);
 
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState<boolean>(false);
@@ -303,6 +297,7 @@ export default function HomeScreen() {
   const [isLoadingWeekDay, setIsLoadingWeekDay] = useState<boolean>(false);
   const [isLoadingCategoryContent, setIsLoadingCategoryContent] =
     useState<boolean>(false);
+  // const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
@@ -476,19 +471,16 @@ export default function HomeScreen() {
     [fetchWeeklyContentData],
   );
 
-  const handleScrollStateChange = (
-    e: NativeSyntheticEvent<NativeScrollEvent>,
-  ) => {
-    const { contentOffset } = e.nativeEvent;
-    // 현재 스크롤 위치 (Y축)
-    const currentScrollY = contentOffset.y;
+  // const handleScrollStateChange = (
+  //   e: NativeSyntheticEvent<NativeScrollEvent>,
+  // ) => {
+  //   const { contentOffset } = e.nativeEvent;
+  //   // 현재 스크롤 위치 (Y축)
+  //   const currentScrollY = contentOffset.y;
 
-    // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
-    setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
-    // 스크롤 위치에 따라 배경색 변경 (0 기준으로 색상 변경)
-    const backgroundColor = currentScrollY <= 0 ? "#816BFF" : "#FFFFFF";
-    setScrollBackgroundColor(backgroundColor);
-  };
+  //   // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
+  //   setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
+  // };
 
   const handleSearchPress = () => router.push("/(tabs)/search_tab");
 
@@ -496,12 +488,10 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar style={isScrolled ? "dark" : "light"} />
-
       {/* 스크롤 시 보이는 헤더 */}
-      {isScrolled && (
+      {/* {isScrolled && (
         <View
-          className="absolute left-0 right-0 top-0 z-10 flex h-36 justify-end bg-white p-[18px]"
+          className="absolute left-0 right-0 top-0 z-10 flex h-40 justify-end bg-white p-[18px]"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -520,65 +510,63 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         </View>
-      )}
+      )} */}
 
-      <ScrollView
-        className="flex-1"
-        style={{ backgroundColor: scrollBackgroundColor }}
-        contentInsetAdjustmentBehavior="automatic"
-        showsVerticalScrollIndicator={false}
-        onScroll={handleScrollStateChange}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#FFFFFF"
-            colors={["#FFFFFF"]}
-          />
-        }
+      {/* 기본 헤더 - 고정 */}
+      <LinearGradient
+        colors={["#816BFF", "#5E47E3"]}
+        start={{ x: 0, y: 0.14 }}
+        end={{ x: 1, y: 0.86 }}
+        locations={[0.0682, 0.9458]}
       >
-        {/* 기본 헤더 */}
-        <LinearGradient
-          colors={["#816BFF", "#816BFF"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.2, y: 1 }}
-          locations={[0.0683, 0.9503]}
-        >
-          <View className="h-28 flex-row items-end justify-center px-[18px] pb-11">
-            <View className="w-full flex-row items-center gap-x-2">
-              <LogoIcon width={35} height={32} />
-              <Pressable
-                className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
-                onPress={handleSearchPress}
-              >
-                <Text className="text-[#6E6E6E]">
-                  6월에 안가면 손해! 고창 수박 축제
-                </Text>
-                <SearchIcon size={24} color="#6B51FB" />
-              </Pressable>
-            </View>
+        <View className="h-52 flex-row items-end justify-center px-[18px] pb-20">
+          <View className="w-full flex-row items-center gap-x-2">
+            <LogoIcon width={35} height={32} />
+            <Pressable
+              className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
+              onPress={handleSearchPress}
+            >
+              <Text className="text-[#6E6E6E]">
+                6월에 안가면 손해! 고창 수박 축제
+              </Text>
+              <SearchIcon size={24} color="#6B51FB" />
+            </Pressable>
           </View>
-        </LinearGradient>
+        </View>
+      </LinearGradient>
 
-        <View className="mt-[-20px] flex-1 rounded-t-3xl bg-white pb-6">
+      <View className="mt-[-55px] flex-1 rounded-t-3xl pb-6">
+        <ScrollView
+          className="rounded-t-3xl bg-white"
+          contentInsetAdjustmentBehavior="automatic"
+          showsVerticalScrollIndicator={false}
+          // onScroll={handleScrollStateChange}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#6C4DFF"
+              colors={["#6C4DFF"]}
+            />
+          }
+        >
           {/* 카테고리 버튼 */}
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
                 <View className="gap-y-[7px]" key={item.id}>
                   <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
-                    {item.iconType === "paint" && (
-                      <PaintIcon width={32} height={32} />
+                    {item.iconType === "performance" && (
+                      <PerformanceIcon width={32} height={32} />
                     )}
-                    {item.iconType === "palette" && (
-                      <PaletteIcon width={32} height={29} />
+                    {item.iconType === "exhibition" && (
+                      <ExhibitionIcon width={32} height={29} />
                     )}
-                    {item.iconType === "celebration" && (
-                      <CelebrationIcon width={48} height={48} />
+                    {item.iconType === "festival" && (
+                      <FestivalIcon width={48} height={48} />
                     )}
-                    {item.iconType === "food" && (
-                      <FoodIcon width={30} height={30} />
+                    {item.iconType === "event" && (
+                      <EventIcon width={54} height={54} />
                     )}
                   </View>
                   <Text className="text-center text-sm text-black">
@@ -830,8 +818,8 @@ export default function HomeScreen() {
               )}
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 }

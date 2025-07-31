@@ -2,12 +2,12 @@ import React from "react";
 
 import Svg, { Circle, Path } from "react-native-svg";
 
-interface PaletteIconProps {
+interface ExhibitionIconProps {
   width?: number;
   height?: number;
 }
 
-export const PaletteIcon: React.FC<PaletteIconProps> = ({
+export const ExhibitionIcon: React.FC<ExhibitionIconProps> = ({
   width = 40,
   height = 36,
 }) => {
@@ -107,4 +107,4 @@ export const PaletteIcon: React.FC<PaletteIconProps> = ({
   );
 };
 
-export default PaletteIcon;
+export default ExhibitionIcon;
