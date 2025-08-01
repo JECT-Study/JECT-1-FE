@@ -4,7 +4,6 @@ import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
-import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
@@ -26,11 +25,10 @@ import LockIcon from "@/components/icons/LockIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
+import { BACKEND_URL } from "@/constants/ApiUrls";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
-
-const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL || "";
 
 /**
  * 최소 로딩 시간을 보장하는 유틸 함수
@@ -535,7 +533,7 @@ export default function HomeScreen() {
         </View>
       </LinearGradient>
 
-      <View className="mt-[-55px] flex-1 rounded-t-3xl pb-6">
+      <View className="mt-[-55px] flex-1 rounded-t-3xl">
         <ScrollView
           className="rounded-t-3xl bg-white"
           contentInsetAdjustmentBehavior="automatic"
@@ -786,7 +784,7 @@ export default function HomeScreen() {
             </View>
 
             {/* 이런 축제 어때요? */}
-            <View className="px-[18px] py-2.5">
+            <View className="px-[18px] py-2.5 pb-6">
               <View className="mb-[18px] flex-row items-center justify-between">
                 <Text className="text-xl font-semibold text-[#424242]">
                   이런 축제 어때요?

@@ -19,11 +19,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
+import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import NaverMap from "@/components/map/NaverMap";
+import { BACKEND_URL } from "@/constants/ApiUrls";
 
 function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
   return <View className={`w-full ${height} ${bg}`} />;
@@ -99,6 +101,8 @@ export default function DetailScreen() {
   const [contentData, setContentData] = useState<ContentDetail | null>(null);
   const [scrollY, setScrollY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -168,6 +172,36 @@ export default function DetailScreen() {
   const handleScroll = (event: any) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
     setScrollY(currentScrollY);
+  };
+
+  const handleLikeToggle = async () => {
+    if (!contentData || !id || isLikeLoading) return;
+
+    setIsLikeLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/contents/${id}/favorites`,
+      );
+
+      if (response.data.isSuccess) {
+        const { result: newLikesCount } = response.data;
+
+        setIsLiked((prev) => !prev);
+        setContentData((prev) =>
+          prev
+            ? {
+                ...prev,
+                likes: newLikesCount,
+              }
+            : null,
+        );
+      }
+    } catch (error) {
+      console.error("좋아요 오류:", error);
+    } finally {
+      setIsLikeLoading(false);
+    }
   };
 
   return (
@@ -365,9 +399,19 @@ export default function DetailScreen() {
             <View className="flex-col items-center">
               <Pressable
                 className="items-center justify-center"
-                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                style={({ pressed }) => [
+                  {
+                    opacity: isLikeLoading ? 0.5 : pressed ? 0.7 : 1,
+                  },
+                ]}
+                onPress={handleLikeToggle}
+                disabled={isLikeLoading}
               >
-                <HeartOutlineIcon size={28} />
+                {isLiked ? (
+                  <HeartFilledIcon size={28} />
+                ) : (
+                  <HeartOutlineIcon size={28} />
+                )}
               </Pressable>
               <Text className="text-lg font-medium text-gray-700">
                 {contentData?.likes || 0}

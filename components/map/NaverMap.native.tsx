@@ -12,8 +12,6 @@ export default function NaverMapNative({
   latitude = 37.566535,
   longitude = 126.9779692,
 }: NaverMapProps) {
-  console.log(latitude, longitude);
-
   return (
     <View className="mb-3 h-48 overflow-hidden rounded-lg">
       <NaverMapView
