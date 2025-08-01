@@ -61,15 +61,12 @@ function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
         onSnapToItem={(index) => setCurrentIndex(index)}
       />
 
-      <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
-        {carouselData.map((_, index) => (
-          <View
-            key={index}
-            className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
-              index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
-            }`}
-          />
-        ))}
+      <View className="absolute bottom-8 right-4">
+        <View className="rounded-full bg-black/50 px-2.5 py-0.5">
+          <Text className="font-base text-sm text-[#F5F5F5]">
+            {currentIndex + 1}/{carouselData.length}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -201,20 +198,8 @@ export default function DetailScreen() {
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
         >
-          {/* 상단 이미지 영역 */}
-          <View>
-            <DetailImageCarousel imageHeight={IMAGE_HEIGHT} />
-
-            {/* 태그들 */}
-            <View className="absolute bottom-10 left-4 flex-row gap-2">
-              <View className="rounded-full bg-[#E0FFEB] px-3 py-1">
-                <Text className="text-sm text-[#22A04C]">조용한쉼</Text>
-              </View>
-              <View className="rounded-full bg-[#E9F2FF] px-3 py-1">
-                <Text className="text-sm text-[#4D87FF]">한적하게</Text>
-              </View>
-            </View>
-          </View>
+          {/* 상단 캐러셀 영역 */}
+          <DetailImageCarousel imageHeight={IMAGE_HEIGHT} />
 
           {/* 정보 영역 */}
           <View className="mt-[-20px] rounded-t-2xl bg-white py-6">
