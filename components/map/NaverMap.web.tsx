@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export default function NaverMapWeb({ mapKey }: { mapKey: number }) {
+export default function NaverMapWeb() {
   const sdkUrl = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${Constants.expoConfig?.extra?.NAVER_MAP_CLIENT_ID}`;
   useEffect(() => {
     const existingScript = document.querySelector(`script[src="${sdkUrl}"]`);
@@ -29,7 +29,7 @@ export default function NaverMapWeb({ mapKey }: { mapKey: number }) {
       }
     };
     document.head.appendChild(script);
-  }, [mapKey, sdkUrl]);
+  }, [sdkUrl]);
   const renderMap = () => {
     const map = new window.naver.maps.Map("map", {
       center: new window.naver.maps.LatLng(37.5665, 126.978),

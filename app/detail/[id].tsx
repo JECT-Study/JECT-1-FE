@@ -1,8 +1,9 @@
-import { useCallback, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { shareFeedTemplate } from "@react-native-kakao/share";
+import axios from "axios";
 import * as Clipboard from "expo-clipboard";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Dimensions,
   Image,
@@ -76,25 +77,57 @@ function DetailImageCarousel({ imageHeight }: { imageHeight: number }) {
 
 const IMAGE_HEIGHT = 350;
 
+interface ContentDetail {
+  contentId: number;
+  title: string;
+  images: string[];
+  tags: string[];
+  placeName: string;
+  startDate: string;
+  endDate: string;
+  likes: number;
+  openingHour: string;
+  closedHour: string;
+  address: string;
+  introduction: string;
+  description: string;
+  longitude: number;
+  latitude: number;
+  alwaysOpen: boolean;
+}
+
 export default function DetailScreen() {
+  const [contentData, setContentData] = useState<ContentDetail | null>(null);
   const [scrollY, setScrollY] = useState<number>(0);
-  const [mapKey, setMapKey] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+
+  useEffect(() => {
+    const fetchContentDetail = async () => {
+      try {
+        setLoading(true);
+        if (id) {
+          const response = await axios(
+            `http://43.202.150.138:8080/contents/${id}`,
+          );
+
+          if (response.data.isSuccess) setContentData(response.data.result);
+        }
+      } catch (error) {
+        console.error("API 호출 에러:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContentDetail();
+  }, [id]);
 
   const showHeaderBackground = scrollY > 150;
-
-  useFocusEffect(
-    useCallback(() => {
-      // 지도 키 초기화
-      setMapKey((prev) => prev + 1);
-      // 스크롤 위치 초기화
-      setScrollY(0);
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-    }, []),
-  );
 
   const handleKakaoShare = async () => {
     try {
@@ -146,10 +179,11 @@ export default function DetailScreen() {
 
         {/* 상단 고정 헤더 */}
         <View
-          className="absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-4 pt-[60px]"
-          style={{
-            backgroundColor: showHeaderBackground ? "#ffffff" : "transparent",
-          }}
+          className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-4 pt-[60px] ${
+            showHeaderBackground
+              ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
+              : "bg-transparent"
+          }`}
         >
           <Pressable
             onPress={handleGoBack}
@@ -166,7 +200,6 @@ export default function DetailScreen() {
           className="flex-1"
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
-          scrollEventThrottle={16}
         >
           {/* 상단 이미지 영역 */}
           <View>
@@ -322,7 +355,7 @@ export default function DetailScreen() {
                 </Text>
 
                 {/*네이버지도 컴포넌트*/}
-                <NaverMap mapKey={mapKey} />
+                <NaverMap />
 
                 <View className="mb-3 flex-row items-center">
                   <LocationIcon size={16} />

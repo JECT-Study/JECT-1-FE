@@ -3,7 +3,7 @@ import { JSX } from "react";
 import { Platform } from "react-native";
 
 // 타입 명시가 있으면 더 안전
-type NaverMapComponent = (props: { mapKey: number }) => JSX.Element;
+type NaverMapComponent = () => JSX.Element;
 
 const loader = Platform.select<() => NaverMapComponent>({
   native: () => require("./NaverMap.native").default,

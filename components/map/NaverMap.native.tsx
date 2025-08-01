@@ -6,11 +6,10 @@ import { View } from "react-native";
 
 import LocationMarkerIcon from "@/components/icons/LocationMarkerIcon";
 
-export default function NaverMapNative({ mapKey }: { mapKey: number }) {
+export default function NaverMapNative() {
   return (
     <View className="mb-3 h-48 overflow-hidden rounded-lg">
       <NaverMapView
-        key={mapKey} // 지도 리셋을 위한 key
         style={{ width: "100%", height: "100%" }}
         initialCamera={{
           latitude: 37.566535,
