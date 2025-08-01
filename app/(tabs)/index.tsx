@@ -26,23 +26,10 @@ import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
+import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
-
-/**
- * 최소 로딩 시간을 보장하는 유틸 함수
- * @param startTime 시작 시간 (Date.now()로 기록된 값)
- */
-const ensureMinLoadingTime = async (startTime: number): Promise<void> => {
-  const minDuration = 300; // 최소 로딩 시간 200ms
-  const elapsedTime = Date.now() - startTime; // 경과 시간 계산
-  const remainingTime = Math.max(0, minDuration - elapsedTime); // 남은 시간 계산
-
-  if (remainingTime > 0) {
-    await new Promise((resolve) => setTimeout(resolve, remainingTime));
-  }
-};
 
 interface CustomContentItem {
   contentId: number;

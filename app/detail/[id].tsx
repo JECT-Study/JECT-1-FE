@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   Pressable,
@@ -26,6 +27,7 @@ import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import NaverMap from "@/components/map/NaverMap";
 import { BACKEND_URL } from "@/constants/ApiUrls";
+import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
   return <View className={`w-full ${height} ${bg}`} />;
@@ -112,18 +114,19 @@ export default function DetailScreen() {
 
   useEffect(() => {
     const fetchContentDetail = async () => {
+      const startTime = Date.now();
+
       try {
         setLoading(true);
         if (id) {
-          const response = await axios(
-            `http://43.202.150.138:8080/contents/${id}`,
-          );
+          const response = await axios(`${BACKEND_URL}/contents/${id}`);
 
           if (response.data.isSuccess) setContentData(response.data.result);
         }
       } catch (error) {
         console.error("API 호출 에러:", error);
       } finally {
+        await ensureMinLoadingTime(startTime);
         setLoading(false);
       }
     };
@@ -160,10 +163,8 @@ export default function DetailScreen() {
 
   const handleCopyAddress = async () => {
     try {
-      if (contentData?.address) {
-        await Clipboard.setStringAsync(contentData.address);
-        console.log("주소가 복사되었습니다.");
-      }
+      await Clipboard.setStringAsync(contentData!.address);
+      console.log("주소가 복사되었습니다.");
     } catch (error) {
       console.error("복사 오류:", error);
     }
@@ -175,7 +176,7 @@ export default function DetailScreen() {
   };
 
   const handleLikeToggle = async () => {
-    if (!contentData || !id || isLikeLoading) return;
+    if (!id || isLikeLoading) return;
 
     setIsLikeLoading(true);
 
@@ -203,6 +204,19 @@ export default function DetailScreen() {
       setIsLikeLoading(false);
     }
   };
+
+  if (loading || !contentData) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <ActivityIndicator size="large" color="#6C4DFF" />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -234,7 +248,7 @@ export default function DetailScreen() {
               className={`flex-1 text-center text-lg font-semibold text-[#212121]`}
               numberOfLines={1}
             >
-              {contentData?.title}
+              {contentData.title}
             </Text>
           )}
 
@@ -268,13 +282,13 @@ export default function DetailScreen() {
               <View className="mb-3.5 flex-row items-center justify-between">
                 <View className="flex-1 gap-1 pr-4">
                   <Text className="text-xl font-semibold text-[#212121]">
-                    {contentData?.title}
+                    {contentData.title}
                   </Text>
                   <Text className="text-[#424242]">
-                    {contentData?.placeName}
+                    {contentData.placeName}
                   </Text>
                   <Text className="text-[#424242]">
-                    {contentData?.startDate && contentData?.endDate
+                    {contentData.startDate && contentData.endDate
                       ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
                       : ""}
                   </Text>
@@ -301,7 +315,7 @@ export default function DetailScreen() {
                     관람시간
                   </Text>
                   <Text className="text-sm text-gray-700">
-                    {contentData?.openingHour && contentData?.closedHour
+                    {contentData.openingHour && contentData.closedHour
                       ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
                       : ""}
                   </Text>
@@ -318,7 +332,7 @@ export default function DetailScreen() {
                   <Text className="w-20 font-semibold text-gray-800">주소</Text>
                   <View className="flex-row flex-wrap items-center gap-x-1">
                     <Text className="text-sm text-gray-700">
-                      {contentData?.address}
+                      {contentData.address}
                     </Text>
                     <Pressable
                       onPress={handleCopyAddress}
@@ -336,7 +350,7 @@ export default function DetailScreen() {
                     행사소개
                   </Text>
                   <Text className="flex-1 text-sm text-gray-700">
-                    {contentData?.introduction}
+                    {contentData.introduction}
                   </Text>
                 </View>
               </View>
@@ -349,7 +363,7 @@ export default function DetailScreen() {
                 </Text>
                 <View className="flex-row flex-wrap gap-y-1">
                   <Text className="text-gray-700">
-                    {contentData?.description}
+                    {contentData.description}
                   </Text>
                 </View>
               </View>
@@ -362,17 +376,15 @@ export default function DetailScreen() {
                 </Text>
 
                 {/*네이버지도 컴포넌트*/}
-                {contentData && (
-                  <NaverMap
-                    latitude={contentData?.latitude}
-                    longitude={contentData?.longitude}
-                  />
-                )}
+                <NaverMap
+                  latitude={contentData.latitude}
+                  longitude={contentData.longitude}
+                />
 
                 <View className="mb-3 flex-row items-center">
                   <LocationIcon size={16} />
                   <Text className="ml-1.5 flex-1 text-sm text-black">
-                    {contentData?.address}
+                    {contentData.address}
                   </Text>
                 </View>
 
@@ -414,7 +426,7 @@ export default function DetailScreen() {
                 )}
               </Pressable>
               <Text className="text-lg font-medium text-gray-700">
-                {contentData?.likes || 0}
+                {contentData.likes}
               </Text>
             </View>
 
