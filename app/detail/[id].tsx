@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { shareFeedTemplate } from "@react-native-kakao/share";
 import axios from "axios";
+import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -14,6 +15,7 @@ import {
   View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
@@ -102,6 +104,7 @@ export default function DetailScreen() {
 
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const fetchContentDetail = async () => {
@@ -153,8 +156,10 @@ export default function DetailScreen() {
 
   const handleCopyAddress = async () => {
     try {
-      await Clipboard.setStringAsync("경기도 양평군 청운면 용두로 170");
-      console.log("주소가 복사되었습니다.");
+      if (contentData?.address) {
+        await Clipboard.setStringAsync(contentData.address);
+        console.log("주소가 복사되었습니다.");
+      }
     } catch (error) {
       console.error("복사 오류:", error);
     }
@@ -176,7 +181,7 @@ export default function DetailScreen() {
 
         {/* 상단 고정 헤더 */}
         <View
-          className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-4 pt-[60px] ${
+          className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-3 pt-20 ${
             showHeaderBackground
               ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
               : "bg-transparent"
@@ -189,6 +194,26 @@ export default function DetailScreen() {
           >
             <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
           </Pressable>
+
+          {showHeaderBackground && (
+            <Text
+              className={`flex-1 text-center text-lg font-semibold text-[#212121]`}
+              numberOfLines={1}
+            >
+              {contentData?.title}
+            </Text>
+          )}
+
+          <Pressable
+            onPress={handleKakaoShare}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+          >
+            <ShareOutlineIcon
+              size={28}
+              color={showHeaderBackground ? "#000" : "#fff"}
+            />
+          </Pressable>
         </View>
 
         {/* 전체 스크롤 영역 */}
@@ -197,65 +222,39 @@ export default function DetailScreen() {
           className="flex-1"
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
+          contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
         >
           {/* 상단 캐러셀 영역 */}
           <DetailImageCarousel imageHeight={IMAGE_HEIGHT} />
 
           {/* 정보 영역 */}
-          <View className="mt-[-20px] rounded-t-2xl bg-white py-6">
+          <View className="mt-[-20px] rounded-t-2xl bg-white pt-6">
             {/* 제목 섹션 */}
             <View className="mb-3 px-5">
-              <View className="mb-6 flex-row items-center justify-between">
+              <View className="mb-3.5 flex-row items-center justify-between">
                 <View className="flex-1 gap-1 pr-4">
-                  <Text className="text-xl font-semibold text-gray-800">
-                    양평 수박 축제
+                  <Text className="text-xl font-semibold text-[#212121]">
+                    {contentData?.title}
                   </Text>
-                  <Text className="text-gray-800">
-                    양평군 청운면 용두사장 일원
+                  <Text className="text-[#424242]">
+                    {contentData?.placeName}
                   </Text>
-                  <Text className="text-gray-800">2025.07.05 - 2025.07.06</Text>
-                </View>
-
-                <View className="flex-row gap-x-1.5">
-                  <View className="flex-row items-center gap-x-1">
-                    <Pressable
-                      className="items-center justify-center"
-                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                    >
-                      <HeartOutlineIcon size={28} />
-                    </Pressable>
-                    <Text className="text-lg font-medium text-gray-700">
-                      24
-                    </Text>
-                  </View>
-                  <Pressable
-                    onPress={handleKakaoShare}
-                    className="items-center justify-center"
-                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                  >
-                    <ShareOutlineIcon size={28} />
-                  </Pressable>
+                  <Text className="text-[#424242]">
+                    {contentData?.startDate && contentData?.endDate
+                      ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
+                      : ""}
+                  </Text>
                 </View>
               </View>
 
-              <View className="flex-row gap-x-3">
-                <Pressable
-                  className="h-12 flex-1 justify-center rounded-lg border-[0.5px] border-gray-300 p-2.5"
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                >
-                  <Text className="text-center font-medium text-black">
-                    전시 홈페이지
-                  </Text>
-                </Pressable>
-                <Pressable
-                  className="h-12 flex-1 justify-center rounded-lg border-[0.5px] border-[#6C4DFF] p-2.5"
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                >
-                  <Text className="text-center font-medium text-[#6C4DFF]">
-                    내 일정 추가
-                  </Text>
-                </Pressable>
-              </View>
+              <Pressable
+                className="h-[43px] flex-1 justify-center rounded border-[0.5px] border-gray-300 p-2.5"
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              >
+                <Text className="text-center font-medium text-black">
+                  전시 홈페이지
+                </Text>
+              </Pressable>
             </View>
 
             <Divider />
@@ -267,7 +266,11 @@ export default function DetailScreen() {
                   <Text className="w-20 font-semibold text-gray-800">
                     관람시간
                   </Text>
-                  <Text className="text-sm text-gray-700">10:00-18:00</Text>
+                  <Text className="text-sm text-gray-700">
+                    {contentData?.openingHour && contentData?.closedHour
+                      ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
+                      : ""}
+                  </Text>
                 </View>
 
                 <View className="flex-row items-center">
@@ -279,9 +282,9 @@ export default function DetailScreen() {
 
                 <View className="flex-row items-center">
                   <Text className="w-20 font-semibold text-gray-800">주소</Text>
-                  <View className="flex-row flex-wrap items-center">
+                  <View className="flex-row flex-wrap items-center gap-x-1">
                     <Text className="text-sm text-gray-700">
-                      경기도 양평군 청운면 용두로 170{" "}
+                      {contentData?.address}
                     </Text>
                     <Pressable
                       onPress={handleCopyAddress}
@@ -299,11 +302,7 @@ export default function DetailScreen() {
                     행사소개
                   </Text>
                   <Text className="flex-1 text-sm text-gray-700">
-                    축제이다. 푸른 하늘 아래 천혜의 자연환경에서 생산된
-                    양평수박은 깨끗한 물과 높은 일교차, 뜨거운 햇빛 속에서 자라
-                    높은 당도와 아삭한 식감을 자랑한다. 청운면의 특산물로
-                    자리잡은 고품질의 수박과 함께, 가족이 함께 즐길 수 있는
-                    축제이다.
+                    {contentData?.introduction}
                   </Text>
                 </View>
               </View>
@@ -316,18 +315,7 @@ export default function DetailScreen() {
                 </Text>
                 <View className="flex-row flex-wrap gap-y-1">
                   <Text className="text-gray-700">
-                    1. 메인프로그램 : 양평수박 홍보 및 판매, 키원대회,
-                    수박가요제, 가수 축하공연 등
-                  </Text>
-                  <Text className="text-gray-700">
-                    2. 부대프로그램 : 수박품평회, 지역동아리 공연, 체험 등
-                  </Text>
-                  <Text className="text-gray-700">
-                    3. 소비자 참여 프로그램 : 어린이 물놀이, 페이스페인팅,
-                    네일아트, 수막만간놀이 등
-                  </Text>
-                  <Text className="text-gray-700">
-                    4. 각종 먹거리 및 지역특산물 판매장 운영
+                    {contentData?.description}
                   </Text>
                 </View>
               </View>
@@ -340,12 +328,17 @@ export default function DetailScreen() {
                 </Text>
 
                 {/*네이버지도 컴포넌트*/}
-                <NaverMap />
+                {contentData && (
+                  <NaverMap
+                    latitude={contentData?.latitude}
+                    longitude={contentData?.longitude}
+                  />
+                )}
 
                 <View className="mb-3 flex-row items-center">
                   <LocationIcon size={16} />
                   <Text className="ml-1.5 flex-1 text-sm text-black">
-                    경기도 양평군 청운면 용두로 170
+                    {contentData?.address}
                   </Text>
                 </View>
 
@@ -362,6 +355,35 @@ export default function DetailScreen() {
             </View>
           </View>
         </ScrollView>
+
+        {/* 하단 고정 바 */}
+        <View
+          className="absolute bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white px-5 pt-3"
+          style={{ paddingBottom: 12 + insets.bottom }}
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="flex-col items-center">
+              <Pressable
+                className="items-center justify-center"
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              >
+                <HeartOutlineIcon size={28} />
+              </Pressable>
+              <Text className="text-lg font-medium text-gray-700">
+                {contentData?.likes || 0}
+              </Text>
+            </View>
+
+            <Pressable
+              className="ml-4 h-[50px] flex-1 justify-center rounded-lg bg-[#6C4DFF] px-6"
+              style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+            >
+              <Text className="text-center text-lg font-semibold text-white">
+                내 일정에 추가
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </>
   );

@@ -3,14 +3,31 @@ import { useEffect } from "react";
 import Constants from "expo-constants";
 import { View } from "react-native";
 
+import { NaverMapProps } from "./NaverMap";
+
 declare global {
   interface Window {
     naver: any;
   }
 }
 
-export default function NaverMapWeb() {
+export default function NaverMapWeb({
+  latitude = 37.5665,
+  longitude = 126.978,
+}: NaverMapProps) {
   const sdkUrl = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${Constants.expoConfig?.extra?.NAVER_MAP_CLIENT_ID}`;
+  const renderMap = () => {
+    const map = new window.naver.maps.Map("map", {
+      center: new window.naver.maps.LatLng(latitude, longitude),
+      zoom: 15,
+    });
+
+    new window.naver.maps.Marker({
+      position: new window.naver.maps.LatLng(latitude, longitude),
+      map,
+    });
+  };
+
   useEffect(() => {
     const existingScript = document.querySelector(`script[src="${sdkUrl}"]`);
     if (existingScript) {
@@ -29,18 +46,7 @@ export default function NaverMapWeb() {
       }
     };
     document.head.appendChild(script);
-  }, [sdkUrl]);
-  const renderMap = () => {
-    const map = new window.naver.maps.Map("map", {
-      center: new window.naver.maps.LatLng(37.5665, 126.978),
-      zoom: 15,
-    });
-
-    new window.naver.maps.Marker({
-      position: new window.naver.maps.LatLng(37.5665, 126.978),
-      map,
-    });
-  };
+  }, [sdkUrl, latitude, longitude]);
   return (
     <View className="mb-3 h-48 overflow-hidden rounded-lg">
       <View
