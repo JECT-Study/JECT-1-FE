@@ -73,6 +73,13 @@ export default function RootLayout() {
                     presentation: "card",
                   }}
                 />
+                <Stack.Screen
+                  name="image-viewer/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
               </Stack>
             </View>
           </View>
