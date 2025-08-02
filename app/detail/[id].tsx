@@ -26,6 +26,7 @@ import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import NaverMap from "@/components/map/NaverMap";
+import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
@@ -122,6 +123,7 @@ export default function DetailScreen() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -232,6 +234,21 @@ export default function DetailScreen() {
         images: JSON.stringify([]),
       },
     });
+  };
+
+  const handleAddToSchedule = () => {
+    setIsDatePickerOpen(true);
+  };
+
+  const handleDatePickerClose = () => {
+    setIsDatePickerOpen(false);
+  };
+
+  const handleDateSelect = (selectedDate: string) => {
+    console.log("선택된 날짜:", selectedDate);
+    // TODO: 여기에 선택된 날짜를 사용자 일정에 추가하는 API 호출 로직 구현
+    // 예: addEventToCalendar(contentData.id, selectedDate);
+    setIsDatePickerOpen(false);
   };
 
   return (
@@ -466,6 +483,7 @@ export default function DetailScreen() {
               <Pressable
                 className="ml-4 h-[50px] flex-1 justify-center rounded-lg bg-[#6C4DFF] px-6"
                 style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+                onPress={handleAddToSchedule}
               >
                 <Text className="text-center text-lg font-semibold text-white">
                   내 일정에 추가
@@ -474,6 +492,18 @@ export default function DetailScreen() {
             </View>
           </View>
         </View>
+      )}
+
+      {/* 날짜 선택 바텀 시트 */}
+      {contentData && (
+        <DatePickerBottomSheet
+          isOpen={isDatePickerOpen}
+          onClose={handleDatePickerClose}
+          startDate={contentData.startDate}
+          endDate={contentData.endDate}
+          onDateSelect={handleDateSelect}
+          eventTitle={contentData.title}
+        />
       )}
     </>
   );
