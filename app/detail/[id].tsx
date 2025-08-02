@@ -156,12 +156,14 @@ export default function DetailScreen() {
   const showHeaderBackground = scrollY > 150;
 
   const handleKakaoShare = async () => {
+    if (!contentData) return;
+
     try {
       await shareFeedTemplate({
         template: {
           content: {
-            title: "양평 수박 축제",
-            description: "2025.07.05 - 2025.07.06",
+            title: contentData.title,
+            description: contentData.description,
             imageUrl:
               "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
             link: {
