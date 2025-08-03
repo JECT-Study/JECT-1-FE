@@ -35,7 +35,7 @@ export default function ScheduleItem({ item }: ScheduleItemProps) {
         <Text className="mb-1 text-base font-semibold text-[#212121]">
           {item.title}
         </Text>
-        <Text className="text-[13px] font-normal text-[#9E9E9E]">
+        <Text className="mb-0.5 text-[13px] font-normal text-[#9E9E9E]">
           {item.address}
         </Text>
         <Text className="text-[13px] font-normal text-[#424242]">

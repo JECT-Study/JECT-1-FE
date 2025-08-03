@@ -2,9 +2,8 @@ import React, { useCallback, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { Pressable, Text, View, StatusBar } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import {
-  CalendarProvider,
   DateData,
   ExpandableCalendar,
   LocaleConfig,
@@ -227,7 +226,7 @@ export default function CommonCalendar({
       />
 
       <View
-        className={`items-center rounded-b-[32px] bg-white px-4 pb-3 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
+        className={`items-center rounded-b-[32px] bg-white px-4 pb-2 pt-4 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
       >
         <Pressable
           disabled={isToggling !== null}

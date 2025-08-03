@@ -73,7 +73,7 @@ export default function ScheduleScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <StatusBar style="dark" />
-      <View className="flex-1 bg-[#F2F3F6]">
+      <View className="flex-1 bg-[#F9FAFC]">
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
           <Text className="text-center text-lg font-medium text-[#212121]">
             컨텐츠 일정
@@ -98,7 +98,7 @@ export default function ScheduleScreen() {
             ListHeaderComponent={
               getSelectedDateSchedules(selectedDate).length > 0
                 ? () => (
-                    <View className="mb-[18px]">
+                    <View className="mb-4">
                       <Text className="text-[13px] font-normal text-[#9E9E9E]">
                         {formatSelectedDateHeader(selectedDate)}
                       </Text>
@@ -107,7 +107,7 @@ export default function ScheduleScreen() {
                 : null
             }
             ItemSeparatorComponent={() => (
-              <Divider bg="bg-[#EEE]" className="my-3.5" />
+              <Divider bg="bg-[#EEE]" className="my-3" />
             )}
             contentContainerStyle={{
               flexGrow: 1,
