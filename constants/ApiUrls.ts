@@ -9,6 +9,5 @@ export const SearchRecentUrl = `${BACKEND_URL}/search/recent`;
 
 // MyPage
 export const UsersFavoriteUrl = `${BACKEND_URL}/users/favorites`;
-export const UserProfileUrl = `${BACKEND_URL}/users/profile`;
-
-// /users/favorites?page=0&limit=10&category = “FESTIVAL
+export const UsersProfileUrl = `${BACKEND_URL}/users/profile`;
+export const UsersScheduleUrl = `${BACKEND_URL}/users/schedule`;

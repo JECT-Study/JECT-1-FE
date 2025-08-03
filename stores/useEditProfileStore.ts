@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { ImagePickerResult } from "expo-image-picker";
 import { create } from "zustand/react";
 
-import { UserProfileUrl } from "@/constants/ApiUrls";
+import { UsersProfileUrl } from "@/constants/ApiUrls";
 
 interface EditProfileStore {
   profileNickname: string;
@@ -79,7 +79,7 @@ const useEditProfileStore = create<EditProfileStore>((set, get) => ({
         }
 
         console.log("Sending profile update:", { nickname: tempNickname });
-        const response = await axios.patch(UserProfileUrl, formData);
+        const response = await axios.patch(UsersProfileUrl, formData);
 
         set({
           profileNickname: tempNickname,

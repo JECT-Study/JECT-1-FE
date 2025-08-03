@@ -1,9 +1,31 @@
+import { useEffect } from "react";
+
+import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
 import { SafeAreaView, View, Text } from "react-native";
 
 import CustomHeader from "@/components/ui/CustomHeader";
+import { UsersScheduleUrl } from "@/constants/ApiUrls";
 
 export default function Plan() {
+  useEffect(() => {
+    const getSchedule = async () => {
+      try {
+        const response = await axios(`${UsersScheduleUrl}/check`, {
+          params: {
+            month: "2025-06", // TODO: 실제 날짜로 변경
+          },
+        });
+        console.log(response);
+      } catch (e) {
+        const axiosError = e as AxiosError;
+        console.error(axiosError);
+      }
+    };
+    getSchedule();
+    // test
+  }, []);
+
   return (
     <>
       <SafeAreaView className="w-full flex-1 bg-white">
