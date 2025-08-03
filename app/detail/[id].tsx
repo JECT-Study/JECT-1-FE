@@ -27,12 +27,9 @@ import LocationPinIcon from "@/components/icons/LocationPinIcon";
 import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
+import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
-
-function Divider({ height = "h-px", bg = "bg-[#F0F0F0]" }) {
-  return <View className={`w-full ${height} ${bg}`} />;
-}
 
 function DetailImageCarousel({
   imageHeight,

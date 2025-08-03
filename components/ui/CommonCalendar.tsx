@@ -206,45 +206,37 @@ export default function CommonCalendar({
   }, [selectedDate, onDateChange]);
 
   return (
-    <View className="min-h-[400px] bg-white">
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
+    <View>
+      <ExpandableCalendar
+        ref={calendarRef}
+        theme={getCalendarTheme()}
+        firstDay={0} // 주의 첫 번째 요일 설정 (0: 일요일, 1: 월요일)
+        renderHeader={renderHeader} // 커스텀 헤더 렌더링
+        hideArrows={true} // 기본 화살표 숨김 (커스텀 헤더에서 처리)
+        onDayPress={handleDateChange} // 날짜 선택 시 실행할 콜백 함수
+        onMonthChange={handleMonthChange} // 월 변경 시 실행할 콜백 함수
+        onCalendarToggled={handleCalendarToggled} // 캘린더 확장/축소 시 실행할 콜백 함수
+        hideKnob={true} // 기본 캘린더 확장/축소 손잡이 숨김 (커스텀 손잡이 사용)
+        closeOnDayPress={false} // 날짜 선택 시 캘린더 자동 닫기 여부 (false: 닫지 않음)
+        disablePan={false} // 팬(드래그) 제스처 비활성화 여부 (false: 활성화)
+        animateScroll={true} // 스크롤 애니메이션 활성화 여부 (true: 부드러운 애니메이션)
+        pastScrollRange={3} // 과거 방향으로 스크롤 가능한 개월 수 (12개월 전까지)
+        futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
+        markedDates={markedDates} // 일정 마킹 표시 (선택된 날짜는 하얀색 점)
+        markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
       />
-      <CalendarProvider date={selectedDate}>
-        <ExpandableCalendar
-          ref={calendarRef}
-          theme={getCalendarTheme()}
-          firstDay={0} // 주의 첫 번째 요일 설정 (0: 일요일, 1: 월요일)
-          renderHeader={renderHeader} // 커스텀 헤더 렌더링
-          hideArrows={true} // 기본 화살표 숨김 (커스텀 헤더에서 처리)
-          onDayPress={handleDateChange} // 날짜 선택 시 실행할 콜백 함수
-          onMonthChange={handleMonthChange} // 월 변경 시 실행할 콜백 함수
-          onCalendarToggled={handleCalendarToggled} // 캘린더 확장/축소 시 실행할 콜백 함수
-          hideKnob={true} // 기본 캘린더 확장/축소 손잡이 숨김 (커스텀 손잡이 사용)
-          closeOnDayPress={false} // 날짜 선택 시 캘린더 자동 닫기 여부 (false: 닫지 않음)
-          disablePan={false} // 팬(드래그) 제스처 비활성화 여부 (false: 활성화)
-          animateScroll={true} // 스크롤 애니메이션 활성화 여부 (true: 부드러운 애니메이션)
-          pastScrollRange={3} // 과거 방향으로 스크롤 가능한 개월 수 (12개월 전까지)
-          futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
-          markedDates={markedDates} // 일정 마킹 표시 (선택된 날짜는 하얀색 점)
-          markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
-          calendarStyle={{ backgroundColor: "white" }} // 캘린더 배경색 명시적 설정
-        />
 
-        <View
-          className={`items-center rounded-b-[32px] bg-white px-4 pb-3 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
+      <View
+        className={`items-center rounded-b-[32px] bg-white px-4 pb-3 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
+      >
+        <Pressable
+          disabled={isToggling !== null}
+          className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
+          onPress={toggleCalendar}
         >
-          <Pressable
-            disabled={isToggling !== null}
-            className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
-            onPress={toggleCalendar}
-          >
-            <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
-          </Pressable>
-        </View>
-      </CalendarProvider>
+          <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
+        </Pressable>
+      </View>
     </View>
   );
 }
