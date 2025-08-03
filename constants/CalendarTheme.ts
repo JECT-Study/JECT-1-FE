@@ -25,20 +25,20 @@ export const getCalendarTheme = () => {
 
     // 요일 헤더 (일, 월, 화, 수, 목, 금, 토)
     textSectionTitleColor: "#8F8F8F",
-    textDayHeaderFontSize: 11,
+    textDayHeaderFontSize: 14,
     textDayHeaderFontFamily: "System",
-    textDayHeaderFontWeight: 500 as const,
+    textDayHeaderFontWeight: 400 as const,
 
     // 날짜 숫자들
-    dayTextColor: "#111111",
-    todayTextColor: "#111111",
-    textDayFontSize: 14,
+    dayTextColor: "#424242",
+    todayTextColor: "#424242",
+    textDayFontSize: 16,
     textDayFontFamily: "System",
     textDayFontWeight: 500 as const,
     textDayStyle: {
       marginTop: Platform.OS === "android" ? 2 : 4,
       textAlign: "center" as const,
-      lineHeight: 23,
+      lineHeight: 20,
     },
 
     // 선택된 날짜
