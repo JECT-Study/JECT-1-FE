@@ -14,6 +14,8 @@ import {
   StatusBar,
   Text,
   View,
+  Linking,
+  Platform,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -250,6 +252,36 @@ export default function DetailScreen() {
     setIsDatePickerOpen(false);
   };
 
+  const handleNaverMapPress = async () => {
+    const latitude = 37.3677345;
+    const longitude = 127.1083617;
+    const placeName = "마이코드";
+
+    // 네이버 지도 URL scheme
+    const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
+
+    // 네이버 지도 앱 스토어 링크
+    const naverMapStoreURL =
+      Platform.OS === "ios"
+        ? "https://itunes.apple.com/app/id311867728?mt=8" // iOS 앱 스토어
+        : "market://details?id=com.nhn.android.nmap"; // Android 구글 플레이
+
+    try {
+      // 네이버 지도 앱이 설치되어 있는지 확인
+      const supported = await Linking.canOpenURL(naverMapScheme);
+
+      if (supported) {
+        // 네이버 지도 앱으로 이동
+        await Linking.openURL(naverMapScheme);
+      } else {
+        // 네이버 지도 앱이 설치되어 있지 않으면 앱 스토어로 이동
+        await Linking.openURL(naverMapStoreURL);
+      }
+    } catch (error) {
+      console.error("네이버 지도 연동 중 오류 발생:", error);
+    }
+  };
+
   return (
     <>
       {loading || !contentData ? (
@@ -440,6 +472,7 @@ export default function DetailScreen() {
                   <Pressable
                     className="flex flex-row items-center justify-center rounded-lg border border-black py-3"
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                    onPress={handleNaverMapPress}
                   >
                     <LocationPinIcon size={14} />
                     <Text className="ml-1.5 text-center font-medium text-black">
