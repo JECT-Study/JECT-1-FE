@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -211,7 +213,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   );
 };
 
-// const SCROLL_THRESHOLD = 20;
+const SCROLL_THRESHOLD = 20;
 
 const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];
@@ -282,7 +284,7 @@ export default function HomeScreen() {
   const [isLoadingWeekDay, setIsLoadingWeekDay] = useState<boolean>(false);
   const [isLoadingCategoryContent, setIsLoadingCategoryContent] =
     useState<boolean>(false);
-  // const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
@@ -456,16 +458,16 @@ export default function HomeScreen() {
     [fetchWeeklyContentData],
   );
 
-  // const handleScrollStateChange = (
-  //   e: NativeSyntheticEvent<NativeScrollEvent>,
-  // ) => {
-  //   const { contentOffset } = e.nativeEvent;
-  //   // 현재 스크롤 위치 (Y축)
-  //   const currentScrollY = contentOffset.y;
+  const handleScrollStateChange = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const { contentOffset } = e.nativeEvent;
+    // 현재 스크롤 위치 (Y축)
+    const currentScrollY = contentOffset.y;
 
-  //   // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
-  //   setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
-  // };
+    // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
+    setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
+  };
 
   const handleSearchPress = () => router.push("/(tabs)/search_tab");
 
@@ -520,12 +522,15 @@ export default function HomeScreen() {
         </View>
       </LinearGradient>
 
-      <View className="mt-[-55px] flex-1 rounded-t-3xl">
+      <View
+        className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
+      >
         <ScrollView
-          className="rounded-t-3xl bg-white"
+          className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
-          // onScroll={handleScrollStateChange}
+          onScroll={handleScrollStateChange}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
