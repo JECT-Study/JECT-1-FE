@@ -11,7 +11,7 @@ import {
 
 import CalendarArrow from "@/components/icons/CalendarArrow";
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
-import { getCalendarTheme, primaryColor } from "@/constants/CalendarTheme";
+import { getCalendarTheme } from "@/constants/CalendarTheme";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 
 // dayjs 플러그인 확장
@@ -41,29 +41,25 @@ const getMarkedDates = (
 ) => {
   const marked: { [key: string]: any } = {};
 
-  // 일정 데이터로부터 마킹 생성
-  scheduleData.forEach((event) => {
+  // 선택된 날짜에 일정이 있는지 확인
+  const hasScheduleOnSelectedDate = scheduleData.some((event) => {
     const startDate = dayjs(event.startDate);
     const endDate = dayjs(event.endDate);
+    const selected = dayjs(selectedDate);
 
-    // 시작일부터 종료일까지 하루씩 순회
-    let currentDate = startDate;
-    while (currentDate.isSameOrBefore(endDate)) {
-      const dateString = currentDate.format("YYYY-MM-DD");
-
-      // 해당 날짜에 일정이 있음을 표시
-      if (!marked[dateString]) {
-        // 선택된 날짜인 경우 하얀색 점으로 표시
-        const isSelected = dateString === selectedDate;
-        marked[dateString] = {
-          marked: true,
-          dotColor: isSelected ? "#ffffff" : primaryColor,
-        };
-      }
-
-      currentDate = currentDate.add(1, "day");
-    }
+    // 선택된 날짜가 일정 기간에 포함되는지 확인
+    return (
+      selected.isSameOrAfter(startDate) && selected.isSameOrBefore(endDate)
+    );
   });
+
+  // 선택된 날짜에 일정이 있는 경우에만 마킹
+  if (hasScheduleOnSelectedDate) {
+    marked[selectedDate] = {
+      marked: true,
+      dotColor: "#ffffff", // 선택된 날짜는 하얀색 점으로 표시
+    };
+  }
 
   return marked;
 };
