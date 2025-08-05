@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleLogin from "@/components/login/AppleLogin";
@@ -8,6 +8,7 @@ import KakaoLogin from "@/components/login/KakaoLogin";
 
 export default function SocialLoginButtons() {
   const insets = useSafeAreaInsets();
+  const isIOS = Platform.OS === "ios";
   return (
     <View className="w-full">
       <LinearGradient
@@ -21,7 +22,7 @@ export default function SocialLoginButtons() {
         <View className="w-full items-center">
           <KakaoLogin />
           <View className="my-2" />
-          <AppleLogin />
+          {isIOS ? <AppleLogin /> : null}
         </View>
         <Pressable
           onPress={() => router.push("/(tabs)")}
