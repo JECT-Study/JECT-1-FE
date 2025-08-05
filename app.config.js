@@ -20,6 +20,7 @@ export default {
         "kakaokompassauth",
         "kakaolink",
         "kakaoplus",
+        "nmap",
       ],
       CFBundleURLTypes: [
         {
@@ -39,6 +40,15 @@ export default {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
+    intentFilters: [
+      {
+        action: "VIEW",
+        data: {
+          scheme: "nmap",
+        },
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
   },
 
   web: {
