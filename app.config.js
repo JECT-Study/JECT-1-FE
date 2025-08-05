@@ -6,7 +6,7 @@ export default {
   owner: "scorchedrice",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/mycode_icon.png",
   scheme: "mycode",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
@@ -15,6 +15,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
+    // bundleIdentifier: process.env.MYCODE_SERVICE_IDENTIFIER,
     infoPlist: {
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
@@ -52,10 +53,10 @@ export default {
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/images/mycode_splash.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#111111",
       },
     ],
     [
@@ -104,6 +105,7 @@ export default {
 
   extra: {
     kakaoNativeAppKey: process.env.MYCODE_KAKAO_NATIVE_APP_KEY,
+    kakaoWebAppKey: process.env.MYCODE_KAKAO_REST_API_KEY,
     BACKEND_URL: process.env.MYCODE_BACKEND_URL,
     NAVER_MAP_CLIENT_ID: process.env.NAVER_MAP_CLIENT_ID,
     eas: {
