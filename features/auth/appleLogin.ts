@@ -1,4 +1,7 @@
+import axios, { AxiosError } from "axios";
 import * as AppleAuthentication from "expo-apple-authentication";
+
+import { LoginUrl } from "@/constants/ApiUrls";
 
 export async function IOSAppleLogin() {
   try {
@@ -9,9 +12,14 @@ export async function IOSAppleLogin() {
       ],
     });
     console.log("credential", credential);
-    // TODO : 로그인 로직 반영
+    const id = credential.user;
+    await axios.post(LoginUrl, {
+      id,
+      social: "APPLE",
+    });
   } catch (error) {
-    console.log(error);
+    const axiosError = error as AxiosError;
+    alert(`애플 로그인 도중 서버 에러가 발생했습니다. ${axiosError.message}`);
   }
 }
 
