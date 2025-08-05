@@ -20,6 +20,16 @@ dayjs.extend(isSameOrBefore);
 // 기본 로케일을 한국어로 설정 - 모든 캘린더 컴포넌트에서 한국어 사용
 LocaleConfig.defaultLocale = "ko";
 
+interface DayProps {
+  date?: DateData;
+  state?: "selected" | "disabled" | "today" | "inactive" | "";
+  marking?: {
+    marked?: boolean;
+    dotColor?: string;
+  };
+  onPress?: (date: DateData) => void;
+}
+
 interface CommonCalendarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
@@ -62,6 +72,47 @@ const getMarkedDates = (
   }
 
   return marked;
+};
+
+// 커스텀 Day 컴포넌트 (일요일을 빨간색으로 표시)
+const CustomDay = ({ date, state, marking, onPress }: DayProps) => {
+  const dateObj = dayjs(date?.dateString);
+  const isSunday = dateObj.day() === 0;
+  const isSelected = state === "selected";
+  const isDisabled = state === "disabled";
+
+  let textColor = "#424242"; // 기본 색상
+  if (isDisabled) {
+    textColor = "#9E9E9E"; // 비활성화된 날짜
+  } else if (isSelected) {
+    textColor = "#ffffff"; // 선택된 날짜
+  } else if (isSunday) {
+    textColor = "#F43630"; // 일요일
+  }
+
+  return (
+    <Pressable
+      onPress={() => onPress?.(date!)}
+      className={`m-[-2px] h-10 w-10 items-center justify-center rounded-full ${
+        isSelected && "bg-[#6C4DFF]"
+      }`}
+    >
+      <Text
+        className="text-lg font-medium"
+        style={{
+          color: textColor,
+        }}
+      >
+        {date?.day}
+      </Text>
+      {marking?.marked && (
+        <View
+          className="absolute bottom-1 h-1 w-1 rounded-full"
+          style={{ backgroundColor: marking.dotColor || "#6C4DFF" }}
+        />
+      )}
+    </Pressable>
+  );
 };
 
 const CalendarHeader = ({
@@ -219,6 +270,7 @@ export default function CommonCalendar({
         futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
         markedDates={markedDates} // 일정 마킹 표시 (선택된 날짜는 하얀색 점)
         markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
+        dayComponent={CustomDay} // 커스텀 Day 컴포넌트 사용 (일요일 빨간색 표시)
       />
 
       <View

@@ -12,7 +12,6 @@ import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import Divider from "@/components/ui/Divider";
-import { primaryColor } from "@/constants/CalendarTheme";
 import {
   initialScheduleData,
   ScheduleItemType,
@@ -90,9 +89,7 @@ export default function ScheduleScreen() {
           <FlatList
             className="mx-4 mt-7 flex-1"
             data={getSelectedDateSchedules(selectedDate)}
-            renderItem={({ item }) => (
-              <ScheduleItem item={item} primaryColor={primaryColor} />
-            )}
+            renderItem={({ item }) => <ScheduleItem item={item} />}
             keyExtractor={(item) => item.id.toString()}
             ListEmptyComponent={ScheduleEmptyState}
             ListHeaderComponent={

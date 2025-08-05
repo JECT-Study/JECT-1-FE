@@ -1,13 +1,12 @@
 import React from "react";
 
 import dayjs from "dayjs";
-import { View, Text, Image } from "react-native";
+import { Image, Text, View } from "react-native";
 
 import { ScheduleItemType } from "@/constants/ScheduleData";
 
 interface ScheduleItemProps {
   item: ScheduleItemType;
-  primaryColor: string;
 }
 
 const formatDateRange = (startDate: string, endDate: string) => {
