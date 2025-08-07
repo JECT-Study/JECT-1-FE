@@ -160,28 +160,28 @@ export default function DetailScreen() {
 
   const showHeaderBackground = scrollY > 150;
 
-  const handleKakaoShare = async () => {
-    if (!contentData) return;
+  // const handleKakaoShare = async () => {
+  //   if (!contentData) return;
 
-    try {
-      await shareFeedTemplate({
-        template: {
-          content: {
-            title: contentData.title,
-            description: contentData.description,
-            imageUrl:
-              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-            link: {
-              webUrl: "https://github.com/",
-              mobileWebUrl: "https://github.com/",
-            },
-          },
-        },
-      });
-    } catch (error) {
-      console.error("카카오톡 공유 오류:", error);
-    }
-  };
+  //   try {
+  //     await shareFeedTemplate({
+  //       template: {
+  //         content: {
+  //           title: contentData.title,
+  //           description: contentData.description,
+  //           imageUrl:
+  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+  //           link: {
+  //             webUrl: "https://github.com/",
+  //             mobileWebUrl: "https://github.com/",
+  //           },
+  //         },
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("카카오톡 공유 오류:", error);
+  //   }
+  // };
 
   const handleGoBack = () => {
     router.back();
@@ -332,7 +332,7 @@ export default function DetailScreen() {
               </Text>
             )}
 
-            <Pressable
+            {/* <Pressable
               onPress={handleKakaoShare}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
@@ -341,7 +341,7 @@ export default function DetailScreen() {
                 size={28}
                 color={showHeaderBackground ? "#000" : "#fff"}
               />
-            </Pressable>
+            </Pressable> */}
           </View>
 
           {/* 전체 스크롤 영역 */}
