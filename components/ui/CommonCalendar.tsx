@@ -2,188 +2,58 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import {
   DateData,
   ExpandableCalendar,
   LocaleConfig,
 } from "react-native-calendars";
 
-import CalendarArrow from "@/components/icons/CalendarArrow";
 import ChevronIndicator from "@/components/icons/ChevronIndicator";
+import CalendarHeader from "@/components/ui/CalendarHeader";
+import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 
 // dayjs 플러그인 확장
 dayjs.extend(isSameOrBefore);
 
-// 기본 로케일을 한국어로 설정 - 모든 캘린더 컴포넌트에서 한국어 사용
-LocaleConfig.defaultLocale = "ko";
+// 한국어 로케일 설정
+LocaleConfig.locales["ko"] = {
+  monthNames: [
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
+  ],
+  dayNames: [
+    "일요일",
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+  ],
+  dayNamesShort: ["일", "월", "화", "수", "목", "금", "토"],
+  today: "오늘",
+};
 
-interface DayProps {
-  date?: DateData;
-  state?: "selected" | "disabled" | "today" | "inactive" | "";
-  marking?: {
-    marked?: boolean;
-    dotColor?: string;
-  };
-  onPress?: (date: DateData) => void;
-}
+LocaleConfig.defaultLocale = "ko";
 
 interface CommonCalendarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
   scheduleData: ScheduleItemType[];
 }
-
-// 년월 포맷팅 함수
-const formatYearMonth = (dateString: string) => {
-  const date = dayjs(dateString);
-  const year = date.year();
-  const month = String(date.month() + 1).padStart(2, "0");
-  return { year, month };
-};
-
-// 일정 마킹을 위한 markedDates 생성 함수
-const getMarkedDates = (
-  selectedDate: string,
-  scheduleData: ScheduleItemType[],
-) => {
-  const marked: { [key: string]: any } = {};
-
-  // 선택된 날짜에 일정이 있는지 확인
-  const hasScheduleOnSelectedDate = scheduleData.some((event) => {
-    const startDate = dayjs(event.startDate);
-    const endDate = dayjs(event.endDate);
-    const selected = dayjs(selectedDate);
-
-    // 선택된 날짜가 일정 기간에 포함되는지 확인
-    return (
-      selected.isSameOrAfter(startDate) && selected.isSameOrBefore(endDate)
-    );
-  });
-
-  // 선택된 날짜에 일정이 있는 경우에만 마킹
-  if (hasScheduleOnSelectedDate) {
-    marked[selectedDate] = {
-      marked: true,
-      dotColor: "#F9F9F9", // 선택된 날짜는 하얀색 점으로 표시
-    };
-  }
-
-  return marked;
-};
-
-// 커스텀 Day 컴포넌트 (일요일을 빨간색으로 표시)
-const CustomDay = ({ date, state, marking, onPress }: DayProps) => {
-  const dateObj = dayjs(date?.dateString);
-  const isSunday = dateObj.day() === 0;
-  const isSelected = state === "selected";
-  const isDisabled = state === "disabled";
-
-  let textColor = "#424242"; // 기본 색상
-  if (isDisabled) {
-    textColor = "#9E9E9E"; // 비활성화된 날짜
-  } else if (isSelected) {
-    textColor = "#F9F9F9"; // 선택된 날짜
-  } else if (isSunday) {
-    textColor = "#F43630"; // 일요일
-  }
-
-  return (
-    <Pressable
-      onPress={() => onPress?.(date!)}
-      className={`m-[-2px] h-10 w-10 items-center justify-center rounded-full ${
-        isSelected && "bg-[#6C4DFF]"
-      }`}
-    >
-      <Text
-        className="text-lg font-medium"
-        style={{
-          color: textColor,
-        }}
-      >
-        {date?.day}
-      </Text>
-      {marking?.marked && (
-        <View
-          className="absolute bottom-1 h-1 w-1 rounded-full"
-          style={{ backgroundColor: marking.dotColor || "#6C4DFF" }}
-        />
-      )}
-    </Pressable>
-  );
-};
-
-const CalendarHeader = ({
-  selectedDate,
-  setSelectedDate,
-}: {
-  selectedDate: string;
-  setSelectedDate: (date: string) => void;
-}) => {
-  const { year, month } = formatYearMonth(selectedDate);
-
-  // 오늘 월 기준으로 최소/최대 월 계산
-  const today = dayjs();
-  const minMonth = today.subtract(3, "month").format("YYYY-MM");
-  const maxMonth = today.add(3, "month").format("YYYY-MM");
-  const currentMonthStr = dayjs(selectedDate).format("YYYY-MM");
-
-  // 이전/다음 월 이동 가능 여부 체크
-  const canGoPrevious = currentMonthStr > minMonth;
-  const canGoNext = currentMonthStr < maxMonth;
-
-  // 이전 월로 이동
-  const goToPreviousMonth = useCallback(() => {
-    if (!canGoPrevious) return;
-
-    // 이전 월의 1일로 selectedDate 업데이트
-    const firstDayOfPreviousMonth = dayjs(selectedDate)
-      .subtract(1, "month")
-      .startOf("month")
-      .format("YYYY-MM-DD");
-    setSelectedDate(firstDayOfPreviousMonth);
-  }, [selectedDate, setSelectedDate, canGoPrevious]);
-
-  // 다음 월로 이동
-  const goToNextMonth = useCallback(() => {
-    if (!canGoNext) return;
-
-    // 다음 월의 1일로 selectedDate 업데이트
-    const firstDayOfNextMonth = dayjs(selectedDate)
-      .add(1, "month")
-      .startOf("month")
-      .format("YYYY-MM-DD");
-    setSelectedDate(firstDayOfNextMonth);
-  }, [selectedDate, setSelectedDate, canGoNext]);
-
-  return (
-    <View className="my-2 flex-row items-center justify-between px-4 py-2.5">
-      <Pressable
-        onPress={goToPreviousMonth}
-        className="p-2"
-        disabled={!canGoPrevious}
-      >
-        <CalendarArrow
-          direction="left"
-          color={canGoPrevious ? "#424242" : "#BDBDBD"}
-        />
-      </Pressable>
-
-      <Text className="mx-1 text-xl font-semibold text-[#424242]">
-        {year}. {month}
-      </Text>
-
-      <Pressable onPress={goToNextMonth} className="p-2" disabled={!canGoNext}>
-        <CalendarArrow
-          direction="right"
-          color={canGoNext ? "#424242" : "#BDBDBD"}
-        />
-      </Pressable>
-    </View>
-  );
-};
 
 export default function CommonCalendar({
   selectedDate,
@@ -199,10 +69,17 @@ export default function CommonCalendar({
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
   // 일정 마킹을 위한 markedDates 생성
-  const markedDates = useMemo(
-    () => getMarkedDates(selectedDate, scheduleData),
-    [selectedDate, scheduleData],
-  );
+  const markedDates = useMemo(() => {
+    const marked: { [key: string]: any } = {};
+
+    // 선택된 날짜에 항상 마킹 (행사 유무 상관없이)
+    marked[selectedDate] = {
+      marked: true,
+      dotColor: "#F9F9F9", // 선택된 날짜는 하얀색 점으로 표시
+    };
+
+    return marked;
+  }, [selectedDate]);
 
   // 날짜 선택 시 호출되는 핸들러 - 선택된 날짜 상태 업데이트
   const handleDateChange = useCallback(

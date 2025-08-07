@@ -1,14 +1,18 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import axios from "axios";
 import dayjs from "dayjs";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 
+import CalendarHeader from "@/components/ui/CalendarHeader";
+import { CustomDay } from "@/components/ui/CustomDay";
+import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 
 // 한국어 로케일 설정
-LocaleConfig.locales.ko = {
+LocaleConfig.locales["ko"] = {
   monthNames: [
     "1월",
     "2월",
@@ -35,6 +39,7 @@ LocaleConfig.locales.ko = {
   dayNamesShort: ["일", "월", "화", "수", "목", "금", "토"],
   today: "오늘",
 };
+
 LocaleConfig.defaultLocale = "ko";
 
 interface DatePickerBottomSheetProps {
@@ -46,35 +51,39 @@ interface DatePickerBottomSheetProps {
   startDate: string;
   /** 선택 가능한 종료 날짜 */
   endDate: string;
-  /** 날짜 선택 시 호출되는 콜백 */
-  onDateSelect: (selectedDate: string) => void;
   /** 이벤트 제목 */
   eventTitle?: string;
+  /** 콘텐츠 ID */
+  contentId: string;
 }
+
+const formatDateRange = (startDate: string, endDate: string) => {
+  const start = dayjs(startDate).format("YYYY.MM.DD");
+  const end = dayjs(endDate).format("YYYY.MM.DD");
+  return `${start} - ${end}`;
+};
 
 export default function DatePickerBottomSheet({
   isOpen,
   onClose,
   startDate,
   endDate,
-  onDateSelect,
   eventTitle,
+  contentId,
 }: DatePickerBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<string>(
-    dayjs(startDate).format("YYYY-MM"),
+    dayjs(startDate).format("YYYY-MM-DD"),
   );
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // 동적 사이징을 위해 snapPoints 제거 (enableDynamicSizing={true} 사용)
+  const bottomSheetRef = useRef<BottomSheet | null>(null);
 
   // 바텀시트 열기/닫기 처리
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       bottomSheetRef.current?.expand();
-      // 바텀시트가 열릴 때마다 startDate의 월로 리셋하고 선택된 날짜 초기화
-      setCurrentMonth(dayjs(startDate).format("YYYY-MM"));
+      // 바텀시트가 열릴 때마다 startDate로 리셋하고 선택된 날짜 초기화
+      setCurrentMonth(startDate);
       setSelectedDate(null);
     } else {
       bottomSheetRef.current?.close();
@@ -88,28 +97,60 @@ export default function DatePickerBottomSheet({
 
   // 월 변경 처리
   const handleMonthChange = useCallback((month: DateData) => {
-    setCurrentMonth(month.dateString.substring(0, 7)); // YYYY-MM 형식
+    setCurrentMonth(month.dateString);
   }, []);
 
-  // 월 이동 제한 계산
-  const monthNavigationDisabled = useMemo(() => {
-    const startMonth = dayjs(startDate).format("YYYY-MM");
-    const endMonth = dayjs(endDate).format("YYYY-MM");
-    const current = currentMonth;
+  // 커스텀 헤더에서 월 변경 처리
+  const handleHeaderMonthChange = useCallback(
+    (newDate: string) => {
+      setCurrentMonth(newDate);
+      // Calendar 컴포넌트에게 월 변경을 알리기 위해 onMonthChange 호출
+      handleMonthChange({ dateString: newDate } as DateData);
+    },
+    [handleMonthChange],
+  );
 
-    return {
-      disableArrowLeft: current <= startMonth,
-      disableArrowRight: current >= endMonth,
-    };
-  }, [startDate, endDate, currentMonth]);
-
-  // 확인 버튼 처리
-  const handleConfirm = useCallback(() => {
+  const handleAddMySchedule = useCallback(async () => {
     if (selectedDate) {
-      onDateSelect(selectedDate);
-      onClose();
+      try {
+        const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
+
+        const response = await axios.post(
+          `${BACKEND_URL}/contents/${contentId}/my-schedules`,
+          {
+            date: selectedDate,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.data.isSuccess) {
+          onClose();
+          Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
+        } else {
+          throw new Error("일정 생성에 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("API 요청 오류:", error);
+        Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
+      }
     }
-  }, [selectedDate, onDateSelect, onClose]);
+  }, [selectedDate, onClose, contentId]);
+
+  // 커스텀 헤더 렌더링
+  const renderHeader = useCallback(() => {
+    return (
+      <CalendarHeader
+        selectedDate={currentMonth}
+        setSelectedDate={handleHeaderMonthChange}
+        minDate={startDate}
+        maxDate={endDate}
+      />
+    );
+  }, [currentMonth, handleHeaderMonthChange, startDate, endDate]);
 
   // 마킹된 날짜들 생성
   const markedDates = useMemo(() => {
@@ -137,18 +178,13 @@ export default function DatePickerBottomSheet({
         selected: true,
         selectedColor: "#6C4DFF",
         selectedTextColor: "#FFFFFF",
+        marked: true,
+        dotColor: "#FFFFFF", // 선택된 날짜는 하얀색 점으로 표시
       };
     }
 
     return marked;
   }, [startDate, endDate, selectedDate]);
-
-  // 날짜 포맷팅 함수
-  const formatDateRange = () => {
-    const start = dayjs(startDate).format("YYYY.MM.DD");
-    const end = dayjs(endDate).format("YYYY.MM.DD");
-    return `${start} - ${end}`;
-  };
 
   return (
     <BottomSheet
@@ -157,12 +193,29 @@ export default function DatePickerBottomSheet({
       onClose={onClose}
       enablePanDownToClose
       enableDynamicSizing={true}
-      backgroundStyle={{ backgroundColor: "#FFFFFF" }}
-      handleIndicatorStyle={{ backgroundColor: "#E0E0E0" }}
+      backgroundStyle={{
+        backgroundColor: "#FFFFFF",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: -4,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 10,
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: "#D1D5DB",
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        marginTop: 8,
+      }}
     >
       <BottomSheetView className="p-4">
-        {/* 헤더 */}
-        <View className="mb-6">
+        <View>
           <Text className="mb-2 text-xl font-bold text-gray-900">
             날짜를 선택해주세요
           </Text>
@@ -172,17 +225,16 @@ export default function DatePickerBottomSheet({
             </Text>
           )}
           <Text className="text-sm text-gray-500">
-            선택 가능한 기간: {formatDateRange()}
+            선택 가능한 기간: {formatDateRange(startDate, endDate)}
           </Text>
         </View>
 
-        {/* 캘린더 */}
-
         <Calendar
+          key={currentMonth}
           theme={getCalendarTheme()}
           firstDay={0}
           monthFormat="yyyy년 MM월"
-          current={startDate}
+          current={currentMonth}
           minDate={startDate}
           maxDate={endDate}
           markedDates={markedDates}
@@ -190,13 +242,13 @@ export default function DatePickerBottomSheet({
           onMonthChange={handleMonthChange}
           disableAllTouchEventsForDisabledDays
           hideExtraDays
-          disableArrowLeft={monthNavigationDisabled.disableArrowLeft}
-          disableArrowRight={monthNavigationDisabled.disableArrowRight}
+          hideArrows={true}
+          renderHeader={renderHeader}
           disableMonthChange={false}
           enableSwipeMonths={false}
+          dayComponent={CustomDay}
         />
 
-        {/* 선택된 날짜 표시 */}
         {selectedDate && (
           <View className="my-4 rounded-lg bg-gray-50 p-4">
             <Text className="text-center text-base font-medium text-gray-700">
@@ -206,7 +258,6 @@ export default function DatePickerBottomSheet({
           </View>
         )}
 
-        {/* 하단 버튼들 */}
         <View className="flex-row gap-3 pb-32 pt-4">
           <Pressable
             className="flex-1 rounded-lg border border-gray-300 py-4"
@@ -222,7 +273,7 @@ export default function DatePickerBottomSheet({
             className={`flex-1 rounded-lg py-4 ${
               selectedDate ? "bg-[#6C4DFF]" : "bg-gray-300"
             }`}
-            onPress={handleConfirm}
+            onPress={handleAddMySchedule}
             disabled={!selectedDate}
             style={({ pressed }) => [
               { opacity: pressed && selectedDate ? 0.8 : 1 },
@@ -233,7 +284,7 @@ export default function DatePickerBottomSheet({
                 selectedDate ? "text-white" : "text-gray-500"
               }`}
             >
-              확인
+              내 일정에 추가
             </Text>
           </Pressable>
         </View>

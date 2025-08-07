@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-import { shareFeedTemplate } from "@react-native-kakao/share";
 import axios from "axios";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
@@ -9,13 +8,13 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Linking,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
   Text,
   View,
-  Linking,
-  Platform,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,7 +25,6 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
-import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
@@ -132,12 +130,12 @@ export default function DetailScreen() {
 
   useEffect(() => {
     const fetchContentDetail = async () => {
-      const startTime = Date.now();
+      const startTime = dayjs().valueOf();
 
       try {
         setLoading(true);
         if (id) {
-          const token = process.env.TOKEN;
+          const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
 
           const response = await axios(`${BACKEND_URL}/contents/${id}`, {
             headers: {
@@ -251,13 +249,6 @@ export default function DetailScreen() {
   };
 
   const handleDatePickerClose = () => {
-    setIsDatePickerOpen(false);
-  };
-
-  const handleDateSelect = (selectedDate: string) => {
-    console.log("선택된 날짜:", selectedDate);
-    // TODO: 여기에 선택된 날짜를 사용자 일정에 추가하는 API 호출 로직 구현
-    // 예: addEventToCalendar(contentData.id, selectedDate);
     setIsDatePickerOpen(false);
   };
 
@@ -527,7 +518,7 @@ export default function DetailScreen() {
                 onPress={handleAddToSchedule}
               >
                 <Text className="text-center text-lg font-semibold text-white">
-                  내 일정에 추가
+                  날짜 선택하기
                 </Text>
               </Pressable>
             </View>
@@ -542,8 +533,8 @@ export default function DetailScreen() {
           onClose={handleDatePickerClose}
           startDate={contentData.startDate}
           endDate={contentData.endDate}
-          onDateSelect={handleDateSelect}
           eventTitle={contentData.title}
+          contentId={id as string}
         />
       )}
     </>
