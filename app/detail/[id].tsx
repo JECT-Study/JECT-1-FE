@@ -137,7 +137,13 @@ export default function DetailScreen() {
       try {
         setLoading(true);
         if (id) {
-          const response = await axios(`${BACKEND_URL}/contents/${id}`);
+          const token = process.env.TOKEN;
+
+          const response = await axios(`${BACKEND_URL}/contents/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           if (response.data.isSuccess) setContentData(response.data.result);
         }
@@ -253,9 +259,9 @@ export default function DetailScreen() {
   };
 
   const handleNaverMapPress = async () => {
-    const latitude = 37.3677345;
-    const longitude = 127.1083617;
-    const placeName = "마이코드";
+    if (!contentData) return;
+
+    const { latitude, longitude, placeName } = contentData;
 
     // 네이버 지도 URL scheme
     const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
