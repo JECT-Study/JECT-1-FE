@@ -17,3 +17,4 @@ export const UsersScheduleUrl = `${BACKEND_URL}/users/schedule`;
 // export const KakaoLoginCallbackUrl = `${KakaoLoginUrl}/callback`;
 const AuthUrl = `${BACKEND_URL}/auth`;
 export const LoginUrl = `${AuthUrl}/login`;
+export const LogoutUrl = `${AuthUrl}/logout`;
