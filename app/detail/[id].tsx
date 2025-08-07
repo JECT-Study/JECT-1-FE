@@ -232,13 +232,16 @@ export default function DetailScreen() {
   };
 
   const handleImagePress = (index: number) => {
-    // 이미지 뷰어 페이지로 이동
+    const imageUrls = [
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    ];
+
     router.push({
       pathname: "/image-viewer",
       params: {
         initialIndex: index.toString(),
-        // TODO: 실제 이미지 데이터가 API에서 오면 contentData.images를 전달
-        images: JSON.stringify([]),
+        images: JSON.stringify(imageUrls),
       },
     });
   };

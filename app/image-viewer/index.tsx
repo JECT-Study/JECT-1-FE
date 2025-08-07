@@ -65,16 +65,25 @@ export default function ImageViewerScreen() {
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { initialIndex } = useLocalSearchParams();
+  const { initialIndex, images } = useLocalSearchParams();
 
   const [currentIndex, setCurrentIndex] = useState<number>(
     parseInt(initialIndex as string) || 0,
   );
 
-  // 이미지 데이터 파싱 (현재는 더미 데이터 사용)
-  const imageList: ImageItem[] = Array(10).fill({
-    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-  });
+  const imageList: ImageItem[] = (() => {
+    if (images) {
+      try {
+        const parsedImages = JSON.parse(images as string);
+        if (Array.isArray(parsedImages)) {
+          return parsedImages.map((imageUrl: string) => ({ uri: imageUrl }));
+        }
+      } catch (error) {
+        console.error("이미지 파싱 에러:", error);
+      }
+    }
+    return [];
+  })();
 
   const handleThumbnailPress = (index: number) => {
     setCurrentIndex(index);
@@ -83,6 +92,32 @@ export default function ImageViewerScreen() {
   };
 
   const handleClose = () => router.back();
+
+  // 이미지가 없을 경우 처리
+  if (imageList.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="black"
+          translucent
+        />
+        <View
+          className="absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-2"
+          style={{ paddingTop: insets.top + 10 }}
+        >
+          <Pressable
+            onPress={handleClose}
+            className="active:opacity-70"
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          >
+            <X size={28} color="#fff" />
+          </Pressable>
+        </View>
+        <Text className="text-lg text-white">이미지를 불러올 수 없습니다</Text>
+      </View>
+    );
+  }
 
   return (
     <>
