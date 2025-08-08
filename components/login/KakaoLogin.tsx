@@ -2,13 +2,15 @@ import { useEffect } from "react";
 
 import { initializeKakaoSDK } from "@react-native-kakao/core";
 import { login, me } from "@react-native-kakao/user";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import Constants from "expo-constants";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Pressable, Text } from "react-native";
 
 import KakaoIcon from "@/components/icons/KakaoIcon";
 import { LoginUrl } from "@/constants/ApiUrls";
+import { publicApi } from "@/features/axios/axiosInstance";
 
 export default function KakaoLogin() {
   const kakaoNativeAppKey =
@@ -29,7 +31,7 @@ export default function KakaoLogin() {
       const profile = await me();
       const id = profile.id;
       try {
-        const response = await axios.post(LoginUrl, {
+        const response = await publicApi.post(LoginUrl, {
           socialId: id,
           socialType: "KAKAO",
         });
@@ -37,19 +39,13 @@ export default function KakaoLogin() {
         const refreshToken = response.data.result.refreshToken;
         await SecureStore.setItemAsync("accessToken", accessToken);
         await SecureStore.setItemAsync("refreshToken", refreshToken);
+        router.replace("/(tabs)");
       } catch (error) {
         const axiosError = error as AxiosError;
         alert(
           `로그인 정보를 서버로 전송하던 도중 에러가 발생했습니다. ${axiosError.message}`,
         );
       }
-      // finally {
-      //   console.log("토큰저장확인");
-      //   const storeAccessToken = await SecureStore.getItemAsync("accessToken");
-      //   const storeRefreshToken =
-      //     await SecureStore.getItemAsync("refreshToken");
-      //   console.log(storeAccessToken, storeRefreshToken);
-      // }
     }
   }
 

@@ -6,7 +6,7 @@ import MyPageMenu from "@/components/mypage/MyPageMenu";
 import { LogoutUrl } from "@/constants/ApiUrls";
 import usePageNavigation from "@/hooks/usePageNavigation";
 
-const handleLogout = () => {
+const handleLogout = async () => {
   Alert.alert(
     "로그아웃", // 타이틀
     "정말 로그아웃 하시겠어요?", // 메시지
@@ -22,9 +22,10 @@ const handleLogout = () => {
           console.log("로그아웃!");
           try {
             const accessToken = await SecureStore.getItemAsync("accessToken");
+            console.log(accessToken);
             await axios.post(LogoutUrl, {
               headers: {
-                authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${accessToken}`,
               },
             });
           } catch (error) {
