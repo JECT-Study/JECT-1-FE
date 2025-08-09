@@ -21,12 +21,12 @@ const handleLogout = async () => {
         text: "로그아웃",
         onPress: async () => {
           try {
-            await authApi.post(LogoutUrl);
+            // await authApi.post(LogoutUrl);
             await SecureStore.deleteItemAsync("accessToken");
             await SecureStore.deleteItemAsync("refreshToken");
             alert("로그아웃이 완료되었습니다.");
+
             router.replace("/");
-            // TODO: 해당 경로로 이동하면, 로그인 창이 안나오는 이슈 발생.
           } catch (error) {
             const axiosError = error as AxiosError;
             alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);

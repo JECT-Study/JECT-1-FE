@@ -2,7 +2,6 @@ import { useEffect } from "react";
 
 import { initializeKakaoSDK } from "@react-native-kakao/core";
 import { login, me } from "@react-native-kakao/user";
-import { AxiosError } from "axios";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -23,29 +22,21 @@ export default function KakaoLogin() {
   async function kakaoLogin() {
     try {
       await login();
-      // const accessToken = res.accessToken;
-      // const refreshToken = res.refreshToken;
-    } catch (error) {
-      alert("카카오 로그인 도중 에러가 발생했습니다.");
-    } finally {
       const profile = await me();
       const id = profile.id;
-      try {
-        const response = await publicApi.post(LoginUrl, {
-          socialId: id,
-          socialType: "KAKAO",
-        });
-        const accessToken = response.data.result.accessToken;
-        const refreshToken = response.data.result.refreshToken;
-        await SecureStore.setItemAsync("accessToken", accessToken);
-        await SecureStore.setItemAsync("refreshToken", refreshToken);
-        router.replace("/(tabs)");
-      } catch (error) {
-        const axiosError = error as AxiosError;
-        alert(
-          `로그인 정보를 서버로 전송하던 도중 에러가 발생했습니다. ${axiosError.message}`,
-        );
-      }
+
+      const response = await publicApi.post(LoginUrl, {
+        socialId: id,
+        socialType: "KAKAO",
+      });
+      const accessToken = response.data.result.accessToken;
+      const refreshToken = response.data.result.refreshToken;
+      await SecureStore.setItemAsync("accessToken", accessToken);
+      await SecureStore.setItemAsync("refreshToken", refreshToken);
+      router.replace("/(tabs)");
+    } catch (error) {
+      // 카카오 로그인 취소 시에는 에러 메시지를 표시하지 않음
+      console.log("카카오 로그인 취소 또는 에러:", error);
     }
   }
 

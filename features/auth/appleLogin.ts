@@ -1,10 +1,9 @@
-import { AxiosError } from "axios";
 import * as AppleAuthentication from "expo-apple-authentication";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
-import { router } from "expo-router";
 
 export async function IOSAppleLogin() {
   try {
@@ -25,8 +24,8 @@ export async function IOSAppleLogin() {
     await SecureStore.setItemAsync("refreshToken", refreshToken);
     router.replace("/(tabs)");
   } catch (error) {
-    const axiosError = error as AxiosError;
-    alert(`애플 로그인 도중 서버 에러가 발생했습니다. ${axiosError.message}`);
+    // 애플 로그인 취소 시에는 에러 메시지를 표시하지 않음
+    console.log("애플 로그인 취소 또는 에러:", error);
   }
 }
 
