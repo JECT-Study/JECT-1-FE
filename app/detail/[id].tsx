@@ -29,6 +29,7 @@ import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
+import { authApi } from "@/features/axios/axiosInstance";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 function DetailImageCarousel({
@@ -135,13 +136,7 @@ export default function DetailScreen() {
       try {
         setLoading(true);
         if (id) {
-          const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
-
-          const response = await axios(`${BACKEND_URL}/contents/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
 
           if (response.data.isSuccess) setContentData(response.data.result);
         }

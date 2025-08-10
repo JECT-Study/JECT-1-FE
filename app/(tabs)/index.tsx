@@ -6,6 +6,7 @@ import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -475,6 +476,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
+      <StatusBar style="light" />
       {/* 스크롤 시 보이는 헤더 */}
       {/* {isScrolled && (
         <View

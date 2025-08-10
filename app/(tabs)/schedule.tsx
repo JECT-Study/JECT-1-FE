@@ -83,7 +83,6 @@ export default function ScheduleScreen() {
           <CommonCalendar
             selectedDate={selectedDate}
             onDateChange={handleDateChange}
-            scheduleData={schedules}
           />
 
           <FlatList

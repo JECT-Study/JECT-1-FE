@@ -2,6 +2,8 @@ import axios from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
+const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
+
 export const publicApi = axios.create({
   headers: {
     "Content-Type": "application/json",
@@ -17,7 +19,8 @@ export const authApi = axios.create({
 authApi.interceptors.request.use(
   async (config) => {
     try {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
+      // const accessToken = await SecureStore.getItemAsync("accessToken");
+      const accessToken = token;
 
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;

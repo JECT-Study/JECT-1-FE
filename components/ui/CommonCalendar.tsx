@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -13,7 +13,6 @@ import ChevronIndicator from "@/components/icons/ChevronIndicator";
 import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
-import { ScheduleItemType } from "@/constants/ScheduleData";
 
 // dayjs 플러그인 확장
 dayjs.extend(isSameOrBefore);
@@ -52,13 +51,11 @@ LocaleConfig.defaultLocale = "ko";
 interface CommonCalendarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
-  scheduleData: ScheduleItemType[];
 }
 
 export default function CommonCalendar({
   selectedDate,
   onDateChange,
-  scheduleData,
 }: CommonCalendarProps) {
   // 캘린더 확장/축소 상태 관리
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
@@ -68,19 +65,6 @@ export default function CommonCalendar({
   // 캘린더 컴포넌트 참조 (확장/축소 제어용)
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
 
-  // 일정 마킹을 위한 markedDates 생성
-  const markedDates = useMemo(() => {
-    const marked: { [key: string]: any } = {};
-
-    // 선택된 날짜에 항상 마킹 (행사 유무 상관없이)
-    marked[selectedDate] = {
-      marked: true,
-      dotColor: "#F9F9F9", // 선택된 날짜는 하얀색 점으로 표시
-    };
-
-    return marked;
-  }, [selectedDate]);
-
   // 날짜 선택 시 호출되는 핸들러 - 선택된 날짜 상태 업데이트
   const handleDateChange = useCallback(
     (day: DateData) => {
@@ -88,8 +72,6 @@ export default function CommonCalendar({
     },
     [onDateChange],
   );
-
-  console.log(selectedDate);
 
   // 월 변경 시 호출되는 핸들러 - 월이 바뀔 때마다 실행
   const handleMonthChange = useCallback(
@@ -157,7 +139,6 @@ export default function CommonCalendar({
         animateScroll={true} // 스크롤 애니메이션 활성화 여부 (true: 부드러운 애니메이션)
         pastScrollRange={3} // 과거 방향으로 스크롤 가능한 개월 수 (12개월 전까지)
         futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
-        markedDates={markedDates} // 일정 마킹 표시 (선택된 날짜는 하얀색 점)
         markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
         dayComponent={CustomDay} // 커스텀 Day 컴포넌트 사용 (일요일 빨간색 표시)
       />

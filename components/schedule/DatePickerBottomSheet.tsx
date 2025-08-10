@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import axios from "axios";
 import dayjs from "dayjs";
 import { Alert, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -10,6 +9,7 @@ import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
+import { authApi } from "@/features/axios/axiosInstance";
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {
@@ -113,17 +113,10 @@ export default function DatePickerBottomSheet({
   const handleAddMySchedule = useCallback(async () => {
     if (selectedDate) {
       try {
-        const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
-
-        const response = await axios.post(
+        const response = await authApi.post(
           `${BACKEND_URL}/contents/${contentId}/my-schedules`,
           {
             date: selectedDate,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
           },
         );
 
@@ -179,7 +172,6 @@ export default function DatePickerBottomSheet({
         selectedColor: "#6C4DFF",
         selectedTextColor: "#FFFFFF",
         marked: true,
-        dotColor: "#FFFFFF", // 선택된 날짜는 하얀색 점으로 표시
       };
     }
 
