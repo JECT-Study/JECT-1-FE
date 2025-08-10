@@ -138,7 +138,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
         <Text className="mb-1.5 text-base font-semibold text-[#424242]">
           {item.title}
         </Text>
-        <Text className="text-xs text-[#9E9E9E]" numberOfLines={1}>
+        <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
           {item.address}
         </Text>
       </View>
