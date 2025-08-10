@@ -18,6 +18,7 @@ export async function IOSAppleLogin() {
       socialId: id,
       socialType: "APPLE",
     });
+    console.log(response);
     const accessToken = response.data.result.accessToken;
     const refreshToken = response.data.result.refreshToken;
     await SecureStore.setItemAsync("accessToken", accessToken);
