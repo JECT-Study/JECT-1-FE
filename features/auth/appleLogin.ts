@@ -22,7 +22,7 @@ export async function IOSAppleLogin() {
     const refreshToken = response.data.result.refreshToken;
     await SecureStore.setItemAsync("accessToken", accessToken);
     await SecureStore.setItemAsync("refreshToken", refreshToken);
-    router.replace("/(tabs)");
+    router.push("/(tabs)");
   } catch (error) {
     // 애플 로그인 취소 시에는 에러 메시지를 표시하지 않음
     console.log("애플 로그인 취소 또는 에러:", error);

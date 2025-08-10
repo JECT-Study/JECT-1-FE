@@ -26,7 +26,8 @@ const handleLogout = async () => {
             await SecureStore.deleteItemAsync("refreshToken");
             alert("로그아웃이 완료되었습니다.");
 
-            router.replace("/");
+            router.dismissAll();
+            router.push("/");
           } catch (error) {
             const axiosError = error as AxiosError;
             alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
