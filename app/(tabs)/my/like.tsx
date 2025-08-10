@@ -17,7 +17,7 @@ export default function Like() {
   const [infodummy, setInfodummy] = useState(DUMMY_EVENT_POSTS);
   const selected = useCategorySelected();
 
-  // TODO : api test
+  // TODO : api test, 에러로 확인 필요.
   useEffect(() => {
     const fetchResult = async () => {
       try {

@@ -1,17 +1,10 @@
-/**
- * TODO
- * 1. 백엔드와 어떤식으로 주고받을지
- * 2. 카메라 기능은 확인 제한. ios빌드하는 경우 애플 로그인 기능을 활용하고 있어 무료기능으로 확인 불가.
- * 3. 안드로이드는 정상 동작함을 확인했지만 permission에 대한 고민을 해야할듯.
- */
-
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as ImagePicker from "expo-image-picker";
 
 import { useSetTempImageUri } from "@/stores/useEditProfileStore";
 
 export default function useImagePicker() {
-  const setProfileUri = useSetTempImageUri();
+  const setProfileImageFromPicker = useSetTempImageUri();
   const { showActionSheetWithOptions } = useActionSheet();
   const onPress = () => {
     const options = ["사진 가져오기", "사진 촬영", "취소"];
@@ -32,11 +25,11 @@ export default function useImagePicker() {
               mediaTypes: "images",
               allowsEditing: true,
               aspect: [1, 1],
-              quality: 1,
+              quality: 0.8,
+              allowsMultipleSelection: false,
             });
-            console.log(libraryResult);
             if (!libraryResult.canceled) {
-              setProfileUri(libraryResult.assets[0].uri);
+              setProfileImageFromPicker(libraryResult);
             }
             break;
           case 1:
@@ -44,10 +37,11 @@ export default function useImagePicker() {
               mediaTypes: "images",
               allowsEditing: true,
               aspect: [1, 1],
-              quality: 1,
+              quality: 0.8,
+              allowsMultipleSelection: false,
             });
             if (!cameraResult.canceled) {
-              setProfileUri(cameraResult.assets[0].uri);
+              setProfileImageFromPicker(cameraResult);
             }
             break;
           case cancelButtonIndex:

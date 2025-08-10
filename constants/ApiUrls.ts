@@ -9,5 +9,12 @@ export const SearchRecentUrl = `${BACKEND_URL}/search/recent`;
 
 // MyPage
 export const UsersFavoriteUrl = `${BACKEND_URL}/users/favorites`;
+export const UsersProfileUrl = `${BACKEND_URL}/users/profile`;
+export const UsersScheduleUrl = `${BACKEND_URL}/users/schedule`;
 
-// /users/favorites?page=0&limit=10&category = “FESTIVAL
+// Login
+// export const KakaoLoginUrl = `${BACKEND_URL}/auth/social/kakao`;
+// export const KakaoLoginCallbackUrl = `${KakaoLoginUrl}/callback`;
+const AuthUrl = `${BACKEND_URL}/auth`;
+export const LoginUrl = `${AuthUrl}/login`;
+export const LogoutUrl = `${AuthUrl}/logout`;
