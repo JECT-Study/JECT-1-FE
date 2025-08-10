@@ -1,9 +1,14 @@
+import { AxiosError } from "axios";
+import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { Alert, View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
+import { LogoutUrl } from "@/constants/ApiUrls";
+import { authApi } from "@/features/axios/axiosInstance";
 import usePageNavigation from "@/hooks/usePageNavigation";
 
-const handleLogout = () => {
+const handleLogout = async () => {
   Alert.alert(
     "로그아웃", // 타이틀
     "정말 로그아웃 하시겠어요?", // 메시지
@@ -14,9 +19,19 @@ const handleLogout = () => {
       },
       {
         text: "로그아웃",
-        onPress: () => {
-          // TODO 실제 로그아웃 로직
-          console.log("로그아웃!");
+        onPress: async () => {
+          try {
+            // await authApi.post(LogoutUrl);
+            await SecureStore.deleteItemAsync("accessToken");
+            await SecureStore.deleteItemAsync("refreshToken");
+            alert("로그아웃이 완료되었습니다.");
+
+            router.dismissAll();
+            router.push("/");
+          } catch (error) {
+            const axiosError = error as AxiosError;
+            alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
+          }
         },
         style: "default",
       },

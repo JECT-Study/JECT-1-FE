@@ -1,4 +1,9 @@
 import * as AppleAuthentication from "expo-apple-authentication";
+import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+
+import { LoginUrl } from "@/constants/ApiUrls";
+import { publicApi } from "@/features/axios/axiosInstance";
 
 export async function IOSAppleLogin() {
   try {
@@ -8,10 +13,19 @@ export async function IOSAppleLogin() {
         AppleAuthentication.AppleAuthenticationScope.EMAIL,
       ],
     });
-    console.log("credential", credential);
-    // TODO : 로그인 로직 반영
+    const id = credential.user;
+    const response = await publicApi.post(LoginUrl, {
+      socialId: id,
+      socialType: "APPLE",
+    });
+    const accessToken = response.data.result.accessToken;
+    const refreshToken = response.data.result.refreshToken;
+    await SecureStore.setItemAsync("accessToken", accessToken);
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
+    router.push("/(tabs)");
   } catch (error) {
-    console.log(error);
+    // 애플 로그인 취소 시에는 에러 메시지를 표시하지 않음
+    console.log("애플 로그인 취소 또는 에러:", error);
   }
 }
 
