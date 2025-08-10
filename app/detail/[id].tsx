@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import axios from "axios";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
   Dimensions,
@@ -98,6 +98,8 @@ const IMAGE_HEIGHT = 350;
 
 interface ContentDetail {
   contentId: number;
+  likeId: number | null;
+  scheduleId: number | null;
   title: string;
   images: string[];
   tags: string[];
@@ -105,6 +107,7 @@ interface ContentDetail {
   startDate: string;
   endDate: string;
   likes: number;
+  isAlwaysOpen: boolean;
   openingHour: string;
   closedHour: string;
   address: string;
@@ -112,7 +115,11 @@ interface ContentDetail {
   description: string;
   longitude: number;
   latitude: number;
-  alwaysOpen: boolean;
+}
+
+interface LikeApiResponse {
+  likeId: number;
+  likeCount: number;
 }
 
 export default function DetailScreen() {
@@ -122,12 +129,31 @@ export default function DetailScreen() {
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
+
+  console.log("contentData", contentData);
 
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+
+  // 토큰 확인을 통한 로그인 상태 체크
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const accessToken = await SecureStore.getItemAsync("accessToken");
+        const refreshToken = await SecureStore.getItemAsync("refreshToken");
+        setIsLoggedIn(!!(accessToken && refreshToken));
+      } catch (error) {
+        console.error("토큰 확인 실패:", error);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   useEffect(() => {
     const fetchContentDetail = async () => {
@@ -138,7 +164,12 @@ export default function DetailScreen() {
         if (id) {
           const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
 
-          if (response.data.isSuccess) setContentData(response.data.result);
+          if (response.data.isSuccess) {
+            const contentDetail = response.data.result;
+            setContentData(contentDetail);
+            // likeId가 있으면 좋아요 상태로 설정
+            setIsLiked(contentDetail.likeId !== null);
+          }
         }
       } catch (error) {
         console.error("API 호출 에러:", error);
@@ -200,19 +231,20 @@ export default function DetailScreen() {
     setIsLikeLoading(true);
 
     try {
-      const response = await axios.post(
+      const response = await authApi.post(
         `${BACKEND_URL}/contents/${id}/favorites`,
       );
 
       if (response.data.isSuccess) {
-        const { result: newLikesCount } = response.data;
+        const { result }: { result: LikeApiResponse } = response.data;
 
         setIsLiked((prev) => !prev);
         setContentData((prev) =>
           prev
             ? {
                 ...prev,
-                likes: newLikesCount,
+                likes: result.likeCount,
+                likeId: prev.likeId ? null : result.likeId,
               }
             : null,
         );
@@ -387,9 +419,11 @@ export default function DetailScreen() {
                       관람시간
                     </Text>
                     <Text className="text-sm text-gray-700">
-                      {contentData.openingHour && contentData.closedHour
-                        ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
-                        : ""}
+                      {contentData.isAlwaysOpen
+                        ? "24시간 운영"
+                        : contentData.openingHour && contentData.closedHour
+                          ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
+                          : ""}
                     </Text>
                   </View>
 
@@ -490,30 +524,45 @@ export default function DetailScreen() {
                   className="items-center justify-center"
                   style={({ pressed }) => [
                     {
-                      opacity: isLikeLoading ? 0.5 : pressed ? 0.7 : 1,
+                      opacity:
+                        !isLoggedIn || isLikeLoading ? 0.5 : pressed ? 0.7 : 1,
                     },
                   ]}
                   onPress={handleLikeToggle}
-                  disabled={isLikeLoading}
+                  // disabled={!isLoggedIn || isLikeLoading}
                 >
                   {isLiked ? (
-                    <HeartFilledIcon size={28} />
+                    <HeartFilledIcon
+                      size={28}
+                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                    />
                   ) : (
-                    <HeartOutlineIcon size={28} />
+                    <HeartOutlineIcon
+                      size={28}
+                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                    />
                   )}
                 </Pressable>
-                <Text className="text-lg font-medium text-gray-700">
+                <Text
+                  className="text-lg font-medium"
+                  style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
+                >
                   {contentData.likes}
                 </Text>
               </View>
 
               <Pressable
-                className="ml-4 h-[50px] flex-1 justify-center rounded-lg bg-[#6C4DFF] px-6"
-                style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+                className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
+                  isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
+                }`}
+                style={({ pressed }) => [
+                  { opacity: !isLoggedIn ? 0.6 : pressed ? 0.9 : 1 },
+                ]}
                 onPress={handleAddToSchedule}
+                // disabled={!isLoggedIn}
               >
                 <Text className="text-center text-lg font-semibold text-white">
-                  날짜 선택하기
+                  {isLoggedIn ? "날짜 선택하기" : "로그인 필요"}
                 </Text>
               </Pressable>
             </View>
