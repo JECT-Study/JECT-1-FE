@@ -2,7 +2,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
-const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
+// const token = process.env.EXPO_PUBLIC_AUTH_TOKEN;
 
 export const publicApi = axios.create({
   headers: {
@@ -19,8 +19,8 @@ export const authApi = axios.create({
 authApi.interceptors.request.use(
   async (config) => {
     try {
-      // const accessToken = await SecureStore.getItemAsync("accessToken");
-      const accessToken = token;
+      // const accessToken = token;
+      const accessToken = await SecureStore.getItemAsync("accessToken");
 
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;

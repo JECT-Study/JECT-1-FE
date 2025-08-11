@@ -133,13 +133,11 @@ export default function DetailScreen() {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
-  console.log("contentData", contentData);
-
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
-  // 토큰 확인을 통한 로그인 상태 체크
+  //! 토큰 확인을 통한 로그인 상태 체크 임시 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -529,7 +527,7 @@ export default function DetailScreen() {
                     },
                   ]}
                   onPress={handleLikeToggle}
-                  // disabled={!isLoggedIn || isLikeLoading}
+                  disabled={!isLoggedIn || isLikeLoading}
                 >
                   {isLiked ? (
                     <HeartFilledIcon
@@ -559,10 +557,10 @@ export default function DetailScreen() {
                   { opacity: !isLoggedIn ? 0.6 : pressed ? 0.9 : 1 },
                 ]}
                 onPress={handleAddToSchedule}
-                // disabled={!isLoggedIn}
+                disabled={!isLoggedIn}
               >
                 <Text className="text-center text-lg font-semibold text-white">
-                  {isLoggedIn ? "날짜 선택하기" : "로그인 필요"}
+                  내 일정에 추가
                 </Text>
               </Pressable>
             </View>

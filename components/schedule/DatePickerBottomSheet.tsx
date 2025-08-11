@@ -58,12 +58,6 @@ interface DatePickerBottomSheetProps {
   contentId: string;
 }
 
-const formatDateRange = (startDate: string, endDate: string) => {
-  const start = dayjs(startDate).format("YYYY.MM.DD");
-  const end = dayjs(endDate).format("YYYY.MM.DD");
-  return `${start} - ${end}`;
-};
-
 export default function DatePickerBottomSheet({
   isOpen,
   onClose,
@@ -252,7 +246,7 @@ export default function DatePickerBottomSheet({
             ]}
           >
             <Text className="text-center text-base font-medium text-white">
-              내 일정에 추가
+              내 일정에 추가하기
             </Text>
           </Pressable>
         </View>
