@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 
-import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
@@ -19,6 +18,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
@@ -29,6 +29,7 @@ import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
+import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -298,18 +299,17 @@ export default function HomeScreen() {
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType) => {
-      const startTime = Date.now();
+      const startTime = dayjs().valueOf();
 
       try {
         setIsLoadingRecommendations(true);
 
-        const response = await axios.get(
+        const response = await authApi.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
         );
 
         if (response.data.isSuccess && response.data.result) {
           setRecommendationsData(response.data.result);
-          console.log("데이터 패칭");
         }
       } catch (error) {
         console.error(error);
@@ -326,18 +326,15 @@ export default function HomeScreen() {
   );
 
   const fetchHotFestivalData = useCallback(async () => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingHotFestival(true);
 
-      const response = await axios.get(
-        `${BACKEND_URL}/home/festival/hot?category=PERFORMANCE`,
-      );
+      const response = await publicApi.get(`${BACKEND_URL}/home/festival/hot`);
 
       if (response.data.isSuccess && response.data.result) {
         setHotFestivalData(response.data.result);
-        console.log("핫한 축제 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -350,7 +347,7 @@ export default function HomeScreen() {
   }, []);
 
   const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingWeekDay(true);
@@ -366,13 +363,12 @@ export default function HomeScreen() {
         return;
       }
 
-      const response = await axios.get(
+      const response = await publicApi.get(
         `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
       );
 
       if (response.data.isSuccess && response.data.result) {
         setWeekDayData(response.data.result);
-        console.log("금주 콘텐츠 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -385,18 +381,17 @@ export default function HomeScreen() {
   }, []);
 
   const fetchCategoryContentData = useCallback(async () => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingCategoryContent(true);
 
-      const response = await axios.get(
+      const response = await publicApi.get(
         `${BACKEND_URL}/home/category?category=PERFORMANCE`,
       );
 
       if (response.data.isSuccess && response.data.result) {
         setCategoryContentData(response.data.result);
-        console.log("카테고리 콘텐츠 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -475,7 +470,7 @@ export default function HomeScreen() {
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
       <StatusBar style="light" />
       {/* 스크롤 시 보이는 헤더 */}
       {/* {isScrolled && (
@@ -812,6 +807,6 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

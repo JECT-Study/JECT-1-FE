@@ -64,6 +64,9 @@ export default function FilterBottomSheet({
 
   return (
     <BottomSheet
+      style={{
+        marginTop: 20,
+      }}
       ref={bottomSheetRef}
       index={isOpen ? 0 : -1}
       onClose={onClose}
@@ -90,7 +93,7 @@ export default function FilterBottomSheet({
         marginTop: 8,
       }}
     >
-      <BottomSheetView className="px-4 pb-4">
+      <BottomSheetView className="px-4 pb-12">
         {/* 헤더 */}
         <View className="flex-row items-center justify-between pt-4">
           <Text className="text-lg font-semibold text-gray-900">카테고리</Text>

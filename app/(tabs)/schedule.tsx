@@ -158,9 +158,9 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
-      <View className="flex-1 bg-[#F9FAFC]">
+      <View className="flex-1 bg-white">
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
           <Text className="text-center text-lg font-medium text-[#212121]">
             컨텐츠 일정

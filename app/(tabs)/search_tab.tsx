@@ -8,11 +8,11 @@ import {
   FlatList,
   Image,
   Pressable,
-  SafeAreaView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import Chevron from "@/components/icons/Chevron";
 import FilterIcon from "@/components/icons/FilterIcon";

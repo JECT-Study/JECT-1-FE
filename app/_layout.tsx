@@ -1,4 +1,6 @@
 import "@/global.css";
+import { useEffect } from "react";
+
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
   DarkTheme,
@@ -11,11 +13,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-
-import { useEffect } from "react";
 
 SplashScreen.setOptions({
   duration: 1000,

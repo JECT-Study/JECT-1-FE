@@ -71,6 +71,9 @@ export default function RegionBottomSheet({
 
   return (
     <BottomSheet
+      style={{
+        marginTop: 20,
+      }}
       ref={bottomSheetRef}
       index={isOpen ? 0 : -1}
       onClose={onClose}
@@ -97,7 +100,7 @@ export default function RegionBottomSheet({
         marginTop: 8,
       }}
     >
-      <BottomSheetView className="px-4 pb-4">
+      <BottomSheetView className="px-4 pb-12">
         {/* 헤더 */}
         <View className="flex-row items-center justify-between pt-4">
           <Text className="text-lg font-semibold text-gray-900">지역</Text>
