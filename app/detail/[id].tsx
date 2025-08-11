@@ -29,7 +29,7 @@ import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
-import { authApi } from "@/features/axios/axiosInstance";
+import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 function DetailImageCarousel({
@@ -162,7 +162,7 @@ export default function DetailScreen() {
       try {
         setLoading(true);
         if (id) {
-          const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
+          const response = await publicApi.get(`${BACKEND_URL}/contents/${id}`);
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
@@ -515,7 +515,7 @@ export default function DetailScreen() {
 
           {/* 하단 고정 바 */}
           <View
-            className="absolute bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white px-5 pt-3"
+            className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3"
             style={{ paddingBottom: 12 + insets.bottom }}
           >
             <View className="flex-row items-center justify-between">

@@ -4,6 +4,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 import { Alert, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
@@ -77,6 +78,7 @@ export default function DatePickerBottomSheet({
   );
 
   const bottomSheetRef = useRef<BottomSheet | null>(null);
+  const insets = useSafeAreaInsets();
 
   // 바텀시트 열기/닫기 처리
   useEffect(() => {
@@ -206,21 +208,10 @@ export default function DatePickerBottomSheet({
         marginTop: 8,
       }}
     >
-      <BottomSheetView className="p-4">
-        <View>
-          <Text className="mb-2 text-xl font-bold text-gray-900">
-            날짜를 선택해주세요
-          </Text>
-          {eventTitle && (
-            <Text className="mb-2 text-lg font-medium text-gray-700">
-              {eventTitle}
-            </Text>
-          )}
-          <Text className="text-sm text-gray-500">
-            선택 가능한 기간: {formatDateRange(startDate, endDate)}
-          </Text>
-        </View>
-
+      <BottomSheetView
+        className="px-4"
+        style={{ paddingBottom: 16 + insets.bottom }}
+      >
         <Calendar
           key={currentMonth}
           theme={getCalendarTheme()}
@@ -242,28 +233,17 @@ export default function DatePickerBottomSheet({
         />
 
         {selectedDate && (
-          <View className="my-4 rounded-lg bg-gray-50 p-4">
-            <Text className="text-center text-base font-medium text-gray-700">
-              선택된 날짜:{" "}
-              {dayjs(selectedDate).format("YYYY년 MM월 DD일 (ddd)")}
+          <View className="px-4 py-2">
+            <Text className="text-base font-medium text-gray-700">
+              선택한 날: {dayjs(selectedDate).format("MM월 DD일 (ddd)")}
             </Text>
           </View>
         )}
 
-        <View className="flex-row gap-3 pb-32 pt-4">
-          <Pressable
-            className="flex-1 rounded-lg border border-gray-300 py-4"
-            onPress={onClose}
-            style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-          >
-            <Text className="text-center text-base font-medium text-gray-700">
-              취소
-            </Text>
-          </Pressable>
-
+        <View className="pb-4 pt-4">
           <Pressable
             className={`flex-1 rounded-lg py-4 ${
-              selectedDate ? "bg-[#6C4DFF]" : "bg-gray-300"
+              selectedDate ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
             }`}
             onPress={handleAddMySchedule}
             disabled={!selectedDate}
@@ -271,11 +251,7 @@ export default function DatePickerBottomSheet({
               { opacity: pressed && selectedDate ? 0.8 : 1 },
             ]}
           >
-            <Text
-              className={`text-center text-base font-medium ${
-                selectedDate ? "text-white" : "text-gray-500"
-              }`}
-            >
+            <Text className="text-center text-base font-medium text-white">
               내 일정에 추가
             </Text>
           </Pressable>
