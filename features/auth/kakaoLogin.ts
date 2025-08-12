@@ -32,12 +32,25 @@ export async function kakaoLogin() {
     const nickname = response.data.result.nickname;
     const image = response.data.result.image;
 
+    console.log("📝 카카오 로그인 성공 - 사용자 정보:", {
+      nickname,
+      image: image ? "있음" : "없음",
+      accessToken: accessToken ? "있음" : "없음",
+      refreshToken: refreshToken ? "있음" : "없음"
+    });
+
     await SecureStore.setItemAsync("accessToken", accessToken);
     await SecureStore.setItemAsync("refreshToken", refreshToken);
 
     // Store에 사용자 정보 저장
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "", image || "");
+
+    console.log("💾 Store에 저장 완료:", {
+      storedNickname: nickname || "",
+      storedImage: image || "",
+      userStoreState: useUserStore.getState()
+    });
 
     router.push("/(tabs)");
   } catch (error) {
