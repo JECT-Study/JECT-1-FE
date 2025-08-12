@@ -47,14 +47,14 @@ export default function ScheduleScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true); // 초기 로딩 상태
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
     async (
       date: string,
-      page: number = 1,
+      page: number = 0,
       isLoadMore: boolean = false,
       isInitial: boolean = false,
     ) => {
@@ -127,7 +127,7 @@ export default function ScheduleScreen() {
 
   // 초기 데이터 로딩
   useEffect(() => {
-    fetchScheduleData(selectedDate, 1, false, true); // 초기 로딩 플래그 true
+    fetchScheduleData(selectedDate, 0, false, true); // 초기 로딩 플래그 true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -152,7 +152,7 @@ export default function ScheduleScreen() {
       setSelectedDate(date);
       setCurrentPage(1);
       setHasMoreData(true);
-      fetchScheduleData(date, 1, false, false); // 날짜 변경은 초기 로딩 아님
+      fetchScheduleData(date, 0, false, false); // 날짜 변경은 초기 로딩 아님
     },
     [fetchScheduleData],
   );
