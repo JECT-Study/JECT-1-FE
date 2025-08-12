@@ -5,6 +5,7 @@ import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
@@ -30,6 +31,7 @@ import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import useUserStore from "@/stores/useUserStore";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -288,9 +290,34 @@ export default function HomeScreen() {
     useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); //! 🌟 임시 로그인 여부 상태
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { nickname } = useUserStore();
 
   const router = useRouter();
+
+  // 토큰 존재 여부로 로그인 상태 확인
+  const checkLoginStatus = useCallback(async () => {
+    try {
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
+      
+      console.log("🔍 토큰 확인:", {
+        accessToken: accessToken ? "존재" : "없음",
+        refreshToken: refreshToken ? "존재" : "없음",
+        nickname,
+        isLoggedIn: !!accessToken
+      });
+      
+      setIsLoggedIn(!!accessToken);
+    } catch (error) {
+      console.log("❌ 토큰 확인 중 에러:", error);
+      setIsLoggedIn(false);
+    }
+  }, [nickname]);
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
 
   const weekDays = getWeekDays();
 
@@ -544,9 +571,10 @@ export default function HomeScreen() {
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
             <View className="relative px-[18px] py-2.5">
-              {/* 🌟 로그인 시 닉네임이 이름이 표시되어야 합니다. */}
               <Text className="text-xl font-semibold text-black">
-                OO님을 위한 맞춤 콘텐츠
+                {isLoggedIn && nickname
+                  ? `${nickname}님을 위한 맞춤 콘텐츠`
+                  : "맞춤 콘텐츠"}
               </Text>
 
               <View className="mb-5 mt-3 flex-row gap-x-2.5">
@@ -602,9 +630,6 @@ export default function HomeScreen() {
                 />
               )}
 
-              {/* 🌟 로그인하지 않은 경우 맞춤 콘텐츠를 볼 수 없게 하는 오버레이입니다. */}
-              {/* 🌟 비로그인 상태에서는 이 오버레이가 보여야 하고 로그인 된 상태에서는 이 오버레이가 보이지 않아야 합니다. */}
-              {/* 🌟 현재는 임시로 로그인 여부 역할을 하는 isLoggedIn 상태를 통해 로그인 여부를 확인하고 있습니다. */}
               {!isLoggedIn && (
                 <BlurView
                   intensity={8}

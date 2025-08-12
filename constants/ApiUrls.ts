@@ -11,6 +11,8 @@ export const SearchRecentUrl = `${BACKEND_URL}/search/recent`;
 export const UsersFavoriteUrl = `${BACKEND_URL}/users/favorites`;
 export const UsersProfileUrl = `${BACKEND_URL}/users/profile`;
 export const UsersScheduleUrl = `${BACKEND_URL}/users/schedule`;
+export const UsersScheduleCheckUrl = `${BACKEND_URL}/users/schedules/check`;
+export const UsersSchedulesUrl = `${BACKEND_URL}/users/schedules`;
 
 // Login
 // export const KakaoLoginUrl = `${BACKEND_URL}/auth/social/kakao`;

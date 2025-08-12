@@ -80,6 +80,14 @@ export default function RootLayout() {
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen
+                  name="my/terms/service_privacy"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="my/terms/service_location"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
                   name="search/index"
                   options={{ headerShown: false }}
                 />

@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native";
 
@@ -7,11 +9,19 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import {
   useApplyEditProfile,
   useCancelEditProfile,
+  useInitializeFromUserStore,
 } from "@/stores/useEditProfileStore";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
   const applyEdit = useApplyEditProfile();
+  const initializeFromUserStore = useInitializeFromUserStore();
+
+  // 페이지 진입 시 userStore의 정보로 초기화
+  useEffect(() => {
+    initializeFromUserStore();
+  }, [initializeFromUserStore]);
+
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
       <CustomHeader
