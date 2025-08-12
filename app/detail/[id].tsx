@@ -127,9 +127,9 @@ export default function DetailScreen() {
   const [scrollY, setScrollY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
-  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false); //! 🌟 찜 상태
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); //! 🌟 임시 로그인 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -137,7 +137,7 @@ export default function DetailScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
-  //! 토큰 확인을 통한 로그인 상태 체크 임시 코드
+  //! 🌟 토큰 확인을 통한 로그인 상태 체크 임시 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -223,6 +223,7 @@ export default function DetailScreen() {
     setScrollY(currentScrollY);
   };
 
+  //! 🌟 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
   const handleLikeToggle = async () => {
     if (!id || isLikeLoading) return;
 
@@ -518,6 +519,9 @@ export default function DetailScreen() {
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-col items-center">
+                {/* 🌟 찜하기 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
+                {/* 지금은 찜하기 api만 연결 되어 있는데 찜 되어 있는 상태에서 찜 취소 버튼을 누르면 찜 취소 상태로 변경되어야 합니다. */}
+                {/* 기존에 찜 해둔 상태라면 다시 페이지 방문 시 찜 해둔 상태가 유지되어야 합니다. */}
                 <Pressable
                   className="items-center justify-center"
                   style={({ pressed }) => [
@@ -549,6 +553,8 @@ export default function DetailScreen() {
                 </Text>
               </View>
 
+              {/* 🌟 내 일정에 추가 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
+              {/* 🌟 이 부분도 찜 해둔 상태인지 여부를 likeId가 null인지 아닌지로 판단하는 것처럼 scheduleId가 null인지 아닌지로 판단하여 내 일정에 추가 버튼을 활성화 또는 비활성화 해두면 될 것 같습니다. */}
               <Pressable
                 className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"

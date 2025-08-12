@@ -288,7 +288,7 @@ export default function HomeScreen() {
     useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); //! 🌟 임시 로그인 여부 상태
 
   const router = useRouter();
 
@@ -472,29 +472,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
       <StatusBar style="light" />
-      {/* 스크롤 시 보이는 헤더 */}
-      {/* {isScrolled && (
-        <View
-          className="absolute left-0 right-0 top-0 z-10 flex h-40 justify-end bg-white p-[18px]"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.14,
-            shadowRadius: 14,
-            elevation: 5,
-          }}
-        >
-          <Pressable
-            className="h-11 flex-row items-center gap-x-3 rounded-full border border-[#6B51FB] bg-white px-[18px] py-3"
-            onPress={handleSearchPress}
-          >
-            <SearchIcon size={24} color="#6B51FB" />
-            <Text className="text-[#6E6E6E]">
-              6월에 안가면 손해! 고창 수박 축제
-            </Text>
-          </Pressable>
-        </View>
-      )} */}
 
       {/* 기본 헤더 - 고정 */}
       <LinearGradient
@@ -566,7 +543,8 @@ export default function HomeScreen() {
 
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
-            <View className="px-[18px] py-2.5">
+            <View className="relative px-[18px] py-2.5">
+              {/* 🌟 로그인 시 닉네임이 이름이 표시되어야 합니다. */}
               <Text className="text-xl font-semibold text-black">
                 OO님을 위한 맞춤 콘텐츠
               </Text>
@@ -600,78 +578,79 @@ export default function HomeScreen() {
                 })}
               </View>
 
-              <View className="relative">
-                {isLoadingRecommendations ? (
-                  <View className="h-[333px] w-full items-center justify-center">
-                    <ActivityIndicator size="large" color="#6C4DFF" />
-                  </View>
-                ) : (
-                  <FlatList
-                    data={chunkedRecommendationsData}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                      <View className="w-[287px] flex-1 gap-y-[15.5px]">
-                        {item.map((cardItem) => (
-                          <Card
-                            key={cardItem.contentId.toString()}
-                            item={cardItem}
-                          />
-                        ))}
-                      </View>
-                    )}
-                    keyExtractor={(_, index) => index.toString()}
-                    ItemSeparatorComponent={() => <View className="w-3.5" />}
-                  />
-                )}
-
-                {/* 로그인하지 않은 경우 오버레이 */}
-                {!isLoggedIn && (
-                  <BlurView
-                    intensity={8}
-                    className="absolute inset-0 m-[-10px] flex items-center justify-center"
-                  >
-                    <View className="absolute inset-0 bg-white/80" />
-                    <View className="items-center gap-y-2.5">
-                      <LockIcon />
-                      <View>
-                        <Text className="text-center text-lg font-medium text-[#212121]">
-                          회원가입하고
-                        </Text>
-                        <Text className="text-center text-lg font-medium text-[#212121]">
-                          맞춤 컨텐츠를 확인해보세요!
-                        </Text>
-                      </View>
-                      <Pressable onPress={() => setIsLoggedIn(true)}>
-                        <LinearGradient
-                          colors={["#7F69FE", "#6B52FB"]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          locations={[0.0073, 0.9927]}
-                          style={{
-                            borderRadius: 20,
-                            paddingHorizontal: 10,
-                            paddingVertical: 6,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 4,
-                          }}
-                        >
-                          <Text className="font-base text-sm text-white">
-                            회원가입하기
-                          </Text>
-                          <ChevronRight
-                            width={10}
-                            height={10}
-                            color="#FFFFFF"
-                          />
-                        </LinearGradient>
-                      </Pressable>
+              {isLoadingRecommendations ? (
+                <View className="h-[333px] w-full items-center justify-center">
+                  <ActivityIndicator size="large" color="#6C4DFF" />
+                </View>
+              ) : (
+                <FlatList
+                  data={chunkedRecommendationsData}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <View className="w-[287px] flex-1 gap-y-[15.5px]">
+                      {item.map((cardItem) => (
+                        <Card
+                          key={cardItem.contentId.toString()}
+                          item={cardItem}
+                        />
+                      ))}
                     </View>
-                  </BlurView>
-                )}
-              </View>
+                  )}
+                  keyExtractor={(_, index) => index.toString()}
+                  ItemSeparatorComponent={() => <View className="w-3.5" />}
+                />
+              )}
+
+              {/* 🌟 로그인하지 않은 경우 맞춤 콘텐츠를 볼 수 없게 하는 오버레이입니다. */}
+              {/* 🌟 비로그인 상태에서는 이 오버레이가 보여야 하고 로그인 된 상태에서는 이 오버레이가 보이지 않아야 합니다. */}
+              {/* 🌟 현재는 임시로 로그인 여부 역할을 하는 isLoggedIn 상태를 통해 로그인 여부를 확인하고 있습니다. */}
+              {!isLoggedIn && (
+                <BlurView
+                  intensity={8}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <View className="absolute inset-0 bg-white/95" />
+                  <View className="items-center gap-y-2.5">
+                    <LockIcon />
+                    <View>
+                      <Text className="text-center text-lg font-medium text-[#212121]">
+                        회원가입하고
+                      </Text>
+                      <Text className="text-center text-lg font-medium text-[#212121]">
+                        맞춤 컨텐츠를 확인해보세요!
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => {
+                        router.dismissAll();
+                        router.push("/");
+                      }}
+                    >
+                      <LinearGradient
+                        colors={["#7F69FE", "#6B52FB"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        locations={[0.0073, 0.9927]}
+                        style={{
+                          borderRadius: 20,
+                          paddingHorizontal: 10,
+                          paddingVertical: 6,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Text className="font-base text-sm text-white">
+                          회원가입하기
+                        </Text>
+                        <ChevronRight width={10} height={10} color="#FFFFFF" />
+                      </LinearGradient>
+                    </Pressable>
+                  </View>
+                </BlurView>
+              )}
             </View>
 
             {/* 이번달 핫한 축제 */}
