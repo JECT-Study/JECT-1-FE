@@ -25,12 +25,12 @@ export default function Terms() {
           />
           <MyPageMenu
             title="개인 정보 처리방침"
-            onPress={() => console.log("개인정보 처리 방침")}
+            onPress={() => router.push("/my/terms/service_privacy")}
             chevron={true}
           />
           <MyPageMenu
             title="위치기반 서비스 이용약관"
-            onPress={() => console.log("위치기반 서비스 이용약관")}
+            onPress={() => router.push("/my/terms/service_location")}
             chevron={true}
           />
         </View>
