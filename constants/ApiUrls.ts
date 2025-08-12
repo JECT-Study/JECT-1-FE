@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 
-const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL;
+export const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL;
 
 // Search
 export const SearchUrl = `${BACKEND_URL}/search`;

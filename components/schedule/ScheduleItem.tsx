@@ -1,31 +1,45 @@
 import React from "react";
 
-import { View, Text } from "react-native";
+import dayjs from "dayjs";
+import { Image, Text, View } from "react-native";
 
 import { ScheduleItemType } from "@/constants/ScheduleData";
 
 interface ScheduleItemProps {
   item: ScheduleItemType;
-  primaryColor: string;
 }
 
-export default function ScheduleItem({
-  item,
-  primaryColor,
-}: ScheduleItemProps) {
+const formatDateRange = (startDate: string, endDate: string) => {
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+
+  if (start.year() === end.year()) {
+    return `${start.format("YYYY.MM.DD")} - ${end.format("MM.DD")}`;
+  } else {
+    return `${start.format("YYYY.MM.DD")} - ${end.format("YYYY.MM.DD")}`;
+  }
+};
+
+export default function ScheduleItem({ item }: ScheduleItemProps) {
   return (
-    <View className="mx-5 mb-3 rounded-lg border border-gray-100 bg-white p-4">
-      <View className="flex-row items-center">
-        <View
-          className="mr-3 h-3 w-3 rounded-full"
-          style={{ backgroundColor: primaryColor }}
-        />
-        <View className="flex-1">
-          <Text className="text-base font-medium text-gray-900">
-            {item.title}
-          </Text>
-          <Text className="mt-1 text-sm text-gray-500">{item.time}</Text>
-        </View>
+    <View className="flex-row gap-x-[18px]">
+      <Image
+        source={{
+          uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+        }}
+        className="h-[136px] w-[104px] rounded-lg"
+        resizeMode="cover"
+      />
+      <View className="flex-1 py-2.5">
+        <Text className="mb-1 text-base font-semibold text-[#212121]">
+          {item.title}
+        </Text>
+        <Text className="mb-0.5 text-[13px] font-normal text-[#9E9E9E]">
+          {item.address}
+        </Text>
+        <Text className="text-[13px] font-normal text-[#424242]">
+          {formatDateRange(item.startDate, item.endDate)}
+        </Text>
       </View>
     </View>
   );
