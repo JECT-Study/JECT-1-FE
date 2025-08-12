@@ -2,12 +2,12 @@ import React from "react";
 
 import Svg, { Path } from "react-native-svg";
 
-interface CelebrationIconProps {
+interface FestivalIconProps {
   width?: number;
   height?: number;
 }
 
-export const CelebrationIcon: React.FC<CelebrationIconProps> = ({
+export const FestivalIcon: React.FC<FestivalIconProps> = ({
   width = 64,
   height = 64,
 }) => {
@@ -81,4 +81,4 @@ export const CelebrationIcon: React.FC<CelebrationIconProps> = ({
   );
 };
 
-export default CelebrationIcon;
+export default FestivalIcon;

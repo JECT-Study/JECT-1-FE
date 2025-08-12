@@ -2,12 +2,12 @@ import React from "react";
 
 import Svg, { Path } from "react-native-svg";
 
-interface PaintIconProps {
+interface PerformanceIconProps {
   width?: number;
   height?: number;
 }
 
-export const PaintIcon: React.FC<PaintIconProps> = ({
+export const PerformanceIcon: React.FC<PerformanceIconProps> = ({
   width = 40,
   height = 40,
 }) => {
@@ -64,4 +64,4 @@ export const PaintIcon: React.FC<PaintIconProps> = ({
   );
 };
 
-export default PaintIcon;
+export default PerformanceIcon;

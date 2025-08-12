@@ -1,22 +1,22 @@
 import "@/global.css";
+import { useEffect } from "react";
+
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-
-import { useEffect } from "react";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -48,6 +48,7 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
+          <StatusBar style="light" />
           <View
             style={{
               flex: 1,
@@ -89,10 +90,16 @@ export default function RootLayout() {
                     presentation: "card",
                   }}
                 />
+                <Stack.Screen
+                  name="image-viewer/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
               </Stack>
             </View>
           </View>
-          <StatusBar style="auto" />
         </ThemeProvider>
       </ActionSheetProvider>
     </GestureHandlerRootView>

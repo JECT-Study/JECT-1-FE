@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
-import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
-import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -20,34 +18,22 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CelebrationIcon } from "@/components/icons/CelebrationIcon";
 import ChevronRight from "@/components/icons/ChevronRight";
-import { FoodIcon } from "@/components/icons/FoodIcon";
+import { EventIcon } from "@/components/icons/EventIcon";
+import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
+import { FestivalIcon } from "@/components/icons/FestivalIcon";
 import LockIcon from "@/components/icons/LockIcon";
 import { LogoIcon } from "@/components/icons/LogoIcon";
-import { PaintIcon } from "@/components/icons/PaintIcon";
-import { PaletteIcon } from "@/components/icons/PaletteIcon";
+import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
+import { BACKEND_URL } from "@/constants/ApiUrls";
+import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
-
-const BACKEND_URL = Constants.expoConfig?.extra?.BACKEND_URL || "";
-
-/**
- * 최소 로딩 시간을 보장하는 유틸 함수
- * @param startTime 시작 시간 (Date.now()로 기록된 값)
- */
-const ensureMinLoadingTime = async (startTime: number): Promise<void> => {
-  const minDuration = 300; // 최소 로딩 시간 200ms
-  const elapsedTime = Date.now() - startTime; // 경과 시간 계산
-  const remainingTime = Math.max(0, minDuration - elapsedTime); // 남은 시간 계산
-
-  if (remainingTime > 0) {
-    await new Promise((resolve) => setTimeout(resolve, remainingTime));
-  }
-};
 
 interface CustomContentItem {
   contentId: number;
@@ -83,10 +69,10 @@ interface CategoryContentItem {
 type CategoryType = (typeof categoryConfig)[number]["id"];
 
 const categoryConfig = [
-  { id: "PERFORMANCE", iconType: "paint", label: "공연" },
-  { id: "EXHIBITION", iconType: "palette", label: "전시" },
-  { id: "FESTIVAL", iconType: "celebration", label: "축제" },
-  { id: "EVENT", iconType: "food", label: "행사" },
+  { id: "PERFORMANCE", iconType: "performance", label: "공연" },
+  { id: "EXHIBITION", iconType: "exhibition", label: "전시" },
+  { id: "FESTIVAL", iconType: "festival", label: "축제" },
+  { id: "EVENT", iconType: "event", label: "행사" },
 ] as const;
 
 const Card = ({ item }: { item: CustomContentItem }) => {
@@ -153,7 +139,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
         <Text className="mb-1.5 text-base font-semibold text-[#424242]">
           {item.title}
         </Text>
-        <Text className="text-xs text-[#9E9E9E]" numberOfLines={1}>
+        <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
           {item.address}
         </Text>
       </View>
@@ -229,7 +215,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   );
 };
 
-const SCROLL_THRESHOLD = -45;
+const SCROLL_THRESHOLD = 20;
 
 const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];
@@ -278,8 +264,6 @@ const getWeekDays = () => {
 };
 
 export default function HomeScreen() {
-  const [scrollBackgroundColor, setScrollBackgroundColor] =
-    useState<string>("#816BFF");
   const [selectedRecommendationsCategory, setSelectedRecommendationsCategory] =
     useState<CategoryType>("PERFORMANCE");
   const [selectedWeekDayIndex, setSelectedWeekDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
@@ -294,7 +278,6 @@ export default function HomeScreen() {
     CategoryContentItem[]
   >([]);
 
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState<boolean>(false);
@@ -303,6 +286,7 @@ export default function HomeScreen() {
   const [isLoadingWeekDay, setIsLoadingWeekDay] = useState<boolean>(false);
   const [isLoadingCategoryContent, setIsLoadingCategoryContent] =
     useState<boolean>(false);
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 임시 로그인 여부 상태
 
@@ -315,18 +299,17 @@ export default function HomeScreen() {
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType) => {
-      const startTime = Date.now();
+      const startTime = dayjs().valueOf();
 
       try {
         setIsLoadingRecommendations(true);
 
-        const response = await axios.get(
+        const response = await authApi.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
         );
 
         if (response.data.isSuccess && response.data.result) {
           setRecommendationsData(response.data.result);
-          console.log("데이터 패칭");
         }
       } catch (error) {
         console.error(error);
@@ -343,18 +326,15 @@ export default function HomeScreen() {
   );
 
   const fetchHotFestivalData = useCallback(async () => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingHotFestival(true);
 
-      const response = await axios.get(
-        `${BACKEND_URL}/home/festival/hot?category=PERFORMANCE`,
-      );
+      const response = await publicApi.get(`${BACKEND_URL}/home/festival/hot`);
 
       if (response.data.isSuccess && response.data.result) {
         setHotFestivalData(response.data.result);
-        console.log("핫한 축제 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -367,7 +347,7 @@ export default function HomeScreen() {
   }, []);
 
   const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingWeekDay(true);
@@ -383,13 +363,12 @@ export default function HomeScreen() {
         return;
       }
 
-      const response = await axios.get(
+      const response = await publicApi.get(
         `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
       );
 
       if (response.data.isSuccess && response.data.result) {
         setWeekDayData(response.data.result);
-        console.log("금주 콘텐츠 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -402,18 +381,17 @@ export default function HomeScreen() {
   }, []);
 
   const fetchCategoryContentData = useCallback(async () => {
-    const startTime = Date.now();
+    const startTime = dayjs().valueOf();
 
     try {
       setIsLoadingCategoryContent(true);
 
-      const response = await axios.get(
+      const response = await publicApi.get(
         `${BACKEND_URL}/home/category?category=PERFORMANCE`,
       );
 
       if (response.data.isSuccess && response.data.result) {
         setCategoryContentData(response.data.result);
-        console.log("카테고리 콘텐츠 데이터 패칭");
       }
     } catch (error) {
       console.error(error);
@@ -485,9 +463,6 @@ export default function HomeScreen() {
 
     // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
-    // 스크롤 위치에 따라 배경색 변경 (0 기준으로 색상 변경)
-    const backgroundColor = currentScrollY <= 0 ? "#816BFF" : "#FFFFFF";
-    setScrollBackgroundColor(backgroundColor);
   };
 
   const handleSearchPress = () => router.push("/(tabs)/search_tab");
@@ -495,13 +470,12 @@ export default function HomeScreen() {
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style={isScrolled ? "dark" : "light"} />
-
+    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
+      <StatusBar style="light" />
       {/* 스크롤 시 보이는 헤더 */}
-      {isScrolled && (
+      {/* {isScrolled && (
         <View
-          className="absolute left-0 right-0 top-0 z-10 flex h-36 justify-end bg-white p-[18px]"
+          className="absolute left-0 right-0 top-0 z-10 flex h-40 justify-end bg-white p-[18px]"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -520,65 +494,66 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         </View>
-      )}
+      )} */}
 
-      <ScrollView
-        className="flex-1"
-        style={{ backgroundColor: scrollBackgroundColor }}
-        contentInsetAdjustmentBehavior="automatic"
-        showsVerticalScrollIndicator={false}
-        onScroll={handleScrollStateChange}
-        scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#FFFFFF"
-            colors={["#FFFFFF"]}
-          />
-        }
+      {/* 기본 헤더 - 고정 */}
+      <LinearGradient
+        colors={["#816BFF", "#5E47E3"]}
+        start={{ x: 0, y: 0.14 }}
+        end={{ x: 1, y: 0.86 }}
+        locations={[0.0682, 0.9458]}
       >
-        {/* 기본 헤더 */}
-        <LinearGradient
-          colors={["#816BFF", "#816BFF"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.2, y: 1 }}
-          locations={[0.0683, 0.9503]}
-        >
-          <View className="h-28 flex-row items-end justify-center px-[18px] pb-11">
-            <View className="w-full flex-row items-center gap-x-2">
-              <LogoIcon width={35} height={32} />
-              <Pressable
-                className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
-                onPress={handleSearchPress}
-              >
-                <Text className="text-[#6E6E6E]">
-                  6월에 안가면 손해! 고창 수박 축제
-                </Text>
-                <SearchIcon size={24} color="#6B51FB" />
-              </Pressable>
-            </View>
+        <View className="h-52 flex-row items-end justify-center px-[18px] pb-20">
+          <View className="w-full flex-row items-center gap-x-2">
+            <LogoIcon width={35} height={32} />
+            <Pressable
+              className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
+              onPress={handleSearchPress}
+            >
+              <Text className="text-[#6E6E6E]">
+                6월에 안가면 손해! 고창 수박 축제
+              </Text>
+              <SearchIcon size={24} color="#6B51FB" />
+            </Pressable>
           </View>
-        </LinearGradient>
+        </View>
+      </LinearGradient>
 
-        <View className="mt-[-20px] flex-1 rounded-t-3xl bg-white pb-6">
+      <View
+        className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
+      >
+        <ScrollView
+          className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
+          contentInsetAdjustmentBehavior="automatic"
+          showsVerticalScrollIndicator={false}
+          onScroll={handleScrollStateChange}
+          scrollEventThrottle={16}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#6C4DFF"
+              colors={["#6C4DFF"]}
+            />
+          }
+        >
           {/* 카테고리 버튼 */}
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
                 <View className="gap-y-[7px]" key={item.id}>
                   <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
-                    {item.iconType === "paint" && (
-                      <PaintIcon width={32} height={32} />
+                    {item.iconType === "performance" && (
+                      <PerformanceIcon width={32} height={32} />
                     )}
-                    {item.iconType === "palette" && (
-                      <PaletteIcon width={32} height={29} />
+                    {item.iconType === "exhibition" && (
+                      <ExhibitionIcon width={32} height={29} />
                     )}
-                    {item.iconType === "celebration" && (
-                      <CelebrationIcon width={48} height={48} />
+                    {item.iconType === "festival" && (
+                      <FestivalIcon width={48} height={48} />
                     )}
-                    {item.iconType === "food" && (
-                      <FoodIcon width={30} height={30} />
+                    {item.iconType === "event" && (
+                      <EventIcon width={54} height={54} />
                     )}
                   </View>
                   <Text className="text-center text-sm text-black">
@@ -798,7 +773,7 @@ export default function HomeScreen() {
             </View>
 
             {/* 이런 축제 어때요? */}
-            <View className="px-[18px] py-2.5">
+            <View className="px-[18px] py-2.5 pb-6">
               <View className="mb-[18px] flex-row items-center justify-between">
                 <Text className="text-xl font-semibold text-[#424242]">
                   이런 축제 어때요?
@@ -830,8 +805,8 @@ export default function HomeScreen() {
               )}
             </View>
           </View>
-        </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
