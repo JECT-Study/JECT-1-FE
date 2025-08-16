@@ -3,6 +3,7 @@ import Animated from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
 import Separator from "@/components/ui/Separator";
+import { withdraw } from "@/features/auth/withdraw";
 import useWithDrawForm from "@/hooks/useWithDrawForm";
 
 type AccordionProps = {
@@ -91,10 +92,16 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
         className={`w-full rounded-lg py-4 ${
           checkSubmit() ? "bg-[#816BFF]" : "bg-[#D1C9FF]"
         }`}
-        onPress={() => {
-          // TODO : 제출 동작
-          console.log("이유", selected);
-          console.log("상세 이유", otherReason);
+        onPress={async () => {
+          if (checkSubmit()) {
+            console.log("이유", selected);
+            console.log("상세 이유", otherReason);
+            try {
+              await withdraw();
+            } catch (error) {
+              console.error("회원탈퇴 실패:", error);
+            }
+          }
         }}
       >
         <Text className="text-center text-[16px] font-semibold text-white">

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleLogin from "@/components/login/AppleLogin";
 import KakaoLogin from "@/components/login/KakaoLogin";
+import TesterLogin from "@/components/login/TesterLogin";
 
 export default function SocialLoginButtons() {
   const insets = useSafeAreaInsets();
@@ -23,6 +24,8 @@ export default function SocialLoginButtons() {
           <KakaoLogin />
           <View className="my-2" />
           {isIOS ? <AppleLogin /> : null}
+          {isIOS ? <View className="my-2" /> : null}
+          <TesterLogin />
         </View>
         <Pressable
           onPress={() => router.push("/(tabs)")}

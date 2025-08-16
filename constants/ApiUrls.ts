@@ -20,3 +20,4 @@ export const UsersSchedulesUrl = `${BACKEND_URL}/users/schedules`;
 const AuthUrl = `${BACKEND_URL}/auth`;
 export const LoginUrl = `${AuthUrl}/login`;
 export const LogoutUrl = `${AuthUrl}/logout`;
+export const WithdrawUrl = `${AuthUrl}/withdraw`;
