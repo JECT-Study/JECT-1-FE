@@ -52,17 +52,25 @@ function DetailImageCarousel({
     item: any;
     index: number;
   }) => (
+    //! 웹 환경에서 이미지 클릭 시 확대 페이지로 이동하는 기능 제거
     <Pressable
-      onPress={() => onImagePress(index)}
+      onPress={() => Platform.OS !== "web" && onImagePress(index)}
       style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
     >
       <Image
         source={item}
         className="w-full"
-        style={{
-          height: imageHeight,
-          resizeMode: "cover",
-        }}
+        style={[
+          {
+            height: imageHeight,
+            resizeMode: "cover",
+          },
+
+          //! 50% 설정 시 웹 환경에서 캐러셀 이미지 사이 여백 생김
+          Platform.OS === "web" && {
+            maxWidth: "50%",
+          },
+        ]}
       />
     </Pressable>
   );
@@ -74,7 +82,11 @@ function DetailImageCarousel({
       }}
     >
       <Carousel
-        width={Dimensions.get("window").width}
+        width={
+          Platform.OS === "web"
+            ? Math.min(Dimensions.get("window").width, 800)
+            : Dimensions.get("window").width
+        }
         height={imageHeight}
         data={carouselData}
         renderItem={renderCarouselItem}
@@ -117,11 +129,6 @@ interface ContentDetail {
   latitude: number;
 }
 
-interface LikeApiResponse {
-  likeId: number;
-  likeCount: number;
-}
-
 export default function DetailScreen() {
   const [contentData, setContentData] = useState<ContentDetail | null>(null);
   const [scrollY, setScrollY] = useState<number>(0);
@@ -131,8 +138,6 @@ export default function DetailScreen() {
   const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
-
-  console.log("contentData", contentData);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -244,7 +249,6 @@ export default function DetailScreen() {
 
     // 현재 좋아요 상태를 미리 저장 (빠른 클릭 시 상태 일관성 보장)
     const currentIsLiked = isLiked;
-    const currentLikeId = contentData.likeId;
 
     try {
       let response;
@@ -379,39 +383,40 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-3 pt-20 ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
             }`}
           >
+            {/* 왼쪽 BackArrow */}
             <Pressable
               onPress={handleGoBack}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              className="z-10"
             >
               <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
             </Pressable>
 
+            {/* 중앙 제목 텍스트 (절대 위치로 완전 중앙 정렬) */}
             {showHeaderBackground && (
-              <Text
-                className={`flex-1 text-center text-lg font-semibold text-[#212121]`}
-                numberOfLines={1}
+              <View
+                className="absolute left-0 right-0 items-center justify-center"
+                style={{ top: Platform.OS === "web" ? 80 : 72 }}
               >
-                {contentData.title}
-              </Text>
+                <Text
+                  className="text-lg font-semibold text-[#212121]"
+                  numberOfLines={1}
+                  style={{ maxWidth: "60%" }}
+                >
+                  {contentData.title}
+                </Text>
+              </View>
             )}
 
-            {/* <Pressable
-              onPress={handleKakaoShare}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <ShareOutlineIcon
-                size={28}
-                color={showHeaderBackground ? "#000" : "#fff"}
-              />
-            </Pressable> */}
+            {/* 오른쪽 공간 (균형을 위한 투명 요소) */}
+            <View style={{ width: 24, height: 24 }} />
           </View>
 
           {/* 전체 스크롤 영역 */}
@@ -448,14 +453,14 @@ export default function DetailScreen() {
                   </View>
                 </View>
 
-                <Pressable
+                {/* <Pressable
                   className="h-[43px] flex-1 justify-center rounded border-[0.5px] border-gray-300 p-2.5"
                   style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 >
                   <Text className="text-center font-medium text-black">
                     전시 홈페이지
                   </Text>
-                </Pressable>
+                </Pressable> */}
               </View>
 
               <Divider />
