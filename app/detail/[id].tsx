@@ -318,6 +318,21 @@ export default function DetailScreen() {
 
     const { latitude, longitude, placeName } = contentData;
 
+    // 웹 환경에서는 네이버 지도 웹사이트로 이동
+    if (Platform.OS === "web") {
+      const naverMapWebUrl = `https://map.naver.com/v5/search/${encodeURIComponent(placeName)}/place?c=${longitude},${latitude},15,0,0,0,dh`;
+
+      try {
+        window.open(naverMapWebUrl, "_blank");
+      } catch (error) {
+        console.error("네이버 지도 웹사이트 열기 실패:", error);
+        // 대안으로 현재 창에서 열기
+        window.location.href = naverMapWebUrl;
+      }
+      return;
+    }
+
+    // 모바일 환경에서는 기존 로직 유지
     // 네이버 지도 URL scheme
     const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
 
