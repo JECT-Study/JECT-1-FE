@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
@@ -40,6 +41,7 @@ const formatSelectedDateHeader = (date: string) => {
 };
 
 export default function ScheduleScreen() {
+  const router = useRouter();
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format("YYYY-MM-DD"),
@@ -157,6 +159,14 @@ export default function ScheduleScreen() {
     [fetchScheduleData],
   );
 
+  // 스케줄 아이템 클릭 핸들러
+  const handleScheduleItemPress = useCallback(
+    (contentId: number) => {
+      router.push(`/detail/${contentId}`);
+    },
+    [router],
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
@@ -185,7 +195,9 @@ export default function ScheduleScreen() {
           <FlatList
             className="mx-4 mt-7 flex-1"
             data={schedules}
-            renderItem={({ item }) => <ScheduleItem item={item} />}
+            renderItem={({ item }) => (
+              <ScheduleItem item={item} onPress={handleScheduleItemPress} />
+            )}
             keyExtractor={(item) => item.contentId.toString()}
             ListEmptyComponent={
               isLoading ? (
