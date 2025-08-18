@@ -137,12 +137,21 @@ export default function DetailScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
+  // 플랫폼별 토큰 조회 함수
+  const getTokenAsync = async (key: string): Promise<string | null> => {
+    if (Platform.OS === "web") {
+      return localStorage.getItem(key);
+    } else {
+      return await SecureStore.getItemAsync(key);
+    }
+  };
+
   //! 🌟 토큰 확인을 통한 로그인 상태 체크 임시 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const accessToken = await SecureStore.getItemAsync("accessToken");
-        const refreshToken = await SecureStore.getItemAsync("refreshToken");
+        const accessToken = await getTokenAsync("accessToken");
+        const refreshToken = await getTokenAsync("refreshToken");
         setIsLoggedIn(!!(accessToken && refreshToken));
       } catch (error) {
         console.error("토큰 확인 실패:", error);

@@ -1,12 +1,19 @@
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, View } from "react-native";
+import { Alert, Platform, View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
-import { LogoutUrl } from "@/constants/ApiUrls";
-import { authApi } from "@/features/axios/axiosInstance";
 import usePageNavigation from "@/hooks/usePageNavigation";
+
+// 플랫폼별 토큰 삭제 함수
+async function deleteTokenAsync(key: string) {
+  if (Platform.OS === "web") {
+    localStorage.removeItem(key);
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+}
 
 const handleLogout = async () => {
   Alert.alert(
@@ -22,8 +29,8 @@ const handleLogout = async () => {
         onPress: async () => {
           try {
             // await authApi.post(LogoutUrl);
-            await SecureStore.deleteItemAsync("accessToken");
-            await SecureStore.deleteItemAsync("refreshToken");
+            await deleteTokenAsync("accessToken");
+            await deleteTokenAsync("refreshToken");
             alert("로그아웃이 완료되었습니다.");
 
             router.dismissAll();
