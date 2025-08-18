@@ -1,8 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Text,
+  View,
+} from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -40,6 +47,7 @@ const formatSelectedDateHeader = (date: string) => {
 };
 
 export default function ScheduleScreen() {
+  const router = useRouter();
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format("YYYY-MM-DD"),
@@ -157,10 +165,20 @@ export default function ScheduleScreen() {
     [fetchScheduleData],
   );
 
+  // 스케줄 아이템 클릭 핸들러
+  const handleScheduleItemPress = useCallback(
+    (contentId: number) => {
+      router.push(`/detail/${contentId}`);
+    },
+    [router],
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
-      <View className="flex-1 bg-white">
+      <View
+        className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
+      >
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
           <Text className="text-center text-lg font-medium text-[#212121]">
             컨텐츠 일정
@@ -185,7 +203,9 @@ export default function ScheduleScreen() {
           <FlatList
             className="mx-4 mt-7 flex-1"
             data={schedules}
-            renderItem={({ item }) => <ScheduleItem item={item} />}
+            renderItem={({ item }) => (
+              <ScheduleItem item={item} onPress={handleScheduleItemPress} />
+            )}
             keyExtractor={(item) => item.contentId.toString()}
             ListEmptyComponent={
               isLoading ? (

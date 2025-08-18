@@ -29,7 +29,7 @@ import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
-import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import { authApi } from "@/features/axios/axiosInstance";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 function DetailImageCarousel({
@@ -52,17 +52,25 @@ function DetailImageCarousel({
     item: any;
     index: number;
   }) => (
+    //! 웹 환경에서 이미지 클릭 시 확대 페이지로 이동하는 기능 제거
     <Pressable
-      onPress={() => onImagePress(index)}
+      onPress={() => Platform.OS !== "web" && onImagePress(index)}
       style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
     >
       <Image
         source={item}
         className="w-full"
-        style={{
-          height: imageHeight,
-          resizeMode: "cover",
-        }}
+        style={[
+          {
+            height: imageHeight,
+            resizeMode: "cover",
+          },
+
+          //! 50% 설정 시 웹 환경에서 캐러셀 이미지 사이 여백 생김
+          Platform.OS === "web" && {
+            maxWidth: "50%",
+          },
+        ]}
       />
     </Pressable>
   );
@@ -74,7 +82,11 @@ function DetailImageCarousel({
       }}
     >
       <Carousel
-        width={Dimensions.get("window").width}
+        width={
+          Platform.OS === "web"
+            ? Math.min(Dimensions.get("window").width, 800)
+            : Dimensions.get("window").width
+        }
         height={imageHeight}
         data={carouselData}
         renderItem={renderCarouselItem}
@@ -117,19 +129,15 @@ interface ContentDetail {
   latitude: number;
 }
 
-interface LikeApiResponse {
-  likeId: number;
-  likeCount: number;
-}
-
 export default function DetailScreen() {
   const [contentData, setContentData] = useState<ContentDetail | null>(null);
   const [scrollY, setScrollY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
-  const [isLiked, setIsLiked] = useState<boolean>(false); //! 🌟 찜 상태
+  const [isLiked, setIsLiked] = useState<boolean>(false); // 찜 상태
+  const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); //! 🌟 임시 로그인 상태
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -137,12 +145,21 @@ export default function DetailScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
-  //! 🌟 토큰 확인을 통한 로그인 상태 체크 임시 코드
+  // 플랫폼별 토큰 조회 함수
+  const getTokenAsync = async (key: string): Promise<string | null> => {
+    if (Platform.OS === "web") {
+      return localStorage.getItem(key);
+    } else {
+      return await SecureStore.getItemAsync(key);
+    }
+  };
+
+  // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const accessToken = await SecureStore.getItemAsync("accessToken");
-        const refreshToken = await SecureStore.getItemAsync("refreshToken");
+        const accessToken = await getTokenAsync("accessToken");
+        const refreshToken = await getTokenAsync("refreshToken");
         setIsLoggedIn(!!(accessToken && refreshToken));
       } catch (error) {
         console.error("토큰 확인 실패:", error);
@@ -160,13 +177,14 @@ export default function DetailScreen() {
       try {
         setLoading(true);
         if (id) {
-          const response = await publicApi.get(`${BACKEND_URL}/contents/${id}`);
+          const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
+            // 초기에는 likeCount를 null로 유지 (contentData.likes 사용)
           }
         }
       } catch (error) {
@@ -223,27 +241,48 @@ export default function DetailScreen() {
     setScrollY(currentScrollY);
   };
 
-  //! 🌟 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
+  // 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
   const handleLikeToggle = async () => {
-    if (!id || isLikeLoading) return;
+    if (!id || isLikeLoading || !contentData) return;
 
     setIsLikeLoading(true);
 
+    // 현재 좋아요 상태를 미리 저장 (빠른 클릭 시 상태 일관성 보장)
+    const currentIsLiked = isLiked;
+
     try {
-      const response = await authApi.post(
-        `${BACKEND_URL}/contents/${id}/favorites`,
-      );
+      let response;
+
+      // 현재 상태 기준으로 판단 (isLiked 상태 사용)
+      if (!currentIsLiked) {
+        // 좋아요 추가
+        response = await authApi.post(
+          `${BACKEND_URL}/contents/${id}/favorites`,
+        );
+      } else {
+        // 좋아요 취소
+        response = await authApi.delete(
+          `${BACKEND_URL}/contents/${id}/favorites`,
+        );
+      }
 
       if (response.data.isSuccess) {
-        const { result }: { result: LikeApiResponse } = response.data;
+        const { result } = response.data;
 
-        setIsLiked((prev) => !prev);
+        // 좋아요 추가 시: result = { likeId: number, likeCount: number }
+        // 좋아요 취소 시: result = number (likeCount)
+        const isAddAction = !currentIsLiked;
+        const likeCount = isAddAction ? result.likeCount : result;
+        const likeId = isAddAction ? result.likeId : null;
+
+        // UI 상태 업데이트
+        setIsLiked(!currentIsLiked);
+        setLikeCount(likeCount); // API 응답의 likeCount 사용
         setContentData((prev) =>
           prev
             ? {
                 ...prev,
-                likes: result.likeCount,
-                likeId: prev.likeId ? null : result.likeId,
+                likeId: likeId,
               }
             : null,
         );
@@ -283,6 +322,21 @@ export default function DetailScreen() {
 
     const { latitude, longitude, placeName } = contentData;
 
+    // 웹 환경에서는 네이버 지도 웹사이트로 이동
+    if (Platform.OS === "web") {
+      const naverMapWebUrl = `https://map.naver.com/v5/search/${encodeURIComponent(placeName)}/place?c=${longitude},${latitude},15,0,0,0,dh`;
+
+      try {
+        window.open(naverMapWebUrl, "_blank");
+      } catch (error) {
+        console.error("네이버 지도 웹사이트 열기 실패:", error);
+        // 대안으로 현재 창에서 열기
+        window.location.href = naverMapWebUrl;
+      }
+      return;
+    }
+
+    // 모바일 환경에서는 기존 로직 유지
     // 네이버 지도 URL scheme
     const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
 
@@ -329,39 +383,42 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-3 pt-20 ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 ${
+              Platform.OS === "web" ? "pt-10" : "pt-20"
+            } ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
             }`}
           >
+            {/* 왼쪽 BackArrow */}
             <Pressable
               onPress={handleGoBack}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              className="z-10"
             >
               <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
             </Pressable>
 
+            {/* 중앙 제목 텍스트 (절대 위치로 완전 중앙 정렬) */}
             {showHeaderBackground && (
-              <Text
-                className={`flex-1 text-center text-lg font-semibold text-[#212121]`}
-                numberOfLines={1}
+              <View
+                className="absolute left-0 right-0 items-center justify-center"
+                style={{ top: Platform.OS === "web" ? 80 : 72 }}
               >
-                {contentData.title}
-              </Text>
+                <Text
+                  className="text-lg font-semibold text-[#212121]"
+                  numberOfLines={1}
+                  style={{ maxWidth: "60%" }}
+                >
+                  {contentData.title}
+                </Text>
+              </View>
             )}
 
-            {/* <Pressable
-              onPress={handleKakaoShare}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-            >
-              <ShareOutlineIcon
-                size={28}
-                color={showHeaderBackground ? "#000" : "#fff"}
-              />
-            </Pressable> */}
+            {/* 오른쪽 공간 (균형을 위한 투명 요소) */}
+            <View style={{ width: 24, height: 24 }} />
           </View>
 
           {/* 전체 스크롤 영역 */}
@@ -398,14 +455,14 @@ export default function DetailScreen() {
                   </View>
                 </View>
 
-                <Pressable
+                {/* <Pressable
                   className="h-[43px] flex-1 justify-center rounded border-[0.5px] border-gray-300 p-2.5"
                   style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                 >
                   <Text className="text-center font-medium text-black">
                     전시 홈페이지
                   </Text>
-                </Pressable>
+                </Pressable> */}
               </View>
 
               <Divider />
@@ -549,7 +606,7 @@ export default function DetailScreen() {
                   className="text-lg font-medium"
                   style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
                 >
-                  {contentData.likes}
+                  {likeCount !== null ? likeCount : contentData?.likes || 0}
                 </Text>
               </View>
 

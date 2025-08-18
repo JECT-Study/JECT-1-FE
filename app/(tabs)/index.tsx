@@ -13,6 +13,7 @@ import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -295,25 +296,37 @@ export default function HomeScreen() {
 
   const router = useRouter();
 
+  // 플랫폼별 토큰 조회 함수
+  const getTokenAsync = useCallback(
+    async (key: string): Promise<string | null> => {
+      if (Platform.OS === "web") {
+        return localStorage.getItem(key);
+      } else {
+        return await SecureStore.getItemAsync(key);
+      }
+    },
+    [],
+  );
+
   // 토큰 존재 여부로 로그인 상태 확인
   const checkLoginStatus = useCallback(async () => {
     try {
-      const accessToken = await SecureStore.getItemAsync("accessToken");
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-      
+      const accessToken = await getTokenAsync("accessToken");
+      const refreshToken = await getTokenAsync("refreshToken");
+
       console.log("🔍 토큰 확인:", {
         accessToken: accessToken ? "존재" : "없음",
         refreshToken: refreshToken ? "존재" : "없음",
         nickname,
-        isLoggedIn: !!accessToken
+        isLoggedIn: !!accessToken,
       });
-      
+
       setIsLoggedIn(!!accessToken);
     } catch (error) {
       console.log("❌ 토큰 확인 중 에러:", error);
       setIsLoggedIn(false);
     }
-  }, [nickname]);
+  }, [nickname, getTokenAsync]);
 
   useEffect(() => {
     checkLoginStatus();
@@ -507,7 +520,11 @@ export default function HomeScreen() {
         end={{ x: 1, y: 0.86 }}
         locations={[0.0682, 0.9458]}
       >
-        <View className="h-52 flex-row items-end justify-center px-[18px] pb-20">
+        <View
+          className={`flex-row items-end justify-center px-[18px] pb-20 ${
+            Platform.OS === "web" ? "pt-10" : "h-52"
+          }`}
+        >
           <View className="w-full flex-row items-center gap-x-2">
             <LogoIcon width={35} height={32} />
             <Pressable

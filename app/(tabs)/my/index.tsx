@@ -9,7 +9,7 @@ export default function MyScreen() {
   const { goEditProfile } = usePageNavigation();
   return (
     <SafeAreaView className="w-full flex-1 bg-white">
-      <Text className="ml-6 mt-6 text-[18px]">마이페이지</Text>
+      <Text className="ml-6 mt-10 text-[18px]">마이페이지</Text>
       <UserInfo />
       <Pressable
         className="mx-6 mt-6 flex h-[32px] items-center justify-center rounded-[4px] bg-gray-100"

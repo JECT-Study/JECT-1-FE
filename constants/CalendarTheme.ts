@@ -15,5 +15,34 @@ export const getCalendarTheme = () => {
 
     // 로딩 인디케이터
     indicatorColor: primaryColor,
+
+    // 화살표 숨기기 및 헤더 레이아웃 설정 (웹 환경 호환성)
+    "stylesheet.calendar.header": {
+      arrow: {
+        display: "none",
+        opacity: 0,
+        width: 0,
+        height: 0,
+      },
+      arrowImage: {
+        display: "none",
+        opacity: 0,
+        width: 0,
+        height: 0,
+      },
+      monthText: {
+        display: "none",
+        opacity: 0,
+        fontSize: 0,
+      },
+      header: {
+        flexDirection: "row" as const,
+        justifyContent: "center" as const,
+        alignItems: "center" as const,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        width: "100%",
+      },
+    },
   };
 };
