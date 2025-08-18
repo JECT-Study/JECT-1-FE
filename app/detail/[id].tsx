@@ -383,7 +383,9 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 ${
+              Platform.OS === "web" ? "pt-10" : "pt-20"
+            } ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 import X from "@/components/icons/X";
 
@@ -66,6 +66,9 @@ export default function FilterBottomSheet({
     <BottomSheet
       style={{
         marginTop: 20,
+        ...(Platform.OS === "web" && {
+          paddingHorizontal: 20,
+        }),
       }}
       ref={bottomSheetRef}
       index={isOpen ? 0 : -1}
@@ -131,7 +134,9 @@ export default function FilterBottomSheet({
         </View>
 
         {/* 하단 버튼들 */}
-        <View className="flex-row gap-3 pt-6">
+        <View
+          className={`flex-row gap-3 pt-6 ${Platform.OS === "web" ? "pb-11" : ""}`}
+        >
           <Pressable
             className="flex-1 rounded-lg border border-[#E0E0E0] py-4"
             onPress={handleReset}

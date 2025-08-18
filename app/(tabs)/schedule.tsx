@@ -3,7 +3,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Text,
+  View,
+} from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -170,7 +176,9 @@ export default function ScheduleScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
-      <View className="flex-1 bg-white">
+      <View
+        className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
+      >
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
           <Text className="text-center text-lg font-medium text-[#212121]">
             컨텐츠 일정

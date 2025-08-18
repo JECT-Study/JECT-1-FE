@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Platform, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -204,7 +204,10 @@ export default function DatePickerBottomSheet({
     >
       <BottomSheetView
         className="px-4"
-        style={{ paddingBottom: 16 + insets.bottom }}
+        style={{
+          paddingBottom: 16 + insets.bottom,
+          paddingHorizontal: Platform.OS === "web" ? 10 : 0,
+        }}
       >
         <Calendar
           key={currentMonth}
@@ -234,7 +237,7 @@ export default function DatePickerBottomSheet({
           </View>
         )}
 
-        <View className="pb-4 pt-4">
+        <View className="p-4">
           <Pressable
             className={`flex-1 rounded-lg py-4 ${
               selectedDate ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"

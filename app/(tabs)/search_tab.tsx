@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Platform,
   Pressable,
   Text,
   TextInput,
@@ -548,7 +549,7 @@ export default function SearchScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
 
-      <View className="px-4 pb-4 pt-2">
+      <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
         <View className="flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 py-3">
           <SearchIcon size={20} color="#6C4DFF" />
           <TextInput
