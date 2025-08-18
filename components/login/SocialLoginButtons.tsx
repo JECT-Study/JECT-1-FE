@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Alert, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleLogin from "@/components/login/AppleLogin";
@@ -76,7 +76,16 @@ export default function SocialLoginButtons() {
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => router.push("/survey")}
+            onPress={() => {
+              if (!isLoggedIn) {
+                Alert.alert(
+                  "로그인이 필요합니다",
+                  "로그인 후 설문조사를 시작해주세요.",
+                );
+                return;
+              }
+              router.push("/survey");
+            }}
             className="flex-row items-center justify-center px-6"
           >
             <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
