@@ -29,7 +29,7 @@ import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
-import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import { authApi } from "@/features/axios/axiosInstance";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 function DetailImageCarousel({
@@ -127,9 +127,12 @@ export default function DetailScreen() {
   const [scrollY, setScrollY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
-  const [isLiked, setIsLiked] = useState<boolean>(false); //! 🌟 찜 상태
+  const [isLiked, setIsLiked] = useState<boolean>(false); // 찜 상태
+  const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); //! 🌟 임시 로그인 상태
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
+
+  console.log("contentData", contentData);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -146,7 +149,7 @@ export default function DetailScreen() {
     }
   };
 
-  //! 🌟 토큰 확인을 통한 로그인 상태 체크 임시 코드
+  // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -169,13 +172,14 @@ export default function DetailScreen() {
       try {
         setLoading(true);
         if (id) {
-          const response = await publicApi.get(`${BACKEND_URL}/contents/${id}`);
+          const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
+            // 초기에는 likeCount를 null로 유지 (contentData.likes 사용)
           }
         }
       } catch (error) {
@@ -232,27 +236,49 @@ export default function DetailScreen() {
     setScrollY(currentScrollY);
   };
 
-  //! 🌟 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
+  // 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
   const handleLikeToggle = async () => {
-    if (!id || isLikeLoading) return;
+    if (!id || isLikeLoading || !contentData) return;
 
     setIsLikeLoading(true);
 
+    // 현재 좋아요 상태를 미리 저장 (빠른 클릭 시 상태 일관성 보장)
+    const currentIsLiked = isLiked;
+    const currentLikeId = contentData.likeId;
+
     try {
-      const response = await authApi.post(
-        `${BACKEND_URL}/contents/${id}/favorites`,
-      );
+      let response;
+
+      // 현재 상태 기준으로 판단 (isLiked 상태 사용)
+      if (!currentIsLiked) {
+        // 좋아요 추가
+        response = await authApi.post(
+          `${BACKEND_URL}/contents/${id}/favorites`,
+        );
+      } else {
+        // 좋아요 취소
+        response = await authApi.delete(
+          `${BACKEND_URL}/contents/${id}/favorites`,
+        );
+      }
 
       if (response.data.isSuccess) {
-        const { result }: { result: LikeApiResponse } = response.data;
+        const { result } = response.data;
 
-        setIsLiked((prev) => !prev);
+        // 좋아요 추가 시: result = { likeId: number, likeCount: number }
+        // 좋아요 취소 시: result = number (likeCount)
+        const isAddAction = !currentIsLiked;
+        const likeCount = isAddAction ? result.likeCount : result;
+        const likeId = isAddAction ? result.likeId : null;
+
+        // UI 상태 업데이트
+        setIsLiked(!currentIsLiked);
+        setLikeCount(likeCount); // API 응답의 likeCount 사용
         setContentData((prev) =>
           prev
             ? {
                 ...prev,
-                likes: result.likeCount,
-                likeId: prev.likeId ? null : result.likeId,
+                likeId: likeId,
               }
             : null,
         );
@@ -558,7 +584,7 @@ export default function DetailScreen() {
                   className="text-lg font-medium"
                   style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
                 >
-                  {contentData.likes}
+                  {likeCount !== null ? likeCount : contentData?.likes || 0}
                 </Text>
               </View>
 
