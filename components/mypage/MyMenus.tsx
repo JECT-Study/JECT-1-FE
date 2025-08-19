@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
@@ -7,10 +7,21 @@ import usePageNavigation from "@/hooks/usePageNavigation";
 
 export default function MyMenus() {
   const { goLike, goPlan, goSurvey } = usePageNavigation();
+
+  const handlePlanClick = () => {
+    if (Platform.OS === "web") {
+      // 웹에서는 alert 띄우기
+      window.alert("추후 개발 예정입니다");
+    } else {
+      // 네이티브에서는 기존 동작
+      goPlan();
+    }
+  };
+
   return (
     <View className="mx-6 my-4 flex flex-row items-center justify-center rounded-md bg-[#F2F3F6]">
       <Pressable
-        onPress={() => goPlan()}
+        onPress={handlePlanClick}
         className="m-2 flex h-[70px] w-[105px] items-center justify-center"
       >
         <DiaryIcon />

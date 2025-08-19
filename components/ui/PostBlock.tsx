@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import HeartIcon from "@/components/icons/HeartIcon";
 import Separator from "@/components/ui/Separator";
@@ -14,6 +14,9 @@ interface infoInterface {
 
 export default function PostBlock({ info }: { info: infoInterface }) {
   const { like, onPressHeart } = useHeart();
+
+  console.log(info);
+
   return (
     <>
       <View className="my-[18px] flex flex-row items-center">
