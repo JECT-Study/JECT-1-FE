@@ -5,7 +5,7 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import timezone from "dayjs/plugin/timezone";
 import { router } from "expo-router";
-import { FlatList, RefreshControl, View, Text } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -82,7 +82,6 @@ export default function Plan() {
           schedules={getMonthlySchedules()}
           onDateChange={handleDateChange}
           onMonthChange={(month) => {
-            console.log("Month changed to:", month);
             handleMonthChange(month.dateString.slice(0, 7));
           }}
           monthRangeLimit={2}

@@ -76,11 +76,8 @@ export default function CommonCalendar({
   // 월 변경 시 호출되는 핸들러 - 월이 바뀔 때마다 실행
   const handleMonthChange = useCallback(
     (month: DateData) => {
-      console.log("월 변경");
-
       // 캘린더가 접힌 상태에서는 날짜 변경하지 않음
       if (!isCalendarExpanded) {
-        console.log("캘린더가 접힌 상태이므로 날짜 변경 안 함");
         return;
       }
 

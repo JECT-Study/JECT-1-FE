@@ -16,7 +16,6 @@ export default function AfterSurvey({
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-      console.log(context); // context엔 각 step에 어떤 값을 선택했는지 명시되어있음.
     }, 3000);
 
     return () => clearTimeout(timer); // cleanup

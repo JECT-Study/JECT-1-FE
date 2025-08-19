@@ -21,15 +21,10 @@ export default function Login() {
 
   useEffect(() => {
     const checkTokens = async () => {
-      console.log("토큰 확인 - useEffect 실행됨");
       const storeAccessToken = await getTokenAsync("accessToken");
       const storeRefreshToken = await getTokenAsync("refreshToken");
-      console.log("토큰 상태:", { storeAccessToken, storeRefreshToken });
       if (storeAccessToken && storeRefreshToken) {
-        console.log("토큰 존재 - 탭으로 이동");
         router.replace("/(tabs)");
-      } else {
-        console.log("토큰 없음 - 로그인 화면 유지");
       }
     };
 

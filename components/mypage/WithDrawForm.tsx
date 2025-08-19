@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TextInput } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import Animated from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
@@ -94,8 +94,6 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
         }`}
         onPress={async () => {
           if (checkSubmit()) {
-            console.log("이유", selected);
-            console.log("상세 이유", otherReason);
             try {
               await withdraw();
             } catch (error) {

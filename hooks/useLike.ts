@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { AxiosError } from "axios";
-
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 
@@ -61,9 +59,9 @@ export const useLike = (selectedCategory: string) => {
       }
 
       setHasMore(!last && (isLoadMore ? true : totalElements > 0));
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.log(axiosError);
+    } catch {
+      // const axiosError = error as AxiosError;
+      // console.log(axiosError);
     } finally {
       setLoading(false);
     }

@@ -230,7 +230,6 @@ export default function DetailScreen() {
   const handleCopyAddress = async () => {
     try {
       await Clipboard.setStringAsync(contentData!.address);
-      console.log("주소가 복사되었습니다.");
     } catch (error) {
       console.error("복사 오류:", error);
     }

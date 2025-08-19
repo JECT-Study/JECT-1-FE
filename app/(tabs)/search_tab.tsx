@@ -300,17 +300,11 @@ export default function SearchScreen() {
 
           // [테스트용] 임시로 최대 5페이지까지만 로딩 가능하도록 설정
           // setHasMoreData(page < 5);
-
-          console.log("검색 결과:", newResults);
-          console.log(
-            `페이지: ${currentPage}/${totalPages}, 총 ${totalCount}개`,
-          );
         } else {
           if (!isLoadMore) {
             setSearchResults([]);
           }
           setHasMoreData(false);
-          console.log("검색 결과 없음 또는 API 오류");
         }
       } catch (error) {
         console.error("검색 실패:", error);
@@ -396,18 +390,11 @@ export default function SearchScreen() {
 
           setFilterSearchPage(pageInfo.currentPage);
           setFilterHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
-
-          console.log("필터 검색 결과:", transformedResults);
-          console.log("필터 검색 파라미터:", params);
-          console.log(
-            `페이지: ${pageInfo.currentPage}/${pageInfo.totalPages}, 총 ${pageInfo.totalElements}개`,
-          );
         } else {
           if (!isLoadMore) {
             setFilterSearchResults([]);
           }
           setFilterHasMoreData(false);
-          console.log("필터 검색 결과 없음 또는 API 오류");
         }
       } catch (error) {
         console.error("필터 검색 실패:", error);
@@ -504,7 +491,6 @@ export default function SearchScreen() {
     if (isFilterSearchMode && filterHasMoreData && !isLoadingMore) {
       // 필터 검색 모드에서의 무한스크롤
       const nextPage = filterSearchPage + 1;
-      console.log(`필터 검색 다음 페이지 로딩: ${nextPage}`);
       searchByFilters(selectedCategory, selectedRegion, nextPage, true);
     } else if (
       hasSearched &&
@@ -514,7 +500,6 @@ export default function SearchScreen() {
     ) {
       // 키워드 검색 모드에서의 무한스크롤
       const nextPage = currentPage + 1;
-      console.log(`키워드 검색 다음 페이지 로딩: ${nextPage}`);
       searchContent(searchText, nextPage, true);
     }
   }, [

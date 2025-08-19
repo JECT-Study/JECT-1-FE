@@ -104,7 +104,6 @@ export default function SurveyScreen() {
         const handleNext = (answerIndex: number) => {
           try {
             const newContext = { ...context, step6: answerIndex };
-            console.log("API 전송", newContext);
             history.push("done", newContext);
           } catch (error) {
             console.error("설문 제출 중 오류 발생:", error);

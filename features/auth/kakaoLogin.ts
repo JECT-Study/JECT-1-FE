@@ -25,7 +25,6 @@ async function setTokenAsync(key: string, value: string) {
 export function initializeKakao() {
   // 웹 환경에서는 카카오 SDK 초기화를 건너뜀
   if (Platform.OS === "web") {
-    console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
     return;
   }
 
@@ -42,7 +41,6 @@ export function initializeKakao() {
 export async function kakaoLogin() {
   // 웹 환경에서는 카카오 로그인을 지원하지 않음
   if (Platform.OS === "web") {
-    console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
     alert(
       "웹 환경에서는 카카오 로그인이 지원되지 않습니다. 테스터 로그인을 이용해주세요.",
     );
@@ -64,13 +62,6 @@ export async function kakaoLogin() {
     const nickname = response.data.result.nickname;
     const image = response.data.result.image;
 
-    console.log("📝 카카오 로그인 성공 - 사용자 정보:", {
-      nickname,
-      image: image ? "있음" : "없음",
-      accessToken: accessToken ? "있음" : "없음",
-      refreshToken: refreshToken ? "있음" : "없음",
-    });
-
     await setTokenAsync("accessToken", accessToken);
     await setTokenAsync("refreshToken", refreshToken);
 
@@ -78,15 +69,8 @@ export async function kakaoLogin() {
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "", image || "");
 
-    console.log("💾 Store에 저장 완료:", {
-      storedNickname: nickname || "",
-      storedImage: image || "",
-      userStoreState: useUserStore.getState(),
-    });
-
     router.push("/(tabs)");
-  } catch (error) {
+  } catch {
     // 카카오 로그인 취소 시에는 에러 메시지를 표시하지 않음
-    console.log("카카오 로그인 취소 또는 에러:", error);
   }
 }

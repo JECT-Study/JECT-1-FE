@@ -29,18 +29,10 @@ export async function IOSAppleLogin() {
       socialId: id,
       socialType: "APPLE",
     });
-    console.log(response);
     const accessToken = response.data.result.accessToken;
     const refreshToken = response.data.result.refreshToken;
     const nickname = response.data.result.nickname;
     const image = response.data.result.image;
-
-    console.log("🍎 애플 로그인 성공 - 사용자 정보:", {
-      nickname,
-      image: image ? "있음" : "없음",
-      accessToken: accessToken ? "있음" : "없음",
-      refreshToken: refreshToken ? "있음" : "없음",
-    });
 
     await setTokenAsync("accessToken", accessToken);
     await setTokenAsync("refreshToken", refreshToken);
@@ -49,19 +41,12 @@ export async function IOSAppleLogin() {
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "", image || "");
 
-    console.log("💾 Store에 저장 완료:", {
-      storedNickname: nickname || "",
-      storedImage: image || "",
-      userStoreState: useUserStore.getState(),
-    });
-
     router.push("/(tabs)");
-  } catch (error) {
+  } catch {
     // 애플 로그인 취소 시에는 에러 메시지를 표시하지 않음
-    console.log("애플 로그인 취소 또는 에러:", error);
   }
 }
 
 export async function AndroidAppleLogin() {
-  console.log("Android Login");
+  // console.log("Android Login");
 }

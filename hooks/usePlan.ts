@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { AxiosError } from "axios";
+
 import dayjs from "dayjs";
+
 import { UsersScheduleCheckUrl, UsersSchedulesUrl } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 
@@ -20,7 +21,7 @@ export const usePlan = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>(
-    dayjs().format("YYYY-MM-DD")
+    dayjs().format("YYYY-MM-DD"),
   );
 
   const fetchScheduleDates = async (month: string) => {
@@ -29,17 +30,16 @@ export const usePlan = () => {
         params: { month },
       });
       setScheduleDates(response.data.result);
-      console.log("Schedule dates fetched:", response.data.result);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.log("Error fetching schedule dates:", axiosError);
+    } catch {
+      // const axiosError = error as AxiosError;
+      // console.log("Error fetching schedule dates:", axiosError);
     }
   };
 
   const fetchSchedulesByDate = async (
     day: string,
     pageNumber: number = 0,
-    isLoadMore: boolean = false
+    isLoadMore: boolean = false,
   ) => {
     setLoading(true);
     try {
@@ -52,7 +52,6 @@ export const usePlan = () => {
       });
 
       const { content, last } = response.data.result;
-      console.log("Schedules fetched for", day, ":", content);
 
       if (isLoadMore) {
         setSchedules((prev) => [...prev, ...content]);
@@ -63,9 +62,9 @@ export const usePlan = () => {
       }
 
       setHasMore(!last);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.log("Error fetching schedules:", axiosError);
+    } catch {
+      // const axiosError = error as AxiosError;
+      // console.log("Error fetching schedules:", axiosError);
     } finally {
       setLoading(false);
     }
@@ -78,7 +77,7 @@ export const usePlan = () => {
 
   const handleDateChange = (dateString: string) => {
     setSelectedDate(dateString);
-    
+
     // 해당 날짜에 일정이 있는 경우에만 API 호출
     if (scheduleDates.includes(dateString)) {
       fetchSchedulesByDate(dateString);

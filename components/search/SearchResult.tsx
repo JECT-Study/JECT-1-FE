@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 
-import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
-import { View, Text, Pressable, FlatList } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 import * as Progress from "react-native-progress";
 
 import FilterSection from "@/components/search/SearchFilter";
-import { SearchResultUrl } from "@/constants/ApiUrls";
 import { Categories, CategoriesObject } from "@/constants/Categories";
 import { Regions, RegionsObject } from "@/constants/Regions";
 import { SearchResultIndexResponse } from "@/interfaces/search.interfaces";
@@ -83,7 +81,6 @@ export default function SearchResult() {
     //   }
     // };
     // fetchResult();
-    console.log("필터 수정 발생, 새로운 api 요청 필요.");
     const fetchMock = async () => {
       // UI 동작을 확인하기 위한 가짜 함수입니다.
       try {
@@ -95,7 +92,6 @@ export default function SearchResult() {
         setResults(mock);
         setIsLoading(false);
       } catch (e) {
-        console.log(e);
       } finally {
         setIsLoading(false);
       }
@@ -126,7 +122,6 @@ export default function SearchResult() {
         numColumns={2}
         onEndReached={() => {
           // TODO 여기에 무한 스크롤 관련 로직 추가
-          console.log("여기에 무한 스크롤 관련 로직 추가");
         }}
         contentContainerStyle={{ paddingBottom: 32 }}
         columnWrapperStyle={{

@@ -19,8 +19,6 @@ export async function withdraw() {
   try {
     await authApi.delete(WithdrawUrl);
 
-    console.log("회원탈퇴 성공");
-
     // 토큰 삭제
     await deleteTokenAsync("accessToken");
     await deleteTokenAsync("refreshToken");
@@ -32,7 +30,6 @@ export async function withdraw() {
     // 로그인 화면으로 이동
     router.replace("/");
   } catch (error) {
-    console.log("회원탈퇴 에러:", error);
     throw error;
   }
 }

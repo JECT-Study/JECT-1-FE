@@ -7,7 +7,8 @@ import { UsersProfileUrl } from "@/constants/ApiUrls";
 import useUserStore from "@/stores/useUserStore";
 
 // 기본 프로필 이미지 (회색)
-const DEFAULT_PROFILE_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iOTQiIHZpZXdCb3g9IjAgMCA5NCA5NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDciIGN5PSI0NyIgcj0iNDciIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeD0iMjciIHk9IjI3Ij4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCAxMiA3LjU4MTcyIDEyIDEyQzEyIDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEM5IDI0IDAgMzMgMCA0NEg0MEMzNjAgMzMgMzEgMjQgMjAgMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+";
+const DEFAULT_PROFILE_IMAGE =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iOTQiIHZpZXdCb3g9IjAgMCA5NCA5NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDciIGN5PSI0NyIgcj0iNDciIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeD0iMjciIHk9IjI3Ij4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCAxMiA3LjU4MTcyIDEyIDEyQzEyIDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEM5IDI0IDAgMzMgMCA0NEg0MEMzNjAgMzMgMzEgMjQgMjAgMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+";
 
 interface EditProfileStore {
   profileNickname: string;
@@ -73,16 +74,8 @@ const useEditProfileStore = create<EditProfileStore>((set, get) => ({
           formData.append("profileImage", imageFile);
           // formData.append("image", imageFile);  // 대안 필드명
           // formData.append("file", imageFile);   // 대안 필드명
-          console.log("Uploading image:", {
-            uri: tempImageFile.uri,
-            type: tempImageFile.mimeType,
-            name: fileName, // 수정된 파일명 출력
-            originalName: tempImageFile.fileName,
-            fileSize: tempImageFile.fileSize,
-          });
         }
 
-        console.log("Sending profile update:", { nickname: tempNickname });
         const response = await axios.patch(UsersProfileUrl, formData);
 
         set({
@@ -116,7 +109,7 @@ const useEditProfileStore = create<EditProfileStore>((set, get) => ({
       const userStore = useUserStore.getState();
       const nickname = userStore.nickname || "기본닉네임";
       const profileImage = userStore.profileImage || DEFAULT_PROFILE_IMAGE;
-      
+
       set({
         profileNickname: nickname,
         profileImageFromPicker: profileImage,

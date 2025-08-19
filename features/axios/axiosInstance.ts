@@ -83,10 +83,6 @@ authApi.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        console.log(
-          "토큰이 만료되었습니다. 리프레시 토큰으로 갱신을 시도합니다.",
-        );
-
         const refreshToken = await getTokenAsync("refreshToken");
 
         if (!refreshToken) {
@@ -115,7 +111,6 @@ authApi.interceptors.response.use(
         // 원래 요청에 새 토큰 적용하여 재시도
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        console.log("토큰 갱신 성공, 원래 요청을 재시도합니다.");
         return authApi(originalRequest);
       } catch (refreshError) {
         console.error("토큰 갱신 실패:", refreshError);
@@ -123,8 +118,6 @@ authApi.interceptors.response.use(
         // 리프레시 실패 시 저장된 토큰 삭제 및 로그인 페이지로 이동
         await deleteTokenAsync("accessToken");
         await deleteTokenAsync("refreshToken");
-
-        console.log("로그인 페이지로 이동합니다.");
         router.replace("/");
 
         return Promise.reject(refreshError);

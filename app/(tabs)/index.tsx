@@ -312,21 +312,11 @@ export default function HomeScreen() {
   const checkLoginStatus = useCallback(async () => {
     try {
       const accessToken = await getTokenAsync("accessToken");
-      const refreshToken = await getTokenAsync("refreshToken");
-
-      console.log("🔍 토큰 확인:", {
-        accessToken: accessToken ? "존재" : "없음",
-        refreshToken: refreshToken ? "존재" : "없음",
-        nickname,
-        isLoggedIn: !!accessToken,
-      });
-
       setIsLoggedIn(!!accessToken);
-    } catch (error) {
-      console.log("❌ 토큰 확인 중 에러:", error);
+    } catch {
       setIsLoggedIn(false);
     }
-  }, [nickname, getTokenAsync]);
+  }, [getTokenAsync]);
 
   useEffect(() => {
     checkLoginStatus();

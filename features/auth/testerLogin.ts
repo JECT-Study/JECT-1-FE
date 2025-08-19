@@ -27,13 +27,6 @@ export async function testerLogin() {
     const nickname = response.data.result.nickname;
     const image = response.data.result.image;
 
-    console.log("🧪 테스터 로그인 성공 - 사용자 정보:", {
-      nickname,
-      image: image ? "있음" : "없음",
-      accessToken: accessToken ? "있음" : "없음",
-      refreshToken: refreshToken ? "있음" : "없음",
-    });
-
     await setTokenAsync("accessToken", accessToken);
     await setTokenAsync("refreshToken", refreshToken);
 
@@ -41,14 +34,8 @@ export async function testerLogin() {
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "Tester", image || "");
 
-    console.log("💾 Store에 저장 완료:", {
-      storedNickname: nickname || "Tester",
-      storedImage: image || "",
-      userStoreState: useUserStore.getState(),
-    });
-
     router.push("/(tabs)");
-  } catch (error) {
-    console.log("테스터 로그인 에러:", error);
+  } catch {
+    // console.log("테스터 로그인 에러:", error);
   }
 }
