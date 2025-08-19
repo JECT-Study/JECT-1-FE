@@ -18,7 +18,7 @@ async function setTokenAsync(key: string, value: string) {
 export async function testerLogin() {
   try {
     const response = await publicApi.post(LoginUrl, {
-      socialId: "tester1",
+      socialId: "123",
       socialType: "APPLE",
     });
 
