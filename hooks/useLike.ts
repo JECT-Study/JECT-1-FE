@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -29,43 +29,43 @@ export const useLike = (selectedCategory: string) => {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const fetchLikes = async (
-    pageNumber: number,
-    isLoadMore: boolean = false,
-  ) => {
-    setLoading(true);
-    try {
-      const categoryParam = getCategoryParam(selectedCategory);
-      const params: any = {
-        page: pageNumber,
-        limit: 10,
-      };
-      if (categoryParam) {
-        params.category = categoryParam;
+  const fetchLikes = useCallback(
+    async (pageNumber: number, isLoadMore: boolean = false) => {
+      setLoading(true);
+      try {
+        const categoryParam = getCategoryParam(selectedCategory);
+        const params: any = {
+          page: pageNumber,
+          limit: 10,
+        };
+        if (categoryParam) {
+          params.category = categoryParam;
+        }
+
+        const response = await authApi.get(UsersFavoriteUrl, {
+          params,
+        });
+
+        const { content, last, totalElements } = response.data.result;
+
+        if (isLoadMore) {
+          setFavorites((prev) => [...prev, ...content]);
+          setPage(pageNumber);
+        } else {
+          setFavorites(content);
+          setPage(0);
+        }
+
+        setHasMore(!last && (isLoadMore ? true : totalElements > 0));
+      } catch {
+        // const axiosError = error as AxiosError;
+        // console.log(axiosError);
+      } finally {
+        setLoading(false);
       }
-
-      const response = await authApi.get(UsersFavoriteUrl, {
-        params,
-      });
-
-      const { content, last, totalElements } = response.data.result;
-
-      if (isLoadMore) {
-        setFavorites((prev) => [...prev, ...content]);
-        setPage(pageNumber);
-      } else {
-        setFavorites(content);
-        setPage(0);
-      }
-
-      setHasMore(!last && (isLoadMore ? true : totalElements > 0));
-    } catch {
-      // const axiosError = error as AxiosError;
-      // console.log(axiosError);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [selectedCategory],
+  );
 
   const loadMore = async () => {
     if (loading || !hasMore) return;
@@ -74,7 +74,7 @@ export const useLike = (selectedCategory: string) => {
 
   useEffect(() => {
     fetchLikes(0, false);
-  }, [selectedCategory]);
+  }, [fetchLikes]);
 
   return {
     favorites,

@@ -1,11 +1,9 @@
+import React from "react";
+
+import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import {
-  FlatList,
-  RefreshControl,
-  SafeAreaView,
-  View,
-  Text,
-} from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import LikeFilter from "@/components/mypage/LikeFilter";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -17,7 +15,14 @@ import { useCategorySelected } from "@/stores/useCategoryStore";
 export default function Like() {
   const { refresh, onRefresh } = useLikeRefresh();
   const selected = useCategorySelected();
-  const { favorites, loading, loadMore } = useLike(selected);
+  const { favorites, loading, loadMore, refetch } = useLike(selected);
+
+  // 페이지에 포커스될 때마다 데이터 새로고침
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
