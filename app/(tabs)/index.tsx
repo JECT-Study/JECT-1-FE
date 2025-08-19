@@ -562,7 +562,16 @@ export default function HomeScreen() {
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
-                <View className="gap-y-[7px]" key={item.id}>
+                <Pressable
+                  key={item.id}
+                  className="gap-y-[7px]"
+                  onPress={() => {
+                    router.push({
+                      pathname: "/(tabs)/search_tab",
+                      params: { category: item.id },
+                    });
+                  }}
+                >
                   <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
                     {item.iconType === "performance" && (
                       <PerformanceIcon width={32} height={32} />
@@ -580,7 +589,7 @@ export default function HomeScreen() {
                   <Text className="text-center text-sm text-black">
                     {item.label}
                   </Text>
-                </View>
+                </Pressable>
               ))}
             </View>
           </View>

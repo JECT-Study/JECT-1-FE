@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import axios from "axios";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
@@ -199,6 +199,8 @@ export default function SearchScreen() {
   const [isFilterSearchMode, setIsFilterSearchMode] = useState<boolean>(false); // 필터 검색 모드 여부 (카테고리 또는 지역 필터 적용 시)
   const [filterSearchPage, setFilterSearchPage] = useState<number>(1); // 필터 검색 페이지
   const [filterHasMoreData, setFilterHasMoreData] = useState<boolean>(true); // 필터 검색 더 불러올 데이터 있는지
+
+  const params = useLocalSearchParams();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -423,6 +425,21 @@ export default function SearchScreen() {
     },
     [],
   );
+
+  // URL 파라미터에서 카테고리를 받아서 자동 검색 실행
+  useEffect(() => {
+    if (params.category && typeof params.category === "string") {
+      const category = params.category as string;
+      setSelectedCategory(category);
+
+      // 카테고리가 ALL이 아닌 경우 자동으로 필터 검색 실행
+      if (category !== "ALL") {
+        setFilterSearchPage(1);
+        setFilterHasMoreData(true);
+        searchByFilters(category, selectedRegion, 1, false);
+      }
+    }
+  }, [params.category, selectedRegion, searchByFilters]);
 
   // 필터 바텀시트 열기/닫기 함수
   const handleFilterOpen = useCallback(() => {
