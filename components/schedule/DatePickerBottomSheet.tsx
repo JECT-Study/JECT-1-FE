@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Alert, Platform, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,6 +12,8 @@ import { CustomDay } from "@/components/ui/CustomDay";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 import { authApi } from "@/features/axios/axiosInstance";
+
+dayjs.extend(isSameOrBefore);
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {

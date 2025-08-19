@@ -630,7 +630,15 @@ export default function HomeScreen() {
                 <FlatList
                   data={chunkedRecommendationsData}
                   horizontal
-                  showsHorizontalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={Platform.OS === "web"}
+                  contentContainerStyle={
+                    Platform.OS === "web" ? { paddingHorizontal: 0 } : undefined
+                  }
+                  style={
+                    Platform.OS === "web"
+                      ? { cursor: "grab" as any }
+                      : undefined
+                  }
                   renderItem={({ item }) => (
                     <View className="w-[287px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -708,7 +716,15 @@ export default function HomeScreen() {
                 <FlatList
                   data={hotFestivalData}
                   horizontal
-                  showsHorizontalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={Platform.OS === "web"}
+                  contentContainerStyle={
+                    Platform.OS === "web" ? { paddingHorizontal: 0 } : undefined
+                  }
+                  style={
+                    Platform.OS === "web"
+                      ? { cursor: "grab" as any }
+                      : undefined
+                  }
                   renderItem={({ item }) => <HotCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
@@ -763,7 +779,15 @@ export default function HomeScreen() {
                 <FlatList
                   data={chunkedFilteredContentData}
                   horizontal
-                  showsHorizontalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={Platform.OS === "web"}
+                  contentContainerStyle={
+                    Platform.OS === "web" ? { paddingHorizontal: 0 } : undefined
+                  }
+                  style={
+                    Platform.OS === "web"
+                      ? { cursor: "grab" as any }
+                      : undefined
+                  }
                   renderItem={({ item }) => (
                     <View className="w-[285px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -817,7 +841,15 @@ export default function HomeScreen() {
                 <FlatList
                   data={categoryContentData}
                   horizontal
-                  showsHorizontalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={Platform.OS === "web"}
+                  contentContainerStyle={
+                    Platform.OS === "web" ? { paddingHorizontal: 0 } : undefined
+                  }
+                  style={
+                    Platform.OS === "web"
+                      ? { cursor: "grab" as any }
+                      : undefined
+                  }
                   renderItem={({ item }) => <MoreCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
