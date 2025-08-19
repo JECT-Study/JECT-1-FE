@@ -15,8 +15,6 @@ interface infoInterface {
 export default function PostBlock({ info }: { info: infoInterface }) {
   const { like, onPressHeart } = useHeart();
 
-  console.log(info);
-
   return (
     <>
       <View className="my-[18px] flex flex-row items-center">
