@@ -404,7 +404,7 @@ export default function DetailScreen() {
             {showHeaderBackground && (
               <View
                 className="absolute left-0 right-0 items-center justify-center"
-                style={{ top: Platform.OS === "web" ? 80 : 72 }}
+                style={{ top: Platform.OS === "web" ? 40 : 72 }}
               >
                 <Text
                   className="text-lg font-semibold text-[#212121]"
