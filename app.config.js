@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "mycode",
   slug: "mycode",
-  owner: "scorchedrice",
+  owner: "donggukim",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
@@ -59,7 +59,12 @@ export default {
   },
 
   plugins: [
-    "expo-router",
+    [
+      "expo-router",
+      {
+        origin: "https://mycode.expo.app",
+      },
+    ],
     [
       "expo-splash-screen",
       {

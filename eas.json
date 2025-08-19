@@ -6,15 +6,39 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "MYCODE_KAKAO_NATIVE_APP_KEY": "process.env.MYCODE_KAKAO_NATIVE_APP_KEY",
+        "MYCODE_KAKAO_REST_API_KEY": "process.env.MYCODE_KAKAO_REST_API_KEY",
+        "MYCODE_BUNDLE_IDENTIFIER": "process.env.MYCODE_BUNDLE_IDENTIFIER",
+        "MYCODE_PACKAGE": "process.env.MYCODE_PACKAGE",
+        "MYCODE_BACKEND_URL": "process.env.MYCODE_BACKEND_URL",
+        "NAVER_MAP_CLIENT_ID": "process.env.NAVER_MAP_CLIENT_ID"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "MYCODE_KAKAO_NATIVE_APP_KEY": "process.env.MYCODE_KAKAO_NATIVE_APP_KEY",
+        "MYCODE_KAKAO_REST_API_KEY": "process.env.MYCODE_KAKAO_REST_API_KEY",
+        "MYCODE_BUNDLE_IDENTIFIER": "process.env.MYCODE_BUNDLE_IDENTIFIER",
+        "MYCODE_PACKAGE": "process.env.MYCODE_PACKAGE",
+        "MYCODE_BACKEND_URL": "process.env.MYCODE_BACKEND_URL",
+        "NAVER_MAP_CLIENT_ID": "process.env.NAVER_MAP_CLIENT_ID"
+      }
     },
     "production": {
       "autoIncrement": true,
       "ios": {
         "distribution": "store"
+      },
+      "env": {
+        "MYCODE_KAKAO_NATIVE_APP_KEY": "process.env.MYCODE_KAKAO_NATIVE_APP_KEY",
+        "MYCODE_KAKAO_REST_API_KEY": "process.env.MYCODE_KAKAO_REST_API_KEY",
+        "MYCODE_BUNDLE_IDENTIFIER": "process.env.MYCODE_BUNDLE_IDENTIFIER",
+        "MYCODE_PACKAGE": "process.env.MYCODE_PACKAGE",
+        "MYCODE_BACKEND_URL": "process.env.MYCODE_BACKEND_URL",
+        "NAVER_MAP_CLIENT_ID": "process.env.NAVER_MAP_CLIENT_ID"
       }
     }
   },
