@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleLogin from "@/components/login/AppleLogin";
@@ -57,12 +57,15 @@ export default function SocialLoginButtons() {
         style={{ height: 282, width: "100%" }}
         pointerEvents="none"
       />
-      <View className="bg-[#010101] px-4">
+      <View
+        className={`bg-[#010101] px-4 ${Platform.OS === "web" ? "pb-10" : ""}`}
+      >
         <View className="mb-6 w-full items-center">
-          <KakaoLogin disabled={isLoggedIn} />
+          {Platform.OS !== "web" && <KakaoLogin disabled={isLoggedIn} />}
           <View className="my-2" />
-          {isIOS ? <AppleLogin disabled={isLoggedIn} /> : null}
-          {isIOS ? <View className="my-2" /> : null}
+          {isIOS ||
+            (Platform.OS !== "web" && <AppleLogin disabled={isLoggedIn} />)}
+          {isIOS || Platform.OS === "web" ? <View className="my-2" /> : null}
           <TesterLogin disabled={isLoggedIn} />
         </View>
 
@@ -75,7 +78,7 @@ export default function SocialLoginButtons() {
               둘러보기
             </Text>
           </Pressable>
-          <Pressable
+          {/* <Pressable
             onPress={() => {
               if (!isLoggedIn) {
                 Alert.alert(
@@ -91,7 +94,7 @@ export default function SocialLoginButtons() {
             <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
               설문조사 시작하기
             </Text>
-          </Pressable>
+          </Pressable> */}
         </View>
         <View className="m-4" />
         <View style={{ marginBottom: insets.bottom - 1 }} />

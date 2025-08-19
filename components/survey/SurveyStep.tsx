@@ -29,13 +29,24 @@ export default function SurveyStep({
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const optionRows = dividedOptions ? chunk(options, 2) : [];
+
+  const handleBack = () => {
+    if (onBack) {
+      // onBack이 제공된 경우 해당 함수 실행
+      onBack();
+    } else {
+      // onBack이 없는 경우 SurveyAlert 실행
+      SurveyAlert();
+    }
+  };
+
   return (
     <SafeAreaView className="w-full flex-1 justify-between bg-white">
       <View className="h-[60px] items-center justify-center">
         <SurveyStepBar current={currentStep} total={total} />
         <Pressable
           className="absolute left-4 top-1/2 -translate-y-1/2"
-          onPress={() => SurveyAlert()}
+          onPress={handleBack}
         >
           <Chevron direction="left" />
         </Pressable>

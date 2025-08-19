@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
@@ -34,8 +33,10 @@ export async function testerLogin() {
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "Tester", image || "");
 
-    router.push("/(tabs)");
-  } catch {
-    // console.log("테스터 로그인 에러:", error);
+    // 루트 페이지로 이동하는 부분 제거 - 호출하는 쪽에서 처리
+    return { success: true };
+  } catch (error) {
+    console.error("테스터 로그인 에러:", error);
+    throw error;
   }
 }

@@ -1,26 +1,56 @@
 import { useEffect, useRef, useState } from "react";
 
-import { View, GestureResponderEvent, Dimensions } from "react-native";
-import { PIConfetti, ConfettiMethods } from "react-native-fast-confetti";
+import {
+  Dimensions,
+  GestureResponderEvent,
+  Platform,
+  View,
+} from "react-native";
 
 const confettiColors = ["#A864FD", "#29CDFF", "#78FF44", "#FF718D"];
 
 export default function Confetti() {
   const [position, setPosition] = useState({ x: -999, y: -999 });
-  const ref = useRef<ConfettiMethods>(null);
+  const ref = useRef<any>(null);
+  const [PIConfetti, setPIConfetti] = useState<any>(null);
 
-  const handleTouch = (e: GestureResponderEvent) => {
-    const { locationX, locationY } = e.nativeEvent;
-    setPosition({ x: locationX, y: locationY });
-    ref.current?.restart();
-  };
+  // 네이티브용 confetti 처리
   useEffect(() => {
+    if (Platform.OS === "web") return;
+
     const { width, height } = Dimensions.get("window");
     const centerX = width / 2;
     const centerY = height / 2;
     setPosition({ x: centerX, y: centerY });
     ref.current?.restart();
   }, []);
+
+  // react-native-fast-confetti 동적 import
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+
+    import("react-native-fast-confetti").then((module) => {
+      setPIConfetti(() => module.PIConfetti);
+    });
+  }, []);
+
+  const handleTouch = (e: GestureResponderEvent) => {
+    if (Platform.OS === "web") return;
+
+    const { locationX, locationY } = e.nativeEvent;
+    setPosition({ x: locationX, y: locationY });
+    ref.current?.restart();
+  };
+
+  // 웹에서는 빈 View 반환
+  if (Platform.OS === "web") {
+    return <View />;
+  }
+
+  // 네이티브에서는 confetti 컴포넌트 반환
+  if (!PIConfetti) {
+    return <View />;
+  }
 
   return (
     <View
