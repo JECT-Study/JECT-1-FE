@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 
 import { UsersScheduleCheckUrl, UsersSchedulesUrl } from "@/constants/ApiUrls";
@@ -97,6 +98,19 @@ export const usePlan = () => {
     const currentMonth = dayjs().format("YYYY-MM");
     fetchScheduleDates(currentMonth);
   }, []);
+
+  // 페이지 포커스 시 데이터 새로고침
+  useFocusEffect(
+    React.useCallback(() => {
+      const currentMonth = dayjs().format("YYYY-MM");
+      fetchScheduleDates(currentMonth);
+
+      // 현재 선택된 날짜에 일정이 있으면 해당 날짜의 일정도 새로고침
+      if (scheduleDates.includes(selectedDate)) {
+        fetchSchedulesByDate(selectedDate);
+      }
+    }, [selectedDate]),
+  );
 
   return {
     schedules,

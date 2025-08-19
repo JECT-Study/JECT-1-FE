@@ -48,15 +48,15 @@ export default function Plan() {
     });
   }, [schedules, selectedDate]);
 
-  // 월별 일정 데이터를 생성 (scheduleDates 기반)
+  // 월별 일정 데이터를 생성 (schedules 기반)
   const getMonthlySchedules = useCallback(() => {
-    return scheduleDates.map((dateString, index) => ({
-      id: index + 1,
-      startDate: dateString,
-      endDate: dateString,
-      title: "일정",
+    return schedules.map((schedule) => ({
+      id: schedule.contentId,
+      startDate: schedule.startDate,
+      endDate: schedule.endDate,
+      title: schedule.title,
     }));
-  }, [scheduleDates]);
+  }, [schedules]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -85,7 +85,6 @@ export default function Plan() {
             handleMonthChange(month.dateString.slice(0, 7));
           }}
           monthRangeLimit={2}
-          showStatusBar={false}
           closeOnDayPress={false}
           disablePan={true}
           animateScroll={true}
@@ -105,6 +104,7 @@ export default function Plan() {
             renderItem={({ item }) => (
               <PostBlock
                 info={{
+                  id: item.contentId,
                   img_url: item.image || "",
                   title: item.title,
                   address: item.address,

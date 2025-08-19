@@ -1,10 +1,12 @@
-import { Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Image, Pressable, Text, View } from "react-native";
 
 import HeartIcon from "@/components/icons/HeartIcon";
 import Separator from "@/components/ui/Separator";
 import useHeart from "@/hooks/useHeart";
 
 interface infoInterface {
+  id: number;
   img_url: string;
   title: string;
   address: string;
@@ -15,11 +17,23 @@ interface infoInterface {
 export default function PostBlock({ info }: { info: infoInterface }) {
   const { like, onPressHeart } = useHeart();
 
+  const handlePress = () => {
+    router.push(`/detail/${info.id}`);
+  };
+
   return (
     <>
-      <View className="my-[18px] flex flex-row items-center">
-        {/*TODO : 실제 이미지로 교체 필요.*/}
-        <View className="h-[92px] w-[92px] rounded-[4px] bg-gray-200" />
+      <Pressable
+        className="my-[18px] flex flex-row items-center"
+        onPress={handlePress}
+      >
+        <Image
+          source={{
+            uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+          }}
+          className="h-[92px] w-[92px] rounded-[10px]"
+          resizeMode="cover"
+        />
         <View className="ml-[18px] flex-1 justify-center">
           <Text className="text-[16px] font-semibold leading-normal text-[#111]">
             {info.title}
@@ -34,7 +48,7 @@ export default function PostBlock({ info }: { info: infoInterface }) {
         <Pressable className="justify-center" onPress={onPressHeart}>
           <HeartIcon size={32} fill="#F14949" isFill={like} stroke="#FFA7A7" />
         </Pressable>
-      </View>
+      </Pressable>
       <View className="px-2">
         <Separator />
       </View>

@@ -121,13 +121,21 @@ export default function DatePickerBottomSheet({
 
         if (response.data.isSuccess) {
           onClose();
-          Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
+          if (Platform.OS === "web") {
+            window.alert("일정에 추가되었습니다.\n내 일정에서 확인해주세요.");
+          } else {
+            Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
+          }
         } else {
           throw new Error("일정 생성에 실패했습니다.");
         }
       } catch (error) {
         console.error("API 요청 오류:", error);
-        Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
+        if (Platform.OS === "web") {
+          window.alert("오류\n일정 생성에 실패했습니다. 다시 시도해주세요.");
+        } else {
+          Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
+        }
       }
     }
   }, [selectedDate, onClose, contentId]);

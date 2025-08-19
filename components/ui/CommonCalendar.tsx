@@ -51,11 +51,29 @@ LocaleConfig.defaultLocale = "ko";
 interface CommonCalendarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
+  onMonthChange?: (month: DateData) => void;
+  schedules?: {
+    id: number;
+    startDate: string;
+    endDate: string;
+    title: string;
+  }[];
+  monthRangeLimit?: number;
+  closeOnDayPress?: boolean;
+  disablePan?: boolean;
+  animateScroll?: boolean;
+  hideKnob?: boolean;
 }
 
 export default function CommonCalendar({
   selectedDate,
   onDateChange,
+  onMonthChange,
+  monthRangeLimit = 3,
+  closeOnDayPress = false,
+  disablePan = false,
+  animateScroll = true,
+  hideKnob = true,
 }: CommonCalendarProps) {
   // 캘린더 확장/축소 상태 관리
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
@@ -81,19 +99,24 @@ export default function CommonCalendar({
         return;
       }
 
-      // 현재 selectedDate의 월과 다른 경우에만 업데이트
-      const currentSelectedMonth = dayjs(selectedDate).format("YYYY-MM");
-      const newMonth = dayjs(month.dateString).format("YYYY-MM");
+      // 외부에서 전달받은 onMonthChange가 있으면 호출
+      if (onMonthChange) {
+        onMonthChange(month);
+      } else {
+        // 기본 동작: 현재 selectedDate의 월과 다른 경우에만 업데이트
+        const currentSelectedMonth = dayjs(selectedDate).format("YYYY-MM");
+        const newMonth = dayjs(month.dateString).format("YYYY-MM");
 
-      if (currentSelectedMonth !== newMonth) {
-        // 변경된 월의 1일로 selectedDate 업데이트
-        const firstDayOfMonth = dayjs(month.dateString)
-          .startOf("month")
-          .format("YYYY-MM-DD");
-        onDateChange(firstDayOfMonth);
+        if (currentSelectedMonth !== newMonth) {
+          // 변경된 월의 1일로 selectedDate 업데이트
+          const firstDayOfMonth = dayjs(month.dateString)
+            .startOf("month")
+            .format("YYYY-MM-DD");
+          onDateChange(firstDayOfMonth);
+        }
       }
     },
-    [selectedDate, onDateChange, isCalendarExpanded],
+    [selectedDate, onDateChange, isCalendarExpanded, onMonthChange],
   );
 
   // 캘린더 확장/축소 상태 변경 시 호출되는 핸들러
@@ -130,14 +153,14 @@ export default function CommonCalendar({
         onDayPress={handleDateChange} // 날짜 선택 시 실행할 콜백 함수
         onMonthChange={handleMonthChange} // 월 변경 시 실행할 콜백 함수
         onCalendarToggled={handleCalendarToggled} // 캘린더 확장/축소 시 실행할 콜백 함수
-        hideKnob={true} // 기본 캘린더 확장/축소 손잡이 숨김 (커스텀 손잡이 사용)
-        closeOnDayPress={false} // 날짜 선택 시 캘린더 자동 닫기 여부 (false: 닫지 않음)
-        disablePan={false} // 팬(드래그) 제스처 비활성화 여부 (false: 활성화)
-        animateScroll={true} // 스크롤 애니메이션 활성화 여부 (true: 부드러운 애니메이션)
-        pastScrollRange={3} // 과거 방향으로 스크롤 가능한 개월 수 (12개월 전까지)
-        futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
+        pastScrollRange={monthRangeLimit} // 과거 방향으로 스크롤 가능한 개월 수
+        futureScrollRange={monthRangeLimit} // 미래 방향으로 스크롤 가능한 개월 수
         markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
         dayComponent={CustomDay} // 커스텀 Day 컴포넌트 사용 (일요일 빨간색 표시)
+        closeOnDayPress={closeOnDayPress} // 날짜 선택 시 캘린더 자동 닫기 여부
+        disablePan={disablePan} // 팬(드래그) 제스처 비활성화 여부
+        animateScroll={animateScroll} // 스크롤 애니메이션 활성화 여부
+        hideKnob={hideKnob} // 기본 캘린더 확장/축소 손잡이 숨김
       />
 
       <View

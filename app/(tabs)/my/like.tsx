@@ -1,6 +1,5 @@
 import React from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,11 +17,11 @@ export default function Like() {
   const { favorites, loading, loadMore, refetch } = useLike(selected);
 
   // 페이지에 포커스될 때마다 데이터 새로고침
-  useFocusEffect(
-    React.useCallback(() => {
-      refetch();
-    }, [refetch]),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     refetch();
+  //   }, [refetch]),
+  // );
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
@@ -49,6 +48,7 @@ export default function Like() {
           renderItem={({ item }) => (
             <PostBlock
               info={{
+                id: item.contentId,
                 img_url: item.image || "",
                 title: item.title,
                 address: item.address,

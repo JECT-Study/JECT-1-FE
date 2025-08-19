@@ -138,6 +138,7 @@ export default function DetailScreen() {
   const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
+  const [hasError, setHasError] = useState<boolean>(false); // 에러 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -176,6 +177,7 @@ export default function DetailScreen() {
 
       try {
         setLoading(true);
+        setHasError(false);
         if (id) {
           const response = await authApi.get(`${BACKEND_URL}/contents/${id}`);
 
@@ -185,10 +187,13 @@ export default function DetailScreen() {
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
             // 초기에는 likeCount를 null로 유지 (contentData.likes 사용)
+          } else {
+            setHasError(true);
           }
         }
       } catch (error) {
         console.error("API 호출 에러:", error);
+        setHasError(true);
       } finally {
         await ensureMinLoadingTime(startTime);
         setLoading(false);
@@ -363,7 +368,7 @@ export default function DetailScreen() {
 
   return (
     <>
-      {loading || !contentData ? (
+      {loading ? (
         <View className="flex-1 items-center justify-center bg-white">
           <StatusBar
             barStyle="dark-content"
@@ -371,6 +376,78 @@ export default function DetailScreen() {
             translucent
           />
           <ActivityIndicator size="large" color="#6C4DFF" />
+        </View>
+      ) : hasError || !contentData ? (
+        <View className="flex-1 bg-white">
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor="transparent"
+            translucent
+          />
+
+          {/* 뒤로가기 버튼 */}
+          <View
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 ${
+              Platform.OS === "web" ? "pt-10" : "pt-20"
+            } bg-white`}
+          >
+            <Pressable
+              onPress={handleGoBack}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              className="z-10"
+            >
+              <BackArrow color="#000" />
+            </Pressable>
+          </View>
+
+          <View className="flex-1 items-center justify-center">
+            <Text className="mb-2 text-lg font-semibold text-gray-800">
+              데이터를 불러올 수 없습니다
+            </Text>
+            <Text className="mb-1 text-center text-gray-600">
+              잠시 후 다시 시도해주세요
+            </Text>
+            <Text className="mb-4 text-center text-sm text-gray-500">
+              로그아웃 상태에서도 데이터를 볼 수 있습니다
+            </Text>
+            <Pressable
+              className="rounded-lg bg-[#6C4DFF] px-6 py-3"
+              onPress={() => {
+                setLoading(true);
+                setHasError(false);
+                // 페이지 새로고침 로직
+                const fetchContentDetail = async () => {
+                  const startTime = dayjs().valueOf();
+                  try {
+                    if (id) {
+                      const response = await authApi.get(
+                        `${BACKEND_URL}/contents/${id}`,
+                      );
+                      if (response.data.isSuccess) {
+                        const contentDetail = response.data.result;
+                        setContentData(contentDetail);
+                        setIsLiked(contentDetail.likeId !== null);
+                      } else {
+                        setHasError(true);
+                      }
+                    }
+                  } catch (error) {
+                    console.error("API 호출 에러:", error);
+                    setHasError(true);
+                  } finally {
+                    await ensureMinLoadingTime(startTime);
+                    setLoading(false);
+                  }
+                };
+                fetchContentDetail();
+              }}
+            >
+              <Text className="text-center font-semibold text-white">
+                다시 시도
+              </Text>
+            </Pressable>
+          </View>
         </View>
       ) : (
         <View className="flex-1 bg-white">
