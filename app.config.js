@@ -31,6 +31,8 @@ export default {
         },
       ],
       NSAppTransportSecurity: { NSAllowsArbitraryLoads: true },
+      NSLocationWhenInUseUsageDescription:
+        "마이코드가 지도 서비스를 제공하기 위해 위치 정보를 사용합니다.",
     },
   },
 
