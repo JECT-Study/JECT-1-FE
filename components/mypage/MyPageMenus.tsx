@@ -5,6 +5,7 @@ import { Alert, Platform, View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
 import usePageNavigation from "@/hooks/usePageNavigation";
+import useUserStore from "@/stores/useUserStore";
 
 // 플랫폼별 토큰 삭제 함수
 async function deleteTokenAsync(key: string) {
@@ -31,6 +32,11 @@ const handleLogout = async () => {
             // await authApi.post(LogoutUrl);
             await deleteTokenAsync("accessToken");
             await deleteTokenAsync("refreshToken");
+
+            // 전역 상태 초기화
+            const { clearUserInfo } = useUserStore.getState().action;
+            clearUserInfo();
+
             alert("로그아웃이 완료되었습니다.");
 
             router.dismissAll();
