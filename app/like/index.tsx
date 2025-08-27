@@ -136,7 +136,7 @@ export default function Like() {
         title="관심 목록"
         isCommit={false}
         cancel={() => {
-          router.replace("/my");
+          router.back();
         }}
       />
       <View className="flex w-full items-start p-6">

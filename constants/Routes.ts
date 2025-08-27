@@ -5,7 +5,7 @@ export const ROUTES = {
   SCHEDULE: "/schedule",
   DETAIL: "/detail",
   MY: {
-    LIKE: "/my/like",
+    LIKE: "/like",
     INDEX: "/my",
     TERMS: "/my/terms",
     WITHDRAWAL: "/my/withdrawal",
