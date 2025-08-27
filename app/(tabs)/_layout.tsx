@@ -58,17 +58,7 @@ export default function TabLayout() {
         }}
       >
         {TAB_SCREENS.map((screen) => {
-          if (screen.href === null) {
-            return (
-              <Tabs.Screen
-                key={screen.name}
-                name={screen.name}
-                options={{ href: null }}
-              />
-            );
-          }
-
-          // 일반 탭 또는 그룹 탭 처리
+          // 일반 탭 처리
           return (
             <Tabs.Screen
               key={screen.name}
@@ -86,7 +76,7 @@ export default function TabLayout() {
                   if (
                     screen.name === "index" ||
                     screen.name === "schedule" ||
-                    screen.name === "my/index"
+                    screen.name === "mypage"
                   ) {
                     return (
                       <screen.Icon

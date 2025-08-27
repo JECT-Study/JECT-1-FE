@@ -20,14 +20,8 @@ export const TAB_SCREENS = [
     Icon: ScheduleIcon,
   },
   {
-    name: "my/index",
+    name: "mypage",
     title: "마이",
     Icon: MyIcon,
-    activePage: "my",
   },
-  // 탭 바에 표시되지 않을 화면들
-  { name: "my/terms", href: null },
-  { name: "my/edit_profile", href: null },
-  { name: "my/like", href: null },
-  { name: "my/plan", href: null },
 ];
