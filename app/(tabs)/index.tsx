@@ -641,7 +641,7 @@ export default function HomeScreen() {
                     <LockIcon />
                     <View>
                       <Text className="text-center text-lg font-medium text-[#212121]">
-                        회원가입하고
+                        로그인하고
                       </Text>
                       <Text className="text-center text-lg font-medium text-[#212121]">
                         맞춤 컨텐츠를 확인해보세요!
@@ -669,7 +669,7 @@ export default function HomeScreen() {
                         }}
                       >
                         <Text className="font-base text-sm text-white">
-                          회원가입하기
+                          로그인하기
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>

@@ -24,12 +24,9 @@ const useUserStore = create<UserStore>((set) => ({
         profileImage,
         isLoggedIn: true,
       })),
-    setNickname: (nickname: string) =>
-      set(() => ({ nickname })),
-    setProfileImage: (profileImage: string) =>
-      set(() => ({ profileImage })),
-    setLoggedIn: (isLoggedIn: boolean) =>
-      set(() => ({ isLoggedIn })),
+    setNickname: (nickname: string) => set(() => ({ nickname })),
+    setProfileImage: (profileImage: string) => set(() => ({ profileImage })),
+    setLoggedIn: (isLoggedIn: boolean) => set(() => ({ isLoggedIn })),
     clearUserInfo: () =>
       set(() => ({
         nickname: "",
@@ -40,12 +37,10 @@ const useUserStore = create<UserStore>((set) => ({
 }));
 
 // Selectors
-export const useNickname = () =>
-  useUserStore((state) => state.nickname);
+export const useNickname = () => useUserStore((state) => state.nickname);
 export const useProfileImage = () =>
   useUserStore((state) => state.profileImage);
-export const useIsLoggedIn = () =>
-  useUserStore((state) => state.isLoggedIn);
+export const useIsLoggedIn = () => useUserStore((state) => state.isLoggedIn);
 
 // Actions
 export const useSetUserInfo = () =>
