@@ -1,23 +1,134 @@
+import { useCallback, useEffect, useState } from "react";
+
+import { AxiosError } from "axios";
 import { router } from "expo-router";
 import {
   FlatList,
+  Pressable,
   RefreshControl,
   SafeAreaView,
-  View,
   Text,
+  View,
 } from "react-native";
 
-import LikeFilter from "@/components/mypage/LikeFilter";
 import CustomHeader from "@/components/ui/CustomHeader";
 import PostBlock from "@/components/ui/PostBlock";
-import { useLike } from "@/hooks/useLike";
-import useLikeRefresh from "@/hooks/useLikeRefresh";
-import { useCategorySelected } from "@/stores/useCategoryStore";
+import { UsersFavoriteUrl } from "@/constants/ApiUrls";
+import { categoryUnion, filterData } from "@/constants/Filter";
+import { authApi } from "@/features/axios/axiosInstance";
+
+// 좋아요 아이템 타입 정의
+type FavoriteItem = {
+  contentId: number;
+  likeId: number;
+  title: string;
+  image: string | null;
+  address: string;
+  startDate: string;
+  endDate: string;
+};
+
+// 카테고리 매핑 함수 (contentType 파라미터용)
+const getCategoryParam = (category: categoryUnion) => {
+  const categoryMap: Record<categoryUnion, string> = {
+    all: "",
+    festival: "FESTIVAL",
+    event: "EVENT",
+    concert: "PERFORMANCE",
+    exhibition: "EXHIBITION",
+  };
+  return category === "all" ? undefined : categoryMap[category];
+};
 
 export default function Like() {
-  const { refresh, onRefresh } = useLikeRefresh();
-  const selected = useCategorySelected();
-  const { favorites, loading, loadMore } = useLike(selected);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const [selectedCategory, setSelectedCategory] =
+    useState<categoryUnion>("all");
+
+  // 좋아요 데이터 가져오기 함수
+  const fetchLikes = useCallback(
+    async (pageNumber: number, isLoadMore: boolean = false) => {
+      setLoading(true);
+      try {
+        const categoryParam = getCategoryParam(selectedCategory);
+        const params: any = {
+          page: pageNumber,
+          limit: 10,
+        };
+        if (categoryParam) {
+          params.contentType = categoryParam;
+        }
+
+        const response = await authApi.get(UsersFavoriteUrl, {
+          params,
+        });
+
+        const { content, last, totalElements } = response.data.result;
+
+        if (isLoadMore) {
+          setFavorites((prev) => [...prev, ...content]);
+          setPage(pageNumber);
+        } else {
+          setFavorites(content);
+          setPage(0);
+        }
+
+        setHasMore(!last && (isLoadMore ? true : totalElements > 0));
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        console.error("좋아요 데이터 로딩 실패:", axiosError);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedCategory],
+  );
+
+  // 더 많은 데이터 로드
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+    await fetchLikes(page + 1, true);
+  }, [loading, hasMore, page, fetchLikes]);
+
+  // 새로고침 함수
+  const onRefresh = useCallback(async () => {
+    setRefresh(true);
+    try {
+      await fetchLikes(0, false);
+    } catch (error) {
+      console.error("새로고침 실패:", error);
+    } finally {
+      setRefresh(false);
+    }
+  }, [fetchLikes]);
+
+  // 카테고리 변경 시 데이터 새로고침
+  useEffect(() => {
+    fetchLikes(0, false);
+  }, [selectedCategory, fetchLikes]);
+
+  // 카테고리 변경 핸들러
+  const handleCategoryChange = useCallback((category: categoryUnion) => {
+    setSelectedCategory(category);
+    setPage(0);
+    setHasMore(true);
+  }, []);
+
+  // 좋아요 상태 변경 핸들러
+  const handleLikeChange = useCallback(
+    (contentId: number, isLiked: boolean, likeCount: number) => {
+      // 좋아요가 취소된 경우 리스트에서 제거하거나 전체 새로고침
+      if (!isLiked) {
+        // 찜 목록에서 좋아요를 취소하면 해당 항목이 사라져야 하므로 새로고침
+        fetchLikes(0, false);
+      }
+    },
+    [fetchLikes],
+  );
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
@@ -29,7 +140,31 @@ export default function Like() {
         }}
       />
       <View className="flex w-full items-start p-6">
-        <LikeFilter />
+        {/* 카테고리 필터 */}
+        <View className="flex flex-row gap-[10px]">
+          {Object.entries(filterData).map(([key, value]) => {
+            const categoryKey = key as categoryUnion;
+            return (
+              <Pressable
+                onPress={() => handleCategoryChange(categoryKey)}
+                key={key}
+                className={`flex h-[33px] w-[49px] items-center justify-center rounded-[20px] text-[14px] ${
+                  selectedCategory === key
+                    ? "bg-[#816BFF] text-white"
+                    : "border-[1px] border-[#816BFF] bg-white"
+                } `}
+              >
+                <Text
+                  className={`${
+                    selectedCategory === key ? "text-white" : "text-[#816BFF]"
+                  }`}
+                >
+                  {value}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
       {favorites.length === 0 && !loading ? (
         <View className="flex-1 items-center justify-center">
@@ -44,12 +179,16 @@ export default function Like() {
           renderItem={({ item }) => (
             <PostBlock
               info={{
-                img_url: item.image || "",
+                contentId: item.contentId,
                 title: item.title,
                 address: item.address,
                 start_date: item.startDate,
                 end_date: item.endDate,
+                img_url: item.image || undefined,
+                likeId: item.likeId,
+                // likes는 PostBlock 내부에서 API로 가져옴
               }}
+              onLikeChange={handleLikeChange}
             />
           )}
           keyExtractor={(item) => item.contentId.toString()}
