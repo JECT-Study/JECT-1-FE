@@ -192,7 +192,7 @@ export default function Plan() {
         title="나의 일정"
         isCommit={false}
         cancel={() => {
-          router.replace("/my");
+          router.back();
         }}
       />
 

@@ -10,6 +10,6 @@ export const ROUTES = {
     TERMS: "/my/terms",
     WITHDRAWAL: "/my/withdrawal",
     EDIT_PROFILE: "/my/edit_profile",
-    PLAN: "/my/plan",
+    PLAN: "/plan",
   },
 } as const;
