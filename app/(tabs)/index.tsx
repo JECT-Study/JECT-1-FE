@@ -299,8 +299,8 @@ export default function HomeScreen() {
       const refreshToken = await getTokenAsync("refreshToken");
 
       console.log("🔍 토큰 확인:", {
-        accessToken: accessToken ? "존재" : "없음",
-        refreshToken: refreshToken ? "존재" : "없음",
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         nickname,
         isLoggedIn: !!accessToken,
       });
