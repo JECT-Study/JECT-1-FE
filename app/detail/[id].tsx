@@ -42,7 +42,7 @@ function DetailImageCarousel({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const carouselData = Array(5).fill({
-    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
   });
 
   const renderCarouselItem = ({
@@ -296,8 +296,8 @@ export default function DetailScreen() {
 
   const handleImagePress = (index: number) => {
     const imageUrls = [
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
     ];
 
     router.push({

@@ -88,11 +88,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
+        source={require("../../assets/images/content_placeholder.png")}
         className="h-[111px] w-[111px] rounded-[10px]"
         resizeMode="cover"
       />
@@ -125,11 +121,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
+        source={require("../../assets/images/content_placeholder.png")}
         className="h-[154px] w-[154px] rounded-[14px]"
         resizeMode="cover"
       />
@@ -160,11 +152,7 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
+        source={require("../../assets/images/content_placeholder.png")}
         className="h-[90px] w-[120px] rounded-lg"
         resizeMode="cover"
       />
@@ -193,11 +181,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
+        source={require("../../assets/images/content_placeholder.png")}
         className="h-[92px] w-full rounded-[14px]"
         resizeMode="cover"
       />

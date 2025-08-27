@@ -153,11 +153,7 @@ function EventCard({ item, onPress }: EventCardProps) {
     >
       <View className="h-[164px] w-full overflow-hidden rounded-[11px] bg-gray-200">
         <Image
-          source={{
-            uri:
-              item.thumbnailUrl ||
-              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-          }}
+          source={require("../../assets/images/content_placeholder.png")}
           className="h-full w-full"
           resizeMode="cover"
         />

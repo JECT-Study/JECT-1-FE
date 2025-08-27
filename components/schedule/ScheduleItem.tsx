@@ -29,9 +29,7 @@ export default function ScheduleItem({ item, onPress }: ScheduleItemProps) {
     >
       <View className="flex-row gap-x-[18px]">
         <Image
-          source={{
-            uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-          }}
+          source={require("../../assets/images/content_placeholder.png")}
           className="h-[136px] w-[104px] rounded-lg"
           resizeMode="cover"
         />
