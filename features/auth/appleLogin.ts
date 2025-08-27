@@ -1,7 +1,7 @@
 import * as AppleAuthentication from "expo-apple-authentication";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
@@ -29,11 +29,8 @@ export async function IOSAppleLogin() {
       socialId: id,
       socialType: "APPLE",
     });
-    console.log(response);
-    const accessToken = response.data.result.accessToken;
-    const refreshToken = response.data.result.refreshToken;
-    const nickname = response.data.result.nickname;
-    const image = response.data.result.image;
+
+    const { accessToken, refreshToken, nickname, image } = response.data.result;
 
     console.log("🍎 애플 로그인 성공 - 사용자 정보:", {
       nickname,
@@ -56,9 +53,16 @@ export async function IOSAppleLogin() {
     });
 
     router.push("/(tabs)");
-  } catch (error) {
-    // 애플 로그인 취소 시에는 에러 메시지를 표시하지 않음
-    console.log("애플 로그인 취소 또는 에러:", error);
+  } catch (error: any) {
+    console.log("애플 로그인 취소 또는 에러:", error?.response?.data?.message);
+
+    // 2404 에러 코드인 경우 서버 메시지를 alert으로 표시
+    if (error?.response?.data?.code === 2404) {
+      const message =
+        error.response?.data?.message || "미미 탈퇴한 사용자입니다.";
+      Alert.alert("로그인 오류", message);
+    }
+    // 다른 에러의 경우는 기존처럼 조용히 처리 (애플 로그인 취소 등)
   }
 }
 
