@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { SafeAreaView, View, Text, Pressable } from "react-native";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 
 import Chevron from "@/components/icons/Chevron";
 import MyPageMenu from "@/components/mypage/MyPageMenu";
@@ -12,7 +12,7 @@ export default function Terms() {
           <Text className="text-[20px] text-[#383535]">이용약관</Text>
           <Pressable
             className="absolute left-4 top-1/2 -translate-y-1/2"
-            onPress={() => router.replace("/(tabs)/my")}
+            onPress={() => router.back()}
           >
             <Chevron direction="left" />
           </Pressable>

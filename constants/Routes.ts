@@ -7,7 +7,7 @@ export const ROUTES = {
   MY: {
     LIKE: "/like",
     INDEX: "/my",
-    TERMS: "/my/terms",
+    TERMS: "/terms",
     WITHDRAWAL: "/my/withdrawal",
     EDIT_PROFILE: "/my/edit_profile",
     PLAN: "/plan",
