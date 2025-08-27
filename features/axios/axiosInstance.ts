@@ -58,7 +58,7 @@ authApi.interceptors.request.use(
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       } else {
-        console.warn("액세스 토큰이 없습니다. 로그인이 필요할 수 있습니다.");
+        console.log("액세스 토큰이 없습니다. 로그인이 필요할 수 있습니다.");
       }
     } catch (error) {
       console.error("토큰 조회 실패:", error);
