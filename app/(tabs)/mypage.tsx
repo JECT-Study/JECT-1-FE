@@ -1,15 +1,49 @@
+import { useCallback, useEffect, useState } from "react";
+
 import { router } from "expo-router";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
+import * as SecureStore from "expo-secure-store";
+import { Platform, Pressable, SafeAreaView, Text, View } from "react-native";
 
 import MyMenus from "@/components/mypage/MyMenus";
 import MyPageMenus from "@/components/mypage/MyPageMenus";
 import UserInfo from "@/components/mypage/UserInfo";
 import usePageNavigation from "@/hooks/usePageNavigation";
-import { useIsLoggedIn } from "@/stores/useUserStore";
+
+// 플랫폼별 토큰 조회 함수
+async function getTokenAsync(key: string): Promise<string | null> {
+  if (Platform.OS === "web") {
+    return localStorage.getItem(key);
+  } else {
+    return await SecureStore.getItemAsync(key);
+  }
+}
 
 export default function MyScreen() {
   const { goEditProfile } = usePageNavigation();
-  const isLoggedIn = useIsLoggedIn();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  // 토큰 존재 여부로 로그인 상태 확인
+  const checkLoginStatus = useCallback(async () => {
+    try {
+      const accessToken = await getTokenAsync("accessToken");
+      const refreshToken = await getTokenAsync("refreshToken");
+
+      console.log("🔍 MyScreen 토큰 확인:", {
+        accessToken: !!accessToken,
+        refreshToken: !!refreshToken,
+        isLoggedIn: !!(accessToken && refreshToken),
+      });
+
+      setIsLoggedIn(!!(accessToken && refreshToken));
+    } catch (error) {
+      console.log("❌ MyScreen 토큰 확인 중 에러:", error);
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
 
   // 로그인이 필요한 레이어 컴포넌트
   const LoginRequiredLayer = () => (
