@@ -173,6 +173,8 @@ export default function ScheduleScreen() {
     [router],
   );
 
+  console.log(schedules);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
