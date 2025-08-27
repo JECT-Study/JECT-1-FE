@@ -22,7 +22,11 @@ import {
   useInitializeFromUserStore,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
-import { useNickname, useSetNickname } from "@/stores/useUserStore";
+import {
+  useNickname,
+  useSetNickname,
+  useSetProfileImage,
+} from "@/stores/useUserStore";
 
 // 기본 프로필 이미지 (회색)
 const DEFAULT_PROFILE_IMAGE =
@@ -33,6 +37,7 @@ export default function EditProfile() {
   const initializeFromUserStore = useInitializeFromUserStore();
   const currentNickname = useNickname();
   const setGlobalNickname = useSetNickname();
+  const setGlobalProfileImage = useSetProfileImage();
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +45,8 @@ export default function EditProfile() {
   // 프로필 이미지 관련
   const { onPress } = useImagePicker();
   const profileUri = useTempImageUri();
+
+  console.log("profileUri", profileUri);
 
   // 닉네임 관련 - 직접 상태 관리
   const [inputNickname, setInputNickname] = useState("");
@@ -67,27 +74,43 @@ export default function EditProfile() {
       // 닉네임 추가
       formData.append("nickname", inputNickname.trim());
 
-      // 이미지 추가 (임시로 주석처리하여 닉네임만 테스트)
-      /*
-      if (
+      // 이미지 추가 (새로운 이미지가 선택된 경우에만)
+      const hasNewImage =
         profileUri &&
         profileUri.trim() !== "" &&
-        !profileUri.startsWith("data:image/svg+xml")
-      ) {
+        !profileUri.startsWith("data:image/svg+xml");
+
+      if (hasNewImage) {
         const imageUri = profileUri;
         const filename = imageUri.split("/").pop() || "profile.jpg";
-        const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : "image/jpeg";
 
-        formData.append("image", {
+        // 파일 확장자에 따른 MIME 타입 설정
+        let mimeType = "image/jpeg"; // 기본값
+        if (filename.toLowerCase().includes(".png")) {
+          mimeType = "image/png";
+        } else if (
+          filename.toLowerCase().includes(".jpg") ||
+          filename.toLowerCase().includes(".jpeg")
+        ) {
+          mimeType = "image/jpeg";
+        } else if (filename.toLowerCase().includes(".gif")) {
+          mimeType = "image/gif";
+        } else if (filename.toLowerCase().includes(".webp")) {
+          mimeType = "image/webp";
+        }
+
+        // React Native에서 FormData에 파일 추가하는 방식 (블로그 참고)
+        const imageFile = {
           uri: imageUri,
+          type: mimeType,
           name: filename,
-          type: type,
-        } as any);
-      }
-      */
+        } as any;
 
-      console.log("Testing nickname only update:", inputNickname.trim());
+        // 이미지를 FormData에 추가
+        formData.append("image", imageFile);
+      } else {
+        console.log("No new image selected, profileUri:", profileUri);
+      }
 
       const response = await authApi.patch(
         `${BACKEND_URL}/users/profile`,
@@ -99,12 +122,17 @@ export default function EditProfile() {
         },
       );
 
-      console.log("리스폰스", response);
-
       if (response.data.isSuccess) {
         // 전역 상태 업데이트
         setGlobalNickname(inputNickname.trim());
-        console.log("전역 상태 업데이트 완료:", inputNickname.trim());
+
+        // 이미지가 업데이트된 경우 전역 상태에도 반영
+        if (hasNewImage && response.data.result?.profileImage) {
+          setGlobalProfileImage(response.data.result.profileImage);
+        } else if (hasNewImage && profileUri) {
+          // 서버에서 이미지 URL을 반환하지 않는 경우, 로컬 URI 사용
+          setGlobalProfileImage(profileUri);
+        }
 
         Alert.alert("성공", "프로필이 성공적으로 업데이트되었습니다.", [
           {
