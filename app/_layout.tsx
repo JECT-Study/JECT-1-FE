@@ -99,6 +99,13 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="edit-profile/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
                   name="plan/index"
                   options={{
                     headerShown: false,

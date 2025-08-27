@@ -9,7 +9,7 @@ export const ROUTES = {
     INDEX: "/my",
     TERMS: "/terms",
     WITHDRAWAL: "/my/withdrawal",
-    EDIT_PROFILE: "/my/edit_profile",
+    EDIT_PROFILE: "/edit-profile",
     PLAN: "/plan",
   },
 } as const;

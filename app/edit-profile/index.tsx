@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { SafeAreaView } from "react-native";
 
 import EditProfileImage from "@/components/mypage/EditProfileImage";
@@ -29,11 +28,11 @@ export default function EditProfile() {
         isCommit={true}
         commit={() => {
           applyEdit();
-          router.replace("/my");
+          router.back();
         }}
         cancel={() => {
           cancelEdit();
-          router.replace("/my");
+          router.back();
         }}
       />
       <EditProfileImage />
