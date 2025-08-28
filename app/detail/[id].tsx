@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
+import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
   Dimensions,
   Image,
-  Linking,
-  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -52,25 +51,17 @@ function DetailImageCarousel({
     item: any;
     index: number;
   }) => (
-    //! 웹 환경에서 이미지 클릭 시 확대 페이지로 이동하는 기능 제거
     <Pressable
-      onPress={() => Platform.OS !== "web" && onImagePress(index)}
+      onPress={() => onImagePress(index)}
       style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
     >
       <Image
         source={item}
         className="w-full"
-        style={[
-          {
-            height: imageHeight,
-            resizeMode: "cover",
-          },
-
-          //! 50% 설정 시 웹 환경에서 캐러셀 이미지 사이 여백 생김
-          Platform.OS === "web" && {
-            maxWidth: "50%",
-          },
-        ]}
+        style={{
+          height: imageHeight,
+          resizeMode: "cover",
+        }}
       />
     </Pressable>
   );
@@ -82,11 +73,7 @@ function DetailImageCarousel({
       }}
     >
       <Carousel
-        width={
-          Platform.OS === "web"
-            ? Math.min(Dimensions.get("window").width, 800)
-            : Dimensions.get("window").width
-        }
+        width={Dimensions.get("window").width}
         height={imageHeight}
         data={carouselData}
         renderItem={renderCarouselItem}
@@ -145,21 +132,12 @@ export default function DetailScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
 
-  // 플랫폼별 토큰 조회 함수
-  const getTokenAsync = async (key: string): Promise<string | null> => {
-    if (Platform.OS === "web") {
-      return localStorage.getItem(key);
-    } else {
-      return await SecureStore.getItemAsync(key);
-    }
-  };
-
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const accessToken = await getTokenAsync("accessToken");
-        const refreshToken = await getTokenAsync("refreshToken");
+        const accessToken = await SecureStore.getItemAsync("accessToken");
+        const refreshToken = await SecureStore.getItemAsync("refreshToken");
         setIsLoggedIn(!!(accessToken && refreshToken));
       } catch (error) {
         console.error("토큰 확인 실패:", error);
@@ -322,29 +300,11 @@ export default function DetailScreen() {
 
     const { latitude, longitude, placeName } = contentData;
 
-    // 웹 환경에서는 네이버 지도 웹사이트로 이동
-    if (Platform.OS === "web") {
-      const naverMapWebUrl = `https://map.naver.com/v5/search/${encodeURIComponent(placeName)}/place?c=${longitude},${latitude},15,0,0,0,dh`;
-
-      try {
-        window.open(naverMapWebUrl, "_blank");
-      } catch (error) {
-        console.error("네이버 지도 웹사이트 열기 실패:", error);
-        // 대안으로 현재 창에서 열기
-        window.location.href = naverMapWebUrl;
-      }
-      return;
-    }
-
-    // 모바일 환경에서는 기존 로직 유지
     // 네이버 지도 URL scheme
     const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
 
-    // 네이버 지도 앱 스토어 링크
-    const naverMapStoreURL =
-      Platform.OS === "ios"
-        ? "https://itunes.apple.com/app/id311867728?mt=8" // iOS 앱 스토어
-        : "market://details?id=com.nhn.android.nmap"; // Android 구글 플레이
+    // 네이버 지도 앱 스토어 링크 (iOS)
+    const naverMapStoreURL = "https://itunes.apple.com/app/id311867728?mt=8";
 
     try {
       // 네이버 지도 앱이 설치되어 있는지 확인
@@ -383,9 +343,7 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 ${
-              Platform.OS === "web" ? "pt-10" : "pt-20"
-            } ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
@@ -405,7 +363,7 @@ export default function DetailScreen() {
             {showHeaderBackground && (
               <View
                 className="absolute left-0 right-0 items-center justify-center"
-                style={{ top: Platform.OS === "web" ? 80 : 72 }}
+                style={{ top: 72 }}
               >
                 <Text
                   className="text-lg font-semibold text-[#212121]"
@@ -576,9 +534,6 @@ export default function DetailScreen() {
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-col items-center">
-                {/* 🌟 찜하기 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
-                {/* 지금은 찜하기 api만 연결 되어 있는데 찜 되어 있는 상태에서 찜 취소 버튼을 누르면 찜 취소 상태로 변경되어야 합니다. */}
-                {/* 기존에 찜 해둔 상태라면 다시 페이지 방문 시 찜 해둔 상태가 유지되어야 합니다. */}
                 <Pressable
                   className="items-center justify-center"
                   style={({ pressed }) => [
@@ -610,8 +565,6 @@ export default function DetailScreen() {
                 </Text>
               </View>
 
-              {/* 🌟 내 일정에 추가 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
-              {/* 🌟 이 부분도 찜 해둔 상태인지 여부를 likeId가 null인지 아닌지로 판단하는 것처럼 scheduleId가 null인지 아닌지로 판단하여 내 일정에 추가 버튼을 활성화 또는 비활성화 해두면 될 것 같습니다. */}
               <Pressable
                 className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
@@ -632,7 +585,7 @@ export default function DetailScreen() {
       )}
 
       {/* 날짜 선택 바텀 시트 */}
-      {contentData && (
+      {contentData && contentData.startDate && contentData.endDate && (
         <DatePickerBottomSheet
           isOpen={isDatePickerOpen}
           onClose={handleDatePickerClose}
