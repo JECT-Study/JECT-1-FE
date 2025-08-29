@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useState } from "react";
+
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -6,6 +8,15 @@ import { Alert, Platform, View } from "react-native";
 import MyPageMenu from "@/components/mypage/MyPageMenu";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
+
+// 플랫폼별 토큰 조회 함수
+async function getTokenAsync(key: string): Promise<string | null> {
+  if (Platform.OS === "web") {
+    return localStorage.getItem(key);
+  } else {
+    return await SecureStore.getItemAsync(key);
+  }
+}
 
 // 플랫폼별 토큰 삭제 함수
 async function deleteTokenAsync(key: string) {
@@ -59,15 +70,36 @@ const handleLogout = async () => {
 
 export default function MyPageMenus() {
   const { goTerms, goWithdrawal } = usePageNavigation();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  // 토큰 존재 여부로 로그인 상태 확인
+  const checkLoginStatus = useCallback(async () => {
+    try {
+      const accessToken = await getTokenAsync("accessToken");
+      const refreshToken = await getTokenAsync("refreshToken");
+      setIsLoggedIn(!!(accessToken && refreshToken));
+    } catch (error) {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
+
   return (
     <View className="w-full px-4">
       <MyPageMenu title="이용약관" onPress={() => goTerms()} chevron={true} />
-      <MyPageMenu title="로그아웃" onPress={handleLogout} chevron={true} />
-      <MyPageMenu
-        title="회원탈퇴"
-        onPress={() => goWithdrawal()}
-        chevron={true}
-      />
+      {isLoggedIn && (
+        <>
+          <MyPageMenu title="로그아웃" onPress={handleLogout} chevron={true} />
+          <MyPageMenu
+            title="회원탈퇴"
+            onPress={() => goWithdrawal()}
+            chevron={true}
+          />
+        </>
+      )}
     </View>
   );
 }
