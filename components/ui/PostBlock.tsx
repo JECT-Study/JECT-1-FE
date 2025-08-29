@@ -8,6 +8,7 @@ import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 
 interface infoInterface {
   contentId: number;
@@ -153,7 +154,7 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
           source={
             info.img_url
               ? { uri: info.img_url }
-              : require("../../assets/images/content_placeholder.png")
+              : getImageSource(info.contentId)
           }
           className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
           resizeMode="cover"

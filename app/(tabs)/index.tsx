@@ -33,6 +33,7 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
+import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -88,7 +89,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={require("../../assets/images/content_placeholder.png")}
+        source={getImageSource(item.contentId)}
         className="h-[111px] w-[111px] rounded-[10px]"
         resizeMode="cover"
       />
@@ -121,7 +122,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={require("../../assets/images/content_placeholder.png")}
+        source={getImageSource(item.contentId)}
         className="h-[154px] w-[154px] rounded-[14px]"
         resizeMode="cover"
       />
@@ -152,7 +153,7 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <Image
-        source={require("../../assets/images/content_placeholder.png")}
+        source={getImageSource(item.contentId)}
         className="h-[90px] w-[120px] rounded-lg"
         resizeMode="cover"
       />
@@ -181,7 +182,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <Image
-        source={require("../../assets/images/content_placeholder.png")}
+        source={getImageSource(item.contentId)}
         className="h-[92px] w-full rounded-[14px]"
         resizeMode="cover"
       />

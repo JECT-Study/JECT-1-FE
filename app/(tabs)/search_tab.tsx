@@ -23,6 +23,7 @@ import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 
 const SEARCH_LIMIT = 8; // 페이지당 검색 결과 개수
 
@@ -153,7 +154,7 @@ function EventCard({ item, onPress }: EventCardProps) {
     >
       <View className="h-[164px] w-full overflow-hidden rounded-[11px] bg-gray-200">
         <Image
-          source={require("../../assets/images/content_placeholder.png")}
+          source={getImageSource(item.id)}
           className="h-full w-full"
           resizeMode="cover"
         />

@@ -7,7 +7,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
   Pressable,
   ScrollView,
@@ -15,7 +14,6 @@ import {
   Text,
   View,
 } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
@@ -29,69 +27,8 @@ import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
-
-function DetailImageCarousel({
-  imageHeight,
-  onImagePress,
-}: {
-  imageHeight: number;
-  onImagePress: (index: number) => void;
-}) {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-
-  const carouselData = Array(5).fill({
-    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-  });
-
-  const renderCarouselItem = ({
-    item,
-    index,
-  }: {
-    item: any;
-    index: number;
-  }) => (
-    <Pressable
-      onPress={() => onImagePress(index)}
-      style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-    >
-      <Image
-        source={item}
-        className="w-full"
-        style={{
-          height: imageHeight,
-          resizeMode: "cover",
-        }}
-      />
-    </Pressable>
-  );
-
-  return (
-    <View
-      style={{
-        height: imageHeight,
-      }}
-    >
-      <Carousel
-        width={Dimensions.get("window").width}
-        height={imageHeight}
-        data={carouselData}
-        renderItem={renderCarouselItem}
-        loop={true}
-        scrollAnimationDuration={1000}
-        onSnapToItem={(index) => setCurrentIndex(index)}
-      />
-
-      <View className="absolute bottom-8 right-4">
-        <View className="rounded-full bg-black/50 px-2.5 py-0.5">
-          <Text className="font-base text-sm text-[#F5F5F5]">
-            {currentIndex + 1}/{carouselData.length}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 const IMAGE_HEIGHT = 350;
 
@@ -387,10 +324,19 @@ export default function DetailScreen() {
             onScroll={handleScroll}
             contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
           >
-            {/* 상단 캐러셀 영역 */}
-            <DetailImageCarousel
+            {/* <DetailImageCarousel
               imageHeight={IMAGE_HEIGHT}
               onImagePress={handleImagePress}
+            /> */}
+
+            {/* 임시 상단 이미지 영역 */}
+            <Image
+              source={getImageSource(contentData.contentId)}
+              className="w-full"
+              style={{
+                height: IMAGE_HEIGHT,
+                resizeMode: "cover",
+              }}
             />
 
             {/* 정보 영역 */}

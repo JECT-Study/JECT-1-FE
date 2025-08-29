@@ -173,8 +173,6 @@ export default function ScheduleScreen() {
     [router],
   );
 
-  console.log(schedules);
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
@@ -222,15 +220,13 @@ export default function ScheduleScreen() {
               )
             }
             ListHeaderComponent={
-              schedules.length > 0
-                ? () => (
-                    <View className="mb-4">
-                      <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                        {formatSelectedDateHeader(selectedDate)}
-                      </Text>
-                    </View>
-                  )
-                : null
+              schedules.length > 0 ? (
+                <View className="mb-4">
+                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                    {formatSelectedDateHeader(selectedDate)}
+                  </Text>
+                </View>
+              ) : null
             }
             ListFooterComponent={
               isLoadingMore ? (
