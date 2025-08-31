@@ -1,29 +1,21 @@
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
 
 import { WithdrawUrl } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
 
-// 플랫폼별 토큰 삭제 함수
-async function deleteTokenAsync(key: string) {
-  if (Platform.OS === "web") {
-    localStorage.removeItem(key);
-  } else {
-    await SecureStore.deleteItemAsync(key);
-  }
-}
-
-export async function withdraw() {
+export const withdraw = async () => {
   try {
     await authApi.delete(WithdrawUrl);
 
     console.log("회원탈퇴 성공");
 
-    // 토큰 삭제
-    await deleteTokenAsync("accessToken");
-    await deleteTokenAsync("refreshToken");
+    // 토큰 및 사용자 정보 삭제
+    await SecureStore.deleteItemAsync("accessToken");
+    await SecureStore.deleteItemAsync("refreshToken");
+    await SecureStore.deleteItemAsync("nickname");
+    await SecureStore.deleteItemAsync("profileImage");
 
     // Store 초기화
     const { clearUserInfo } = useUserStore.getState().action;
@@ -35,4 +27,4 @@ export async function withdraw() {
     console.log("회원탈퇴 에러:", error);
     throw error;
   }
-}
+};

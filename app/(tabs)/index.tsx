@@ -81,18 +81,47 @@ const categoryConfig = [
 
 const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="flex-row" onPress={handlePress}>
-      <Image
-        source={getImageSource(item.contentId)}
-        className="h-[111px] w-[111px] rounded-[10px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[10px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[10px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[10px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="ml-3.5 flex-1">
         <Text className="mb-1 text-base font-semibold text-[#424242]">
           {item.title}
@@ -108,6 +137,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 
 const HotCard = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
@@ -119,13 +149,41 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
     return categoryItem ? categoryItem.label : "기타";
   };
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
-      <Image
-        source={getImageSource(item.contentId)}
-        className="h-[154px] w-[154px] rounded-[14px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[14px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[14px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[14px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="mt-2">
         <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
           <Text className="text-sm font-medium text-[#707070]">
@@ -145,18 +203,47 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
 
 const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="flex-row" onPress={handlePress}>
-      <Image
-        source={getImageSource(item.contentId)}
-        className="h-[90px] w-[120px] rounded-lg"
-        resizeMode="cover"
-      />
+      <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-lg"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-lg ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-lg"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="ml-3.5 flex-1">
         <Text className="mb-1 text-base font-semibold text-[#424242]">
           {item.title}
@@ -174,18 +261,47 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
 
 const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
-      <Image
-        source={getImageSource(item.contentId)}
-        className="h-[92px] w-full rounded-[14px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[14px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[14px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[14px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="mt-2">
         <Text className="text-base font-semibold text-[#424242]">
           {item.title}

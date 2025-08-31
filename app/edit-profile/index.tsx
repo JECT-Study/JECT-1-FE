@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import {
   Alert,
   Pressable,
@@ -22,11 +23,7 @@ import {
   useInitializeFromUserStore,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
-import {
-  useNickname,
-  useSetNickname,
-  useSetProfileImage,
-} from "@/stores/useUserStore";
+import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
 
 // 기본 프로필 이미지 (회색)
 const DEFAULT_PROFILE_IMAGE =
@@ -35,7 +32,6 @@ const DEFAULT_PROFILE_IMAGE =
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
   const initializeFromUserStore = useInitializeFromUserStore();
-  const currentNickname = useNickname();
   const setGlobalNickname = useSetNickname();
   const setGlobalProfileImage = useSetProfileImage();
 
@@ -46,19 +42,35 @@ export default function EditProfile() {
   const { onPress } = useImagePicker();
   const profileUri = useTempImageUri();
 
-  console.log("profileUri", profileUri);
-
   // 닉네임 관련 - 직접 상태 관리
   const [inputNickname, setInputNickname] = useState("");
+  const [currentProfileImage, setCurrentProfileImage] = useState("");
 
-  // 페이지 진입 시 userStore의 정보로 초기화
+  // 페이지 진입 시 SecureStore에서 사용자 정보 로드
   useEffect(() => {
-    initializeFromUserStore();
-    // 사용자 닉네임으로 초기화
-    if (currentNickname) {
-      setInputNickname(currentNickname);
-    }
-  }, [initializeFromUserStore, currentNickname]);
+    const loadUserInfo = async () => {
+      try {
+        const savedNickname = await SecureStore.getItemAsync("nickname");
+        const savedProfileImage =
+          await SecureStore.getItemAsync("profileImage");
+
+        if (savedNickname) {
+          setInputNickname(savedNickname);
+        }
+
+        if (savedProfileImage) {
+          setCurrentProfileImage(savedProfileImage);
+        }
+
+        // Zustand store도 초기화 (다른 컴포넌트와의 일관성을 위해)
+        initializeFromUserStore();
+      } catch (error) {
+        console.error("사용자 정보 로드 실패:", error);
+      }
+    };
+
+    loadUserInfo();
+  }, [initializeFromUserStore]);
 
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
@@ -126,12 +138,22 @@ export default function EditProfile() {
         // 전역 상태 업데이트
         setGlobalNickname(inputNickname.trim());
 
+        // SecureStore에도 닉네임 업데이트
+        await SecureStore.setItemAsync("nickname", inputNickname.trim());
+
         // 이미지가 업데이트된 경우 전역 상태에도 반영
         if (hasNewImage && response.data.result?.profileImage) {
           setGlobalProfileImage(response.data.result.profileImage);
+          // SecureStore에도 프로필 이미지 업데이트
+          await SecureStore.setItemAsync(
+            "profileImage",
+            response.data.result.profileImage,
+          );
         } else if (hasNewImage && profileUri) {
           // 서버에서 이미지 URL을 반환하지 않는 경우, 로컬 URI 사용
           setGlobalProfileImage(profileUri);
+          // SecureStore에도 프로필 이미지 업데이트
+          await SecureStore.setItemAsync("profileImage", profileUri);
         }
 
         Alert.alert("성공", "프로필이 성공적으로 업데이트되었습니다.", [
@@ -156,9 +178,30 @@ export default function EditProfile() {
     }
   };
 
-  // null이나 빈 문자열인 경우 기본 이미지 사용
-  const imageSource =
-    profileUri && profileUri.trim() !== "" ? profileUri : DEFAULT_PROFILE_IMAGE;
+  // 이미지 소스 결정 로직
+  const getImageSource = () => {
+    // 1. 새로 선택한 이미지가 있고, 기본 SVG 이미지가 아닌 경우에만 사용
+    if (
+      profileUri &&
+      profileUri.trim() !== "" &&
+      !profileUri.startsWith("data:image/svg+xml")
+    ) {
+      console.log("✅ 새로 선택한 이미지 사용:", profileUri);
+      return profileUri;
+    }
+
+    // 2. 현재 사용자의 프로필 이미지가 있으면 사용
+    if (currentProfileImage && currentProfileImage.trim() !== "") {
+      console.log("✅ 현재 프로필 이미지 사용:", currentProfileImage);
+      return currentProfileImage;
+    }
+
+    // 3. 둘 다 없으면 기본 이미지 사용
+    console.log("✅ 기본 이미지 사용");
+    return DEFAULT_PROFILE_IMAGE;
+  };
+
+  const imageSource = getImageSource();
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">

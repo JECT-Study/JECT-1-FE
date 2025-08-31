@@ -3,29 +3,11 @@ import { useCallback, useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Platform, View } from "react-native";
+import { Alert, View } from "react-native";
 
 import MyPageMenu from "@/components/mypage/MyPageMenu";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
-
-// 플랫폼별 토큰 조회 함수
-async function getTokenAsync(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return localStorage.getItem(key);
-  } else {
-    return await SecureStore.getItemAsync(key);
-  }
-}
-
-// 플랫폼별 토큰 삭제 함수
-async function deleteTokenAsync(key: string) {
-  if (Platform.OS === "web") {
-    localStorage.removeItem(key);
-  } else {
-    await SecureStore.deleteItemAsync(key);
-  }
-}
 
 const handleLogout = async () => {
   Alert.alert(
@@ -41,8 +23,12 @@ const handleLogout = async () => {
         onPress: async () => {
           try {
             // await authApi.post(LogoutUrl);
-            await deleteTokenAsync("accessToken");
-            await deleteTokenAsync("refreshToken");
+            await SecureStore.deleteItemAsync("accessToken");
+            await SecureStore.deleteItemAsync("refreshToken");
+
+            // 사용자 정보도 SecureStore에서 제거
+            await SecureStore.deleteItemAsync("nickname");
+            await SecureStore.deleteItemAsync("profileImage");
 
             // 전역 상태 초기화
             const { clearUserInfo } = useUserStore.getState().action;
@@ -75,10 +61,11 @@ export default function MyPageMenus() {
   // 토큰 존재 여부로 로그인 상태 확인
   const checkLoginStatus = useCallback(async () => {
     try {
-      const accessToken = await getTokenAsync("accessToken");
-      const refreshToken = await getTokenAsync("refreshToken");
+      const accessToken = await SecureStore.getItemAsync("accessToken");
+      const refreshToken = await SecureStore.getItemAsync("refreshToken");
       setIsLoggedIn(!!(accessToken && refreshToken));
     } catch (error) {
+      console.error("토큰 확인 실패:", error);
       setIsLoggedIn(false);
     }
   }, []);

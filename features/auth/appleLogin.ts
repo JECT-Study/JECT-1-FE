@@ -1,22 +1,13 @@
 import * as AppleAuthentication from "expo-apple-authentication";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
 
-// 플랫폼별 토큰 저장 함수
-async function setTokenAsync(key: string, value: string) {
-  if (Platform.OS === "web") {
-    localStorage.setItem(key, value);
-  } else {
-    await SecureStore.setItemAsync(key, value);
-  }
-}
-
-export async function IOSAppleLogin() {
+export const IOSAppleLogin = async () => {
   try {
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
@@ -39,14 +30,18 @@ export async function IOSAppleLogin() {
       refreshToken: refreshToken ? "있음" : "없음",
     });
 
-    await setTokenAsync("accessToken", accessToken);
-    await setTokenAsync("refreshToken", refreshToken);
+    await SecureStore.setItemAsync("accessToken", accessToken);
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
+
+    // 사용자 정보도 SecureStore에 저장
+    await SecureStore.setItemAsync("nickname", nickname || "");
+    await SecureStore.setItemAsync("profileImage", image || "");
 
     // Store에 사용자 정보 저장
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "", image || "");
 
-    console.log("💾 Store에 저장 완료:", {
+    console.log("💾 SecureStore 및 Store에 저장 완료:", {
       storedNickname: nickname || "",
       storedImage: image || "",
       userStoreState: useUserStore.getState(),
@@ -64,8 +59,8 @@ export async function IOSAppleLogin() {
     }
     // 다른 에러의 경우는 기존처럼 조용히 처리 (애플 로그인 취소 등)
   }
-}
+};
 
-export async function AndroidAppleLogin() {
+export const AndroidAppleLogin = () => {
   console.log("Android Login");
-}
+};
