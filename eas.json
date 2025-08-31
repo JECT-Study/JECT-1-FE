@@ -21,7 +21,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "kdk7962@naver.com"
+        "appleId": "kdk7962@naver.com",
+        "ascAppId": "6751580479",
+        "appleTeamId": "K7W643Y6T3"
       }
     }
   }

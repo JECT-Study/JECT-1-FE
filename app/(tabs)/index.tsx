@@ -215,40 +215,20 @@ const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
 
 const getWeekDays = () => {
   const today = dayjs();
-  const startOfWeek = today.startOf("week").add(1, "day"); // 월요일부터 시작
 
-  // 이번 주의 모든 날짜 생성 (월요일부터 일요일까지)
+  // 오늘부터 7일간의 연속된 날짜 생성
   const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = startOfWeek.add(i, "day");
+    const day = today.add(i, "day");
     return {
       dayOfIndex: i,
       date: day.format("D"),
       dayName: day.format("ddd"),
       fullDate: day.format("YYYY-MM-DD"),
-      isToday: day.isSame(today, "day"),
+      isToday: i === 0, // 첫 번째 날짜가 항상 오늘
     };
   });
 
-  // 오늘 날짜 찾기
-  const todayIndex = weekDays.findIndex((day) => day.isToday);
-
-  if (todayIndex === -1) {
-    // 오늘이 이번 주에 없으면 기본 순서 반환
-    return weekDays.map((day, index) => ({ ...day, dayOfIndex: index }));
-  }
-
-  // 오늘을 첫 번째로, 나머지를 순서대로 배치
-  const reorderedDays = [
-    weekDays[todayIndex],
-    ...weekDays.slice(0, todayIndex), // 오늘 이전 날짜들
-    ...weekDays.slice(todayIndex + 1), // 오늘 이후 날짜들
-  ];
-
-  // dayOfIndex를 새로운 순서에 맞게 재설정
-  return reorderedDays.map((day, index) => ({
-    ...day,
-    dayOfIndex: index,
-  }));
+  return weekDays;
 };
 
 export default function HomeScreen() {
