@@ -1,38 +1,146 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { useRouter } from "expo-router";
+import { Marquee } from "@animatereactnative/marquee";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform, Text, View } from "react-native";
+import { Alert, Platform, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import LoginCardSlider from "@/components/login/LoginCardSlider";
-import SocialLoginButtons from "@/components/login/SocialLoginButtons";
+import AppleIcon from "@/components/icons/AppleIcon";
+import KakaoIcon from "@/components/icons/KakaoIcon";
+import { loginImages, LoginImageType } from "@/constants/LoginImages";
+import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
+import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
+import { testerLogin } from "@/features/auth/testerLogin";
 
-// 플랫폼별 토큰 조회 함수
-async function getTokenAsync(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return localStorage.getItem(key);
-  } else {
-    return await SecureStore.getItemAsync(key);
-  }
+function LoginMarquee({
+  imageList,
+  direction,
+}: {
+  imageList: LoginImageType;
+  direction: "down" | "up";
+}) {
+  const speed = direction === "down" ? -0.3 : 0.3;
+  return (
+    <Marquee direction="vertical" speed={speed} withGesture={false}>
+      {imageList.map((imageInfo) => {
+        const imageName = imageInfo[0];
+        const imageSrc = imageInfo[1];
+        return (
+          <View
+            key={imageName}
+            className="my-2 flex h-[213px] w-[158px] items-center justify-center overflow-hidden rounded-[26px]"
+          >
+            <Image
+              source={imageSrc}
+              style={{ width: "100%", height: "100%", opacity: 0.3 }}
+              contentFit="cover"
+            />
+          </View>
+        );
+      })}
+    </Marquee>
+  );
+}
+
+function LoginCardSlider() {
+  const images = Object.entries(loginImages);
+  const leftImages = images.splice(0, Math.floor(images.length / 2));
+
+  return (
+    <View className="flex flex-1 flex-row">
+      <LoginMarquee imageList={leftImages} direction={"up"} />
+      <View className="m-2" />
+      <LoginMarquee imageList={images} direction={"down"} />
+    </View>
+  );
+}
+
+function KakaoLogin({ disabled = false }: { disabled?: boolean }) {
+  useEffect(() => {
+    initializeKakao();
+  }, []);
+
+  return (
+    <Pressable
+      onPress={disabled ? undefined : kakaoLogin}
+      disabled={disabled}
+      className={`mx-auto h-14 w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#F9DB00] px-6 ${
+        disabled ? "opacity-50" : "active:opacity-80"
+      }`}
+    >
+      <KakaoIcon size={20} color="#3E1918" />
+      <Text className="text-lg font-medium text-black">
+        카카오톡으로 시작하기
+      </Text>
+    </Pressable>
+  );
+}
+
+function AppleLogin({ disabled = false }: { disabled?: boolean }) {
+  const handlePress =
+    Platform.OS === "android" ? AndroidAppleLogin : IOSAppleLogin;
+
+  return (
+    <Pressable
+      onPress={disabled ? undefined : handlePress}
+      disabled={disabled}
+      className={`mx-auto h-14 w-full flex-row items-center justify-center gap-2 rounded-xl bg-white px-6 ${
+        disabled ? "opacity-50" : "active:opacity-80"
+      }`}
+    >
+      <AppleIcon size={20} color="black" />
+      <Text className="text-lg font-medium text-black">Apple로 시작하기</Text>
+    </Pressable>
+  );
+}
+
+function TesterLogin({ disabled = false }: { disabled?: boolean }) {
+  return (
+    <Pressable
+      onPress={disabled ? undefined : testerLogin}
+      disabled={disabled}
+      className={`mx-auto w-full flex-row items-center justify-center gap-2 rounded-xl bg-gray-500 px-6 py-4 ${
+        disabled ? "opacity-50" : "active:opacity-80"
+      }`}
+    >
+      <Text className="text-white">For Test</Text>
+    </Pressable>
+  );
 }
 
 export default function Login() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const isIOS = Platform.OS === "ios";
 
-  useEffect(() => {
-    const checkTokens = async () => {
-      const storeAccessToken = await getTokenAsync("accessToken");
-      const storeRefreshToken = await getTokenAsync("refreshToken");
-      console.log("토큰 상태:", { storeAccessToken, storeRefreshToken });
-      if (storeAccessToken && storeRefreshToken) {
-        router.replace("/(tabs)");
-      } else {
-        console.log("토큰 없음 - 로그인 화면 유지");
-      }
-    };
+  // 화면 포커스 시 실행 (마운트 시도 포함)
+  useFocusEffect(
+    useCallback(() => {
+      const checkTokens = async () => {
+        try {
+          const accessToken = await SecureStore.getItemAsync("accessToken");
+          const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-    checkTokens();
-  }, [router]); // router 의존성 추가
+          if (accessToken && refreshToken) {
+            setIsLoggedIn(true);
+            router.replace("/(tabs)");
+          } else {
+            setIsLoggedIn(false);
+            console.log("토큰 없음 - 로그인 화면 유지");
+          }
+        } catch (error) {
+          console.error("토큰 확인 실패:", error);
+          setIsLoggedIn(false);
+        }
+      };
+      checkTokens();
+    }, [router, setIsLoggedIn]),
+  );
 
   return (
     <View className="flex-1 items-center bg-black">
@@ -43,7 +151,56 @@ export default function Login() {
           나에게 맞는 컨텐츠를 한눈에
         </Text>
       </View>
-      <SocialLoginButtons />
+
+      {/* SocialLoginButtons 통합 */}
+      <View className="w-full">
+        <LinearGradient
+          colors={["transparent", "black"]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{ height: 282, width: "100%" }}
+          pointerEvents="none"
+        />
+        <View className="bg-[#010101] px-4">
+          <View className="mb-6 w-full items-center">
+            <KakaoLogin disabled={isLoggedIn} />
+            <View className="my-2" />
+            {isIOS ? <AppleLogin disabled={isLoggedIn} /> : null}
+            {isIOS ? <View className="my-2" /> : null}
+            <TesterLogin disabled={isLoggedIn} />
+          </View>
+
+          <View className="flex-col items-center justify-center gap-y-4">
+            <Pressable
+              onPress={() => router.push("/(tabs)")}
+              className="flex-row items-center justify-center px-6"
+            >
+              <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
+                둘러보기
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                if (!isLoggedIn) {
+                  Alert.alert(
+                    "로그인이 필요합니다",
+                    "로그인 후 설문조사를 시작해주세요.",
+                  );
+                  return;
+                }
+                router.push("/survey");
+              }}
+              className="flex-row items-center justify-center px-6"
+            >
+              <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
+                설문조사 시작하기
+              </Text>
+            </Pressable>
+          </View>
+          <View className="m-4" />
+          <View style={{ marginBottom: insets.bottom - 1 }} />
+        </View>
+      </View>
     </View>
   );
 }
