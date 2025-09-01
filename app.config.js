@@ -111,6 +111,7 @@ export default {
         client_id: process.env.NAVER_MAP_CLIENT_ID,
       },
     ],
+    "expo-maps",
   ],
 
   experiments: {

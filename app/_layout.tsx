@@ -58,7 +58,7 @@ export default function RootLayout() {
           >
             <View
               style={{
-                width: 400,
+                width: "100%",
                 maxWidth: "100%",
                 flex: 1,
               }}

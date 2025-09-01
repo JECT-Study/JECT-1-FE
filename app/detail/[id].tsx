@@ -8,6 +8,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -22,6 +23,7 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
+import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
@@ -445,11 +447,18 @@ export default function DetailScreen() {
                     위치
                   </Text>
 
-                  {/*네이버지도 컴포넌트*/}
-                  <NaverMap
-                    latitude={contentData.latitude}
-                    longitude={contentData.longitude}
-                  />
+                  {/*지도 컴포넌트 - iOS는 AppleMap, Android는 NaverMap*/}
+                  {Platform.OS === "ios" ? (
+                    <AppleMap
+                      latitude={contentData.latitude}
+                      longitude={contentData.longitude}
+                    />
+                  ) : (
+                    <NaverMap
+                      latitude={contentData.latitude}
+                      longitude={contentData.longitude}
+                    />
+                  )}
 
                   <View className="mb-3 flex-row items-center">
                     <LocationIcon size={16} />
