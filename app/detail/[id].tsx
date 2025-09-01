@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -70,6 +71,7 @@ export default function DetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const { showActionSheetWithOptions } = useActionSheet();
 
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
@@ -234,30 +236,72 @@ export default function DetailScreen() {
     setIsDatePickerOpen(false);
   };
 
-  const handleNaverMapPress = async () => {
+  const openAppleMaps = async () => {
     if (!contentData) return;
-
     const { latitude, longitude, placeName } = contentData;
-
-    // 네이버 지도 URL scheme
-    const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
-
-    // 네이버 지도 앱 스토어 링크 (iOS)
-    const naverMapStoreURL = "https://itunes.apple.com/app/id311867728?mt=8";
+    const appleMapsUrl = `maps://?q=${encodeURIComponent(placeName)}&ll=${latitude},${longitude}`;
 
     try {
-      // 네이버 지도 앱이 설치되어 있는지 확인
-      const supported = await Linking.canOpenURL(naverMapScheme);
-
+      const supported = await Linking.canOpenURL(appleMapsUrl);
       if (supported) {
-        // 네이버 지도 앱으로 이동
+        await Linking.openURL(appleMapsUrl);
+      } else {
+        // Apple Maps가 설치되어 있지 않으면 앱 스토어로 이동
+        const appStoreUrl = "https://apps.apple.com/app/id915056765";
+        await Linking.openURL(appStoreUrl);
+      }
+    } catch (error) {
+      console.error("Apple Maps 연동 중 오류 발생:", error);
+    }
+  };
+
+  const openNaverMap = async () => {
+    if (!contentData) return;
+    const { latitude, longitude, placeName } = contentData;
+    const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
+
+    try {
+      const supported = await Linking.canOpenURL(naverMapScheme);
+      if (supported) {
         await Linking.openURL(naverMapScheme);
       } else {
-        // 네이버 지도 앱이 설치되어 있지 않으면 앱 스토어로 이동
-        await Linking.openURL(naverMapStoreURL);
+        // 네이버 지도 앱이 설치되어 있지 않으면 스토어로 이동
+        const storeURL = Platform.OS === "ios" 
+          ? "https://itunes.apple.com/app/id311867728?mt=8"
+          : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
+        await Linking.openURL(storeURL);
       }
     } catch (error) {
       console.error("네이버 지도 연동 중 오류 발생:", error);
+    }
+  };
+
+  const handleNaverMapPress = () => {
+    if (!contentData) return;
+
+    if (Platform.OS === "ios") {
+      // iOS: ActionSheet로 지도 앱 선택
+      const options = ["Apple 지도", "네이버 지도", "취소"];
+      const cancelButtonIndex = 2;
+
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          title: "지도 앱 선택",
+          message: "길찾기에 사용할 지도 앱을 선택해주세요",
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) {
+            openAppleMaps();
+          } else if (buttonIndex === 1) {
+            openNaverMap();
+          }
+        }
+      );
+    } else {
+      // Android: 네이버 지도만 사용
+      openNaverMap();
     }
   };
 
