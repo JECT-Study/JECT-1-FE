@@ -53,10 +53,7 @@ export default function SurveyStep({
         <View className="w-7" />
       </View>
       <View className="flex items-center">
-        <Text className="justify-center text-[15px] text-[#9B9696]">
-          {currentStep}/{total}
-        </Text>
-        <Text className="mb-4 mt-8 text-center text-2xl font-semibold text-gray800">
+        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray800">
           {question}
         </Text>
       </View>
