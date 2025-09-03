@@ -45,11 +45,11 @@ export default function SurveyBalloon({ type, onNext }: Props) {
           </View>
         ) : null}
         <Pressable
-          className={`z-50 h-[47px] w-full items-center justify-center rounded-[6px] bg-[#816BFF]`}
+          className={`z-50 h-[47px] w-full items-center justify-center rounded-[6px] bg-[#6C4DFF]`}
           onPress={() => onNext()}
         >
           <Text className={`text-[15px] text-white`}>
-            {type === "INTRO" ? "설문 시작하기" : "마이코드 시작하기"}
+            {type === "INTRO" ? "취향 분석 시작" : "마이코드 시작하기"}
           </Text>
         </Pressable>
       </View>

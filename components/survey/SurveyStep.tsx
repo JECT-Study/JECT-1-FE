@@ -131,7 +131,7 @@ export default function SurveyStep({
                 selected === null ? "text-gray500" : "text-white"
               }`}
             >
-              다음으로
+              다음
             </Text>
           </Pressable>
         </View>
