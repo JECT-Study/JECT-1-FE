@@ -1,18 +1,21 @@
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
 
-type SurveyResult = {
+interface SurveyResult {
   step1?: number;
   step2?: number;
   step3?: number;
   step4?: number;
   step5?: number;
   step6?: number;
-};
+}
+
+const totalQuestions = 6;
 
 export default function SurveyScreen() {
   const funnel = useFunnel<{
@@ -32,8 +35,6 @@ export default function SurveyScreen() {
     },
   });
 
-  const totalQuestions = 6;
-
   return (
     <funnel.Render
       intro={({ history }) => (
@@ -46,7 +47,23 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("step2", { ...context, step1: answerIndex })
           }
-          onBack={() => router.push("/survey")}
+          onBack={() => {
+            Alert.alert(
+              "취향 분석을 그만 두시겠어요?",
+              "선택한 내용은 저장되지 않아요.",
+              [
+                {
+                  text: "계속 진행",
+                  style: "cancel",
+                },
+                {
+                  text: "네, 그만둘게요.",
+                  style: "destructive",
+                  onPress: () => router.back(),
+                },
+              ],
+            );
+          }}
           total={totalQuestions}
           currentStep={1}
           dividedOptions={true}

@@ -87,12 +87,6 @@ export default function MyScreen() {
             const savedProfileImage =
               await SecureStore.getItemAsync("profileImage");
 
-            console.log("🔍 MyScreen 사용자 정보 로드:", {
-              nickname: savedNickname,
-              profileImage: savedProfileImage ? "있음" : "없음",
-              profileImageValue: savedProfileImage,
-            });
-
             setNickname(savedNickname || "");
             setProfileImage(savedProfileImage || "");
           } else {

@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Confetti from "@/components/survey/Confetti";
@@ -17,23 +17,7 @@ export default function SurveyBalloon({ type, onNext }: Props) {
       <CustomHeader
         title={"취향 분석"}
         isCommit={false}
-        cancel={() =>
-          Alert.alert(
-            "취향 분석을 그만 두시겠어요?",
-            "선택한 내용은 저장되지 않아요.",
-            [
-              {
-                text: "계속 진행",
-                style: "cancel",
-              },
-              {
-                text: "네, 그만둘게요.",
-                style: "destructive",
-                onPress: () => router.back(),
-              },
-            ],
-          )
-        }
+        cancel={type === "END" ? undefined : () => router.back()}
       />
       {type === "END" ? <Confetti /> : null}
       <View className="w-full items-center pt-20">
