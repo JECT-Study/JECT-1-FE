@@ -1,7 +1,6 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import Confetti from "@/components/survey/Confetti";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -13,7 +12,7 @@ interface Props {
 
 export default function SurveyBalloon({ type, onNext }: Props) {
   return (
-    <SafeAreaView className="flex-1 justify-between bg-white">
+    <View className="flex-1 justify-between bg-white">
       <CustomHeader
         title={"취향 분석"}
         isCommit={false}
@@ -53,6 +52,6 @@ export default function SurveyBalloon({ type, onNext }: Props) {
           </Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

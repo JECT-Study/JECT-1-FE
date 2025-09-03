@@ -12,7 +12,6 @@ import {
   View,
 } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
@@ -183,7 +182,7 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <View className="flex-1 bg-white pt-[65px]">
       <View
         className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
       >
@@ -264,6 +263,6 @@ export default function ScheduleScreen() {
           />
         </CalendarProvider>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

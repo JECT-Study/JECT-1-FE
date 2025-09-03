@@ -7,7 +7,6 @@ import { dismissAll } from "expo-router/build/global-state/routing";
 import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
 import { Alert, Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import Chevron from "@/components/icons/Chevron";
@@ -217,8 +216,8 @@ export default function MyScreen() {
   };
 
   return (
-    <SafeAreaView className="w-full flex-1 bg-white" edges={["top"]}>
-      <Text className="ml-6 mt-10 text-[18px]">마이페이지</Text>
+    <View className="w-full flex-1 bg-white pt-[65px]">
+      <Text className="ml-6 mt-4 text-[18px]">마이페이지</Text>
 
       <View aria-label="user-info" className="ml-6 mt-6 flex h-[60px] flex-row">
         <View className="size-[60px] overflow-hidden rounded-full">
@@ -305,6 +304,6 @@ export default function MyScreen() {
           </Pressable>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -5,6 +5,7 @@ import { Alert } from "react-native";
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface SurveyResult {
   step1?: number;
@@ -36,112 +37,114 @@ export default function SurveyScreen() {
   });
 
   return (
-    <funnel.Render
-      intro={({ history }) => (
-        <SurveyBalloon type="INTRO" onNext={() => history.push("step1")} />
-      )}
-      step1={({ history, context }) => (
-        <SurveyStep
-          question={questions.Q1}
-          options={options.Q1}
-          onNext={(answerIndex) =>
-            history.push("step2", { ...context, step1: answerIndex })
-          }
-          onBack={() => {
-            Alert.alert(
-              "취향 분석을 그만 두시겠어요?",
-              "선택한 내용은 저장되지 않아요.",
-              [
-                {
-                  text: "계속 진행",
-                  style: "cancel",
-                },
-                {
-                  text: "네, 그만둘게요.",
-                  style: "destructive",
-                  onPress: () => router.back(),
-                },
-              ],
-            );
-          }}
-          total={totalQuestions}
-          currentStep={1}
-          dividedOptions={true}
-        />
-      )}
-      step2={({ history, context }) => (
-        <SurveyStep
-          question={questions.Q2}
-          options={options.Q2}
-          onNext={(answerIndex) =>
-            history.push("step3", { ...context, step2: answerIndex })
-          }
-          onBack={() => history.push("step1", context)}
-          total={totalQuestions}
-          currentStep={2}
-        />
-      )}
-      step3={({ history, context }) => (
-        <SurveyStep
-          question={questions.Q3}
-          options={options.Q3}
-          onNext={(answerIndex) =>
-            history.push("step4", { ...context, step3: answerIndex })
-          }
-          onBack={() => history.push("step2", context)}
-          total={totalQuestions}
-          currentStep={3}
-        />
-      )}
-      step4={({ history, context }) => (
-        <SurveyStep
-          question={questions.Q4}
-          options={options.Q4}
-          onNext={(answerIndex) =>
-            history.push("step5", { ...context, step4: answerIndex })
-          }
-          onBack={() => history.push("step3", context)}
-          total={totalQuestions}
-          currentStep={4}
-        />
-      )}
-      step5={({ history, context }) => (
-        <SurveyStep
-          question={questions.Q5}
-          options={options.Q5}
-          onNext={(answerIndex) =>
-            history.push("step6", { ...context, step5: answerIndex })
-          }
-          onBack={() => history.push("step4", context)}
-          total={totalQuestions}
-          currentStep={5}
-        />
-      )}
-      step6={({ history, context }) => {
-        const handleNext = (answerIndex: number) => {
-          try {
-            const newContext = { ...context, step6: answerIndex };
-            console.log("API 전송", newContext);
-            history.push("done", newContext);
-          } catch (error) {
-            console.error("설문 제출 중 오류 발생:", error);
-          }
-        };
-
-        return (
+    <SafeAreaView className="w-full flex-1 justify-between bg-white">
+      <funnel.Render
+        intro={({ history }) => (
+          <SurveyBalloon type="INTRO" onNext={() => history.push("step1")} />
+        )}
+        step1={({ history, context }) => (
           <SurveyStep
-            question={questions.Q6}
-            options={options.Q6}
-            onNext={handleNext}
-            onBack={() => history.push("step5", context)}
+            question={questions.Q1}
+            options={options.Q1}
+            onNext={(answerIndex) =>
+              history.push("step2", { ...context, step1: answerIndex })
+            }
+            onBack={() => {
+              Alert.alert(
+                "취향 분석을 그만 두시겠어요?",
+                "선택한 내용은 저장되지 않아요.",
+                [
+                  {
+                    text: "계속 진행",
+                    style: "cancel",
+                  },
+                  {
+                    text: "네, 그만둘게요.",
+                    style: "destructive",
+                    onPress: () => router.back(),
+                  },
+                ],
+              );
+            }}
             total={totalQuestions}
-            currentStep={6}
+            currentStep={1}
+            dividedOptions={true}
           />
-        );
-      }}
-      done={({ context, history }) => (
-        <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
-      )}
-    />
+        )}
+        step2={({ history, context }) => (
+          <SurveyStep
+            question={questions.Q2}
+            options={options.Q2}
+            onNext={(answerIndex) =>
+              history.push("step3", { ...context, step2: answerIndex })
+            }
+            onBack={() => history.push("step1", context)}
+            total={totalQuestions}
+            currentStep={2}
+          />
+        )}
+        step3={({ history, context }) => (
+          <SurveyStep
+            question={questions.Q3}
+            options={options.Q3}
+            onNext={(answerIndex) =>
+              history.push("step4", { ...context, step3: answerIndex })
+            }
+            onBack={() => history.push("step2", context)}
+            total={totalQuestions}
+            currentStep={3}
+          />
+        )}
+        step4={({ history, context }) => (
+          <SurveyStep
+            question={questions.Q4}
+            options={options.Q4}
+            onNext={(answerIndex) =>
+              history.push("step5", { ...context, step4: answerIndex })
+            }
+            onBack={() => history.push("step3", context)}
+            total={totalQuestions}
+            currentStep={4}
+          />
+        )}
+        step5={({ history, context }) => (
+          <SurveyStep
+            question={questions.Q5}
+            options={options.Q5}
+            onNext={(answerIndex) =>
+              history.push("step6", { ...context, step5: answerIndex })
+            }
+            onBack={() => history.push("step4", context)}
+            total={totalQuestions}
+            currentStep={5}
+          />
+        )}
+        step6={({ history, context }) => {
+          const handleNext = (answerIndex: number) => {
+            try {
+              const newContext = { ...context, step6: answerIndex };
+              console.log("API 전송", newContext);
+              history.push("done", newContext);
+            } catch (error) {
+              console.error("설문 제출 중 오류 발생:", error);
+            }
+          };
+
+          return (
+            <SurveyStep
+              question={questions.Q6}
+              options={options.Q6}
+              onNext={handleNext}
+              onBack={() => history.push("step5", context)}
+              total={totalQuestions}
+              currentStep={6}
+            />
+          );
+        }}
+        done={({ context, history }) => (
+          <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
+        )}
+      />
+    </SafeAreaView>
   );
 }
