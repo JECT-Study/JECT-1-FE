@@ -1,15 +1,18 @@
 import { useCallback, useState } from "react";
 
+import { AxiosError } from "axios";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
+import { dismissAll } from "expo-router/build/global-state/routing";
 import * as SecureStore from "expo-secure-store";
 import { Alert, Pressable, SafeAreaView, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
+import Chevron from "@/components/icons/Chevron";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
-import MyPageMenus from "@/components/mypage/MyPageMenus";
 import usePageNavigation from "@/hooks/usePageNavigation";
+import useUserStore from "@/stores/useUserStore";
 
 // 기본 프로필 이미지 (회색)
 const DEFAULT_PROFILE_IMAGE =
@@ -20,7 +23,53 @@ export default function MyScreen() {
   const [nickname, setNickname] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>("");
 
-  const { goEditProfile, goLike, goPlan, goSurvey } = usePageNavigation();
+  const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
+    usePageNavigation();
+
+  const handleAuthAction = async () => {
+    if (!isLoggedIn) {
+      // 로그인되지 않은 상태면 루트 페이지로 이동
+      dismissAll();
+      router.push("/");
+      return;
+    }
+
+    // 로그인된 상태면 로그아웃 확인 다이얼로그 표시
+    Alert.alert(
+      "로그아웃",
+      "정말 로그아웃 하시겠어요?",
+      [
+        {
+          text: "취소",
+          style: "default",
+        },
+        {
+          text: "로그아웃",
+          onPress: async () => {
+            try {
+              await SecureStore.deleteItemAsync("accessToken");
+              await SecureStore.deleteItemAsync("refreshToken");
+              await SecureStore.deleteItemAsync("nickname");
+              await SecureStore.deleteItemAsync("profileImage");
+
+              const { clearUserInfo } = useUserStore.getState().action;
+              clearUserInfo();
+
+              alert("로그아웃이 완료되었습니다.");
+
+              router.dismissAll();
+              router.push("/");
+            } catch (error) {
+              const axiosError = error as AxiosError;
+              alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
+            }
+          },
+          style: "default",
+        },
+      ],
+      { cancelable: true },
+    );
+  };
 
   // 화면 포커스 시 실행 (마운트 시도 포함)
   useFocusEffect(
@@ -228,7 +277,35 @@ export default function MyScreen() {
         aria-label="seperator"
         className="my-2 h-[12px] w-full bg-[#F2F2F7]"
       />
-      <MyPageMenus />
+
+      {/* MyPageMenus 내용 직접 구현 */}
+      <View className="w-full px-4">
+        <Pressable
+          onPress={() => goTerms()}
+          className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+        >
+          <Text className="text-[14px]">이용약관</Text>
+          <Chevron direction={"right"} />
+        </Pressable>
+        <Pressable
+          onPress={handleAuthAction}
+          className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+        >
+          <Text className="text-[14px]">
+            {isLoggedIn ? "로그아웃" : "로그인"}
+          </Text>
+          <Chevron direction={"right"} />
+        </Pressable>
+        {isLoggedIn && (
+          <Pressable
+            onPress={() => goWithdrawal()}
+            className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+          >
+            <Text className="text-[14px]">회원탈퇴</Text>
+            <Chevron direction={"right"} />
+          </Pressable>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
