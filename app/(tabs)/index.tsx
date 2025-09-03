@@ -7,7 +7,7 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { StatusBar } from "expo-status-bar";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -21,7 +21,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
@@ -380,6 +379,9 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // StatusBar 스타일을 light로 설정
+      setStatusBarStyle("light");
+
       const checkLoginStatus = async () => {
         try {
           const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -578,9 +580,7 @@ export default function HomeScreen() {
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
-      <StatusBar style="light" />
-
+    <View className="flex-1 bg-white">
       {/* 기본 헤더 - 고정 */}
       <LinearGradient
         colors={["#816BFF", "#5E47E3"]}
@@ -896,6 +896,6 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

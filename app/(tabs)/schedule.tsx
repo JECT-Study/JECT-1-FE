@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -47,7 +48,6 @@ const formatSelectedDateHeader = (date: string) => {
 };
 
 export default function ScheduleScreen() {
-  const router = useRouter();
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format("YYYY-MM-DD"),
@@ -57,6 +57,15 @@ export default function ScheduleScreen() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
+
+  const router = useRouter();
+
+  // 탭 포커스 시 StatusBar 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
@@ -174,8 +183,7 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <View
         className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
       >

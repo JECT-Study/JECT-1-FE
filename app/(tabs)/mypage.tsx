@@ -5,7 +5,9 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { dismissAll } from "expo-router/build/global-state/routing";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Pressable, SafeAreaView, Text, View } from "react-native";
+import { setStatusBarStyle } from "expo-status-bar";
+import { Alert, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import Chevron from "@/components/icons/Chevron";
@@ -74,6 +76,9 @@ export default function MyScreen() {
   // 화면 포커스 시 실행 (마운트 시도 포함)
   useFocusEffect(
     useCallback(() => {
+      // StatusBar 스타일을 dark로 설정
+      setStatusBarStyle("dark");
+
       const checkLoginStatus = async () => {
         try {
           const accessToken = await SecureStore.getItemAsync("accessToken");
@@ -212,7 +217,7 @@ export default function MyScreen() {
   };
 
   return (
-    <SafeAreaView className="w-full flex-1 bg-white">
+    <SafeAreaView className="w-full flex-1 bg-white" edges={["top"]}>
       <Text className="ml-6 mt-10 text-[18px]">마이페이지</Text>
 
       <View aria-label="user-info" className="ml-6 mt-6 flex h-[60px] flex-row">
