@@ -75,7 +75,7 @@ export default function MyScreen() {
           },
           {
             text: "로그인하러 가기",
-            onPress: () => router.replace("/"),
+            onPress: () => router.push("/"),
           },
         ],
       );
@@ -115,7 +115,7 @@ export default function MyScreen() {
           },
           {
             text: "로그인하러 가기",
-            onPress: () => router.replace("/"),
+            onPress: () => router.push("/"),
           },
         ],
       );
@@ -137,7 +137,7 @@ export default function MyScreen() {
           },
           {
             text: "로그인하러 가기",
-            onPress: () => router.replace("/"),
+            onPress: () => router.push("/"),
           },
         ],
       );
@@ -159,7 +159,7 @@ export default function MyScreen() {
           },
           {
             text: "로그인하러 가기",
-            onPress: () => router.replace("/"),
+            onPress: () => router.push("/"),
           },
         ],
       );

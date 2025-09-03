@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
@@ -377,41 +378,27 @@ export default function HomeScreen() {
 
   const router = useRouter();
 
-  // 플랫폼별 토큰 조회 함수
-  const getTokenAsync = useCallback(
-    async (key: string): Promise<string | null> => {
-      if (Platform.OS === "web") {
-        return localStorage.getItem(key);
-      } else {
-        return await SecureStore.getItemAsync(key);
-      }
-    },
-    [],
+  useFocusEffect(
+    useCallback(() => {
+      const checkLoginStatus = async () => {
+        try {
+          const accessToken = await SecureStore.getItemAsync("accessToken");
+          const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+          if (accessToken && refreshToken) {
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+          }
+        } catch (error) {
+          console.log("❌ 토큰 확인 중 에러:", error);
+          setIsLoggedIn(false);
+        }
+      };
+
+      checkLoginStatus();
+    }, []),
   );
-
-  // 토큰 존재 여부로 로그인 상태 확인
-  const checkLoginStatus = useCallback(async () => {
-    try {
-      const accessToken = await getTokenAsync("accessToken");
-      const refreshToken = await getTokenAsync("refreshToken");
-
-      console.log("🔍 토큰 확인:", {
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        nickname,
-        isLoggedIn: !!accessToken,
-      });
-
-      setIsLoggedIn(!!accessToken);
-    } catch (error) {
-      console.log("❌ 토큰 확인 중 에러:", error);
-      setIsLoggedIn(false);
-    }
-  }, [nickname, getTokenAsync]);
-
-  useEffect(() => {
-    checkLoginStatus();
-  }, [checkLoginStatus]);
 
   const weekDays = getWeekDays();
 

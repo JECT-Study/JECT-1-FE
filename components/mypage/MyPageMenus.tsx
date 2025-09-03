@@ -37,11 +37,7 @@ const handleLogout = async () => {
             alert("로그아웃이 완료되었습니다.");
 
             router.dismissAll();
-            // dismissAll 완료 후 잠시 대기
-            setTimeout(() => {
-              router.push("/");
-              router.dismissAll(); // 이전 기록들 정리
-            }, 100);
+            router.push("/");
           } catch (error) {
             const axiosError = error as AxiosError;
             alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);

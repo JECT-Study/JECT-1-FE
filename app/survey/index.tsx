@@ -46,7 +46,7 @@ export default function SurveyScreen() {
           onNext={(answerIndex) =>
             history.push("step2", { ...context, step1: answerIndex })
           }
-          onBack={() => router.replace("/survey")}
+          onBack={() => router.push("/survey")}
           total={totalQuestions}
           currentStep={1}
           dividedOptions={true}
@@ -123,7 +123,7 @@ export default function SurveyScreen() {
         );
       }}
       done={({ context, history }) => (
-        <SurveyBalloon type="END" onNext={() => router.push("/my")} />
+        <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
       )}
     />
   );

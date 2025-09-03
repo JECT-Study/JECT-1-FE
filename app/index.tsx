@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleIcon from "@/components/icons/AppleIcon";
@@ -13,7 +13,6 @@ import KakaoIcon from "@/components/icons/KakaoIcon";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
-import { testerLogin } from "@/features/auth/testerLogin";
 
 function LoginMarquee({
   imageList,
@@ -97,20 +96,6 @@ function AppleLogin({ disabled = false }: { disabled?: boolean }) {
   );
 }
 
-function TesterLogin({ disabled = false }: { disabled?: boolean }) {
-  return (
-    <Pressable
-      onPress={disabled ? undefined : testerLogin}
-      disabled={disabled}
-      className={`mx-auto w-full flex-row items-center justify-center gap-2 rounded-xl bg-gray-500 px-6 py-4 ${
-        disabled ? "opacity-50" : "active:opacity-80"
-      }`}
-    >
-      <Text className="text-white">For Test</Text>
-    </Pressable>
-  );
-}
-
 export default function Login() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
@@ -118,7 +103,6 @@ export default function Login() {
   const insets = useSafeAreaInsets();
   const isIOS = Platform.OS === "ios";
 
-  // 화면 포커스 시 실행 (마운트 시도 포함)
   useFocusEffect(
     useCallback(() => {
       const checkTokens = async () => {
@@ -128,7 +112,7 @@ export default function Login() {
 
           if (accessToken && refreshToken) {
             setIsLoggedIn(true);
-            router.replace("/(tabs)");
+            router.push("/(tabs)");
           } else {
             setIsLoggedIn(false);
             console.log("토큰 없음 - 로그인 화면 유지");
@@ -152,7 +136,6 @@ export default function Login() {
         </Text>
       </View>
 
-      {/* SocialLoginButtons 통합 */}
       <View className="w-full">
         <LinearGradient
           colors={["transparent", "black"]}
@@ -167,7 +150,6 @@ export default function Login() {
             <View className="my-2" />
             {isIOS ? <AppleLogin disabled={isLoggedIn} /> : null}
             {isIOS ? <View className="my-2" /> : null}
-            <TesterLogin disabled={isLoggedIn} />
           </View>
 
           <View className="flex-col items-center justify-center gap-y-4">
@@ -177,23 +159,6 @@ export default function Login() {
             >
               <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
                 둘러보기
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                if (!isLoggedIn) {
-                  Alert.alert(
-                    "로그인이 필요합니다",
-                    "로그인 후 설문조사를 시작해주세요.",
-                  );
-                  return;
-                }
-                router.push("/survey");
-              }}
-              className="flex-row items-center justify-center px-6"
-            >
-              <Text className="text-[16px] text-[#AAAAAA] underline underline-offset-4">
-                설문조사 시작하기
               </Text>
             </Pressable>
           </View>
