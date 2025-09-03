@@ -1,11 +1,11 @@
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
 import { Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface SurveyResult {
   step1?: number;
@@ -35,6 +35,55 @@ export default function SurveyScreen() {
       context: {},
     },
   });
+
+  const handleStep6Next = async (
+    answerIndex: number,
+    context: SurveyResult,
+    history: any,
+  ) => {
+    const newContext = { ...context, step6: answerIndex };
+
+    // 첫 번째 질문의 답변을 region으로 사용
+    const region = options.Q1[context.step1 ?? 0];
+
+    const answers = [
+      { questionId: 1, optionId: (context.step1 ?? 0) + 1 },
+      { questionId: 2, optionId: (context.step2 ?? 0) + 1 },
+      { questionId: 3, optionId: (context.step3 ?? 0) + 1 },
+      { questionId: 4, optionId: (context.step4 ?? 0) + 1 },
+      { questionId: 5, optionId: (context.step5 ?? 0) + 1 },
+      { questionId: 6, optionId: answerIndex + 1 },
+    ];
+
+    const requestBody = {
+      region,
+      answers,
+    };
+
+    console.log("API 전송 데이터:", requestBody);
+
+    // // API 호출
+    // try {
+    //   const response = await authApi.post("/trait-test", requestBody);
+
+    //   if (response.data.isSuccess) {
+    //     console.log("설문 제출 성공:", response.data);
+    //     history.push("done", newContext);
+    //   } else {
+    //     throw new Error(response.data.message || "설문 제출 실패");
+    //   }
+    // } catch (error) {
+    //   console.error("설문 제출 중 오류 발생:", error);
+    //   Alert.alert(
+    //     "설문 제출 실패",
+    //     "설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
+    //     [{ text: "확인", style: "default" }],
+    //   );
+    // }
+
+    // 임시로 done 페이지로 이동
+    history.push("done", newContext);
+  };
 
   return (
     <SafeAreaView className="w-full flex-1 justify-between bg-white">
@@ -119,28 +168,18 @@ export default function SurveyScreen() {
             currentStep={5}
           />
         )}
-        step6={({ history, context }) => {
-          const handleNext = (answerIndex: number) => {
-            try {
-              const newContext = { ...context, step6: answerIndex };
-              console.log("API 전송", newContext);
-              history.push("done", newContext);
-            } catch (error) {
-              console.error("설문 제출 중 오류 발생:", error);
+        step6={({ history, context }) => (
+          <SurveyStep
+            question={questions.Q6}
+            options={options.Q6}
+            onNext={(answerIndex) =>
+              handleStep6Next(answerIndex, context, history)
             }
-          };
-
-          return (
-            <SurveyStep
-              question={questions.Q6}
-              options={options.Q6}
-              onNext={handleNext}
-              onBack={() => history.push("step5", context)}
-              total={totalQuestions}
-              currentStep={6}
-            />
-          );
-        }}
+            onBack={() => history.push("step5", context)}
+            total={totalQuestions}
+            currentStep={6}
+          />
+        )}
         done={({ context, history }) => (
           <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
         )}
