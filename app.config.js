@@ -4,7 +4,7 @@ export default {
   name: "mycode",
   slug: "mycode",
   owner: "donggukim",
-  version: "1.0.0",
+  version: "1.0.1",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
   scheme: "mycode",
@@ -15,7 +15,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "17",
+    buildNumber: "18",
     config: {
       usesNonExemptEncryption: false,
     },
