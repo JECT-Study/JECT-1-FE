@@ -42,8 +42,9 @@ export default {
   android: {
     package: process.env.MYCODE_BUNDLE_IDENTIFIER,
     edgeToEdgeEnabled: true,
+    icon: "./assets/mycode_icon.png",
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/mycode_icon.png",
       backgroundColor: "#ffffff",
     },
     intentFilters: [

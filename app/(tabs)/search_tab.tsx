@@ -552,7 +552,9 @@ export default function SearchScreen() {
   return (
     <View className="flex-1 bg-white pt-[65px]">
       <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
-        <View className="flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 py-3">
+        <View
+          className={`flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 ${Platform.OS === "ios" ? "py-3" : ""}`}
+        >
           <SearchIcon size={20} color="#6C4DFF" />
           <TextInput
             className="ml-3 flex-1 text-[16px] text-gray-700"
@@ -566,6 +568,7 @@ export default function SearchScreen() {
               searchContent(searchText, 1, false);
             }}
             returnKeyType="search"
+            style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
           />
         </View>
       </View>

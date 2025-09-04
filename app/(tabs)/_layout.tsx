@@ -1,5 +1,5 @@
 import { Tabs, usePathname } from "expo-router";
-import { Text } from "react-native";
+import { Platform, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -38,14 +38,14 @@ export default function TabLayout() {
           tabBarStyle: {
             paddingBottom: 10,
             paddingTop: 5,
-            height: 60,
+            height: Platform.OS === "ios" ? 60 : 70,
             backgroundColor: "white",
             borderTopWidth: 0, // 기존 border 제거
             shadowColor: "#575757",
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.05,
             shadowRadius: 4,
-            elevation: 4, // Android를 위한 shadow
+            elevation: 0, // Android에서 그림자 제거
           },
           tabBarIconStyle: {
             marginBottom: 3,
