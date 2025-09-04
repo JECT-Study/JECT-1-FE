@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import Chevron from "@/components/icons/Chevron";
 import XIcon from "@/components/icons/X";
 
-type Props = {
+interface CustomHeaderProps {
   title: string;
   // X 눌렀을 때 수행할 동작
   cancel?: () => void;
@@ -13,7 +13,7 @@ type Props = {
   commit?: () => void;
   // seperator 여부
   separator?: boolean;
-};
+}
 
 export default function CustomHeader({
   title,
@@ -21,18 +21,19 @@ export default function CustomHeader({
   isCommit,
   commit,
   separator,
-}: Props) {
+}: CustomHeaderProps) {
   return (
     <View
       aria-label={`${title} header`}
       className={`relative z-50 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
     >
-      <Pressable
-        onPress={cancel ? cancel : null}
-        className="w-[60px] items-start"
-      >
-        {isCommit ? <XIcon size={24} /> : <Chevron direction="left" />}
-      </Pressable>
+      {cancel ? (
+        <Pressable onPress={cancel} className="w-[60px] items-start">
+          {isCommit ? <XIcon size={24} /> : <Chevron direction="left" />}
+        </Pressable>
+      ) : (
+        <View className="w-[60px]" />
+      )}
 
       <View className="flex-1 items-center">
         <Text className="text-[18px] font-semibold text-[#383535]">

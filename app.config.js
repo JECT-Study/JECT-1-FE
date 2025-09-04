@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "mycode",
   slug: "mycode",
-  owner: "scorchedrice",
+  owner: "donggukim",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
@@ -15,7 +15,10 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    // bundleIdentifier: process.env.MYCODE_SERVICE_IDENTIFIER,
+    buildNumber: "17",
+    config: {
+      usesNonExemptEncryption: false,
+    },
     infoPlist: {
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
@@ -37,7 +40,7 @@ export default {
   },
 
   android: {
-    package: process.env.MYCODE_PACKAGE,
+    package: process.env.MYCODE_BUNDLE_IDENTIFIER,
     edgeToEdgeEnabled: true,
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
@@ -109,6 +112,7 @@ export default {
         client_id: process.env.NAVER_MAP_CLIENT_ID,
       },
     ],
+    "expo-maps",
   ],
 
   experiments: {

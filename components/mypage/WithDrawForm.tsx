@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TextInput } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import Animated from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
@@ -105,7 +105,7 @@ export default function WithDrawForm({ title, items }: AccordionProps) {
         }}
       >
         <Text className="text-center text-[16px] font-semibold text-white">
-          제출
+          탈퇴하기
         </Text>
       </Pressable>
     </>

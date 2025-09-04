@@ -67,9 +67,15 @@ export default function DatePickerBottomSheet({
   contentId,
 }: DatePickerBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState<string>(
-    dayjs(startDate).format("YYYY-MM-DD"),
-  );
+  const [currentMonth, setCurrentMonth] = useState<string>(() => {
+    try {
+      return dayjs(startDate).isValid()
+        ? dayjs(startDate).format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD");
+    } catch {
+      return dayjs().format("YYYY-MM-DD");
+    }
+  });
 
   const bottomSheetRef = useRef<BottomSheet | null>(null);
   const insets = useSafeAreaInsets();
@@ -79,7 +85,14 @@ export default function DatePickerBottomSheet({
     if (isOpen) {
       bottomSheetRef.current?.expand();
       // 바텀시트가 열릴 때마다 startDate로 리셋하고 선택된 날짜 초기화
-      setCurrentMonth(startDate);
+      try {
+        const validStartDate = dayjs(startDate).isValid()
+          ? startDate
+          : dayjs().format("YYYY-MM-DD");
+        setCurrentMonth(validStartDate);
+      } catch {
+        setCurrentMonth(dayjs().format("YYYY-MM-DD"));
+      }
       setSelectedDate(null);
     } else {
       bottomSheetRef.current?.close();
@@ -145,30 +158,39 @@ export default function DatePickerBottomSheet({
   const markedDates = useMemo(() => {
     const marked: { [key: string]: any } = {};
 
-    // 선택 가능한 날짜 범위 설정
-    const start = dayjs(startDate);
-    const end = dayjs(endDate);
-    let current = start;
+    try {
+      // 선택 가능한 날짜 범위 설정
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
 
-    // 시작일부터 종료일까지 모든 날짜를 활성화
-    while (current.isSameOrBefore(end)) {
-      const dateString = current.format("YYYY-MM-DD");
-      marked[dateString] = {
-        disabled: false,
-        disableTouchEvent: false,
-      };
-      current = current.add(1, "day");
-    }
+      if (!start.isValid() || !end.isValid()) {
+        return marked;
+      }
 
-    // 선택된 날짜 표시
-    if (selectedDate) {
-      marked[selectedDate] = {
-        ...marked[selectedDate],
-        selected: true,
-        selectedColor: "#6C4DFF",
-        selectedTextColor: "#FFFFFF",
-        marked: true,
-      };
+      let current = start;
+
+      // 시작일부터 종료일까지 모든 날짜를 활성화
+      while (current.isSameOrBefore(end)) {
+        const dateString = current.format("YYYY-MM-DD");
+        marked[dateString] = {
+          disabled: false,
+          disableTouchEvent: false,
+        };
+        current = current.add(1, "day");
+      }
+
+      // 선택된 날짜 표시
+      if (selectedDate) {
+        marked[selectedDate] = {
+          ...marked[selectedDate],
+          selected: true,
+          selectedColor: "#6C4DFF",
+          selectedTextColor: "#FFFFFF",
+          marked: true,
+        };
+      }
+    } catch (error) {
+      console.error("날짜 마킹 오류:", error);
     }
 
     return marked;

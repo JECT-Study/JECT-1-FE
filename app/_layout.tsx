@@ -58,7 +58,7 @@ export default function RootLayout() {
           >
             <View
               style={{
-                width: 400,
+                width: "100%",
                 maxWidth: "100%",
                 flex: 1,
               }}
@@ -69,7 +69,10 @@ export default function RootLayout() {
                   name="survey/index"
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{ headerShown: false, gestureEnabled: false }}
+                />
                 <Stack.Screen name="+not-found" />
                 <Stack.Screen
                   name="my/withdrawal"
@@ -93,6 +96,34 @@ export default function RootLayout() {
                 />
                 <Stack.Screen
                   name="detail/[id]"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
+                  name="edit-profile/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
+                  name="plan/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
+                  name="like/index"
+                  options={{
+                    headerShown: false,
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
+                  name="terms/index"
                   options={{
                     headerShown: false,
                     presentation: "card",

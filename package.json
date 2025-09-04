@@ -66,7 +66,8 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "expo-maps": "~0.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

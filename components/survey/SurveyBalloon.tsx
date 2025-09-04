@@ -1,7 +1,6 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Alert, Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
 
 import Confetti from "@/components/survey/Confetti";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -13,27 +12,11 @@ interface Props {
 
 export default function SurveyBalloon({ type, onNext }: Props) {
   return (
-    <SafeAreaView className="flex-1 justify-between bg-white">
+    <View className="flex-1 justify-between bg-white">
       <CustomHeader
         title={"취향 분석"}
         isCommit={false}
-        cancel={() =>
-          Alert.alert(
-            "취향 분석을 그만 두시겠어요?",
-            "선택한 내용은 저장되지 않아요.",
-            [
-              {
-                text: "계속 진행",
-                style: "cancel",
-              },
-              {
-                text: "네, 그만둘게요.",
-                style: "destructive",
-                onPress: () => router.back(),
-              },
-            ],
-          )
-        }
+        cancel={type === "END" ? undefined : () => router.back()}
       />
       {type === "END" ? <Confetti /> : null}
       <View className="w-full items-center pt-20">
@@ -61,14 +44,14 @@ export default function SurveyBalloon({ type, onNext }: Props) {
           </View>
         ) : null}
         <Pressable
-          className={`z-50 h-[47px] w-full items-center justify-center rounded-[6px] bg-[#816BFF]`}
+          className={`z-50 h-[47px] w-full items-center justify-center rounded-[6px] bg-[#6C4DFF]`}
           onPress={() => onNext()}
         >
           <Text className={`text-[15px] text-white`}>
-            {type === "INTRO" ? "설문 시작하기" : "마이코드 시작하기"}
+            {type === "INTRO" ? "취향 분석 시작" : "마이코드 시작하기"}
           </Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

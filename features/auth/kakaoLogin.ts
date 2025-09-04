@@ -3,26 +3,16 @@ import { login, me } from "@react-native-kakao/user";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
 
 const kakaoNativeAppKey = Constants.expoConfig?.extra?.kakaoNativeAppKey ?? "";
-const kakaoWebAppKey = Constants.expoConfig?.extra?.kakaoWebAppKey ?? "";
-
-// 플랫폼별 토큰 저장 함수
-async function setTokenAsync(key: string, value: string) {
-  if (Platform.OS === "web") {
-    localStorage.setItem(key, value);
-  } else {
-    await SecureStore.setItemAsync(key, value);
-  }
-}
 
 // SDK 초기화 함수
-export function initializeKakao() {
+export const initializeKakao = () => {
   // 웹 환경에서는 카카오 SDK 초기화를 건너뜀
   if (Platform.OS === "web") {
     console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
@@ -36,10 +26,10 @@ export function initializeKakao() {
   }
 
   initializeKakaoSDK(appKey);
-}
+};
 
 // 카카오 로그인 함수
-export async function kakaoLogin() {
+export const kakaoLogin = async () => {
   // 웹 환경에서는 카카오 로그인을 지원하지 않음
   if (Platform.OS === "web") {
     console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
@@ -59,10 +49,7 @@ export async function kakaoLogin() {
       socialType: "KAKAO",
     });
 
-    const accessToken = response.data.result.accessToken;
-    const refreshToken = response.data.result.refreshToken;
-    const nickname = response.data.result.nickname;
-    const image = response.data.result.image;
+    const { accessToken, refreshToken, nickname, image } = response.data.result;
 
     console.log("📝 카카오 로그인 성공 - 사용자 정보:", {
       nickname,
@@ -71,22 +58,31 @@ export async function kakaoLogin() {
       refreshToken: refreshToken ? "있음" : "없음",
     });
 
-    await setTokenAsync("accessToken", accessToken);
-    await setTokenAsync("refreshToken", refreshToken);
+    await SecureStore.setItemAsync("accessToken", accessToken);
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
+
+    // 사용자 정보도 SecureStore에 저장
+    await SecureStore.setItemAsync("nickname", nickname || "");
+    await SecureStore.setItemAsync("profileImage", image || "");
 
     // Store에 사용자 정보 저장
     const { setUserInfo } = useUserStore.getState().action;
     setUserInfo(nickname || "", image || "");
 
-    console.log("💾 Store에 저장 완료:", {
-      storedNickname: nickname || "",
-      storedImage: image || "",
-      userStoreState: useUserStore.getState(),
-    });
-
     router.push("/(tabs)");
-  } catch (error) {
+  } catch (error: any) {
     // 카카오 로그인 취소 시에는 에러 메시지를 표시하지 않음
-    console.log("카카오 로그인 취소 또는 에러:", error);
+
+    console.log(
+      "카카오 로그인 취소 또는 에러:",
+      error?.response?.data?.message,
+    );
+
+    // 2404 에러 코드인 경우 서버 메시지를 alert으로 표시
+    if (error?.response?.data?.code === 2404) {
+      const message =
+        error.response?.data?.message || "미미 탈퇴한 사용자입니다.";
+      Alert.alert("로그인 오류", message);
+    }
   }
-}
+};

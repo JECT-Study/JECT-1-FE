@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
+import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -16,7 +16,6 @@ import {
   Text,
   View,
 } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
@@ -25,86 +24,14 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
+import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
-
-function DetailImageCarousel({
-  imageHeight,
-  onImagePress,
-}: {
-  imageHeight: number;
-  onImagePress: (index: number) => void;
-}) {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-
-  const carouselData = Array(5).fill({
-    uri: "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-  });
-
-  const renderCarouselItem = ({
-    item,
-    index,
-  }: {
-    item: any;
-    index: number;
-  }) => (
-    //! 웹 환경에서 이미지 클릭 시 확대 페이지로 이동하는 기능 제거
-    <Pressable
-      onPress={() => Platform.OS !== "web" && onImagePress(index)}
-      style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-    >
-      <Image
-        source={item}
-        className="w-full"
-        style={[
-          {
-            height: imageHeight,
-            resizeMode: "cover",
-          },
-
-          //! 50% 설정 시 웹 환경에서 캐러셀 이미지 사이 여백 생김
-          Platform.OS === "web" && {
-            maxWidth: "50%",
-          },
-        ]}
-      />
-    </Pressable>
-  );
-
-  return (
-    <View
-      style={{
-        height: imageHeight,
-      }}
-    >
-      <Carousel
-        width={
-          Platform.OS === "web"
-            ? Math.min(Dimensions.get("window").width, 800)
-            : Dimensions.get("window").width
-        }
-        height={imageHeight}
-        data={carouselData}
-        renderItem={renderCarouselItem}
-        loop={true}
-        scrollAnimationDuration={1000}
-        onSnapToItem={(index) => setCurrentIndex(index)}
-      />
-
-      <View className="absolute bottom-8 right-4">
-        <View className="rounded-full bg-black/50 px-2.5 py-0.5">
-          <Text className="font-base text-sm text-[#F5F5F5]">
-            {currentIndex + 1}/{carouselData.length}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 const IMAGE_HEIGHT = 350;
 
@@ -144,22 +71,14 @@ export default function DetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-
-  // 플랫폼별 토큰 조회 함수
-  const getTokenAsync = async (key: string): Promise<string | null> => {
-    if (Platform.OS === "web") {
-      return localStorage.getItem(key);
-    } else {
-      return await SecureStore.getItemAsync(key);
-    }
-  };
+  const { showActionSheetWithOptions } = useActionSheet();
 
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const accessToken = await getTokenAsync("accessToken");
-        const refreshToken = await getTokenAsync("refreshToken");
+        const accessToken = await SecureStore.getItemAsync("accessToken");
+        const refreshToken = await SecureStore.getItemAsync("refreshToken");
         setIsLoggedIn(!!(accessToken && refreshToken));
       } catch (error) {
         console.error("토큰 확인 실패:", error);
@@ -296,8 +215,8 @@ export default function DetailScreen() {
 
   const handleImagePress = (index: number) => {
     const imageUrls = [
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
     ];
 
     router.push({
@@ -317,48 +236,72 @@ export default function DetailScreen() {
     setIsDatePickerOpen(false);
   };
 
-  const handleNaverMapPress = async () => {
+  const openAppleMaps = async () => {
     if (!contentData) return;
-
     const { latitude, longitude, placeName } = contentData;
-
-    // 웹 환경에서는 네이버 지도 웹사이트로 이동
-    if (Platform.OS === "web") {
-      const naverMapWebUrl = `https://map.naver.com/v5/search/${encodeURIComponent(placeName)}/place?c=${longitude},${latitude},15,0,0,0,dh`;
-
-      try {
-        window.open(naverMapWebUrl, "_blank");
-      } catch (error) {
-        console.error("네이버 지도 웹사이트 열기 실패:", error);
-        // 대안으로 현재 창에서 열기
-        window.location.href = naverMapWebUrl;
-      }
-      return;
-    }
-
-    // 모바일 환경에서는 기존 로직 유지
-    // 네이버 지도 URL scheme
-    const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
-
-    // 네이버 지도 앱 스토어 링크
-    const naverMapStoreURL =
-      Platform.OS === "ios"
-        ? "https://itunes.apple.com/app/id311867728?mt=8" // iOS 앱 스토어
-        : "market://details?id=com.nhn.android.nmap"; // Android 구글 플레이
+    const appleMapsUrl = `maps://?q=${encodeURIComponent(placeName)}&ll=${latitude},${longitude}`;
 
     try {
-      // 네이버 지도 앱이 설치되어 있는지 확인
-      const supported = await Linking.canOpenURL(naverMapScheme);
-
+      const supported = await Linking.canOpenURL(appleMapsUrl);
       if (supported) {
-        // 네이버 지도 앱으로 이동
+        await Linking.openURL(appleMapsUrl);
+      } else {
+        // Apple Maps가 설치되어 있지 않으면 앱 스토어로 이동
+        const appStoreUrl = "https://apps.apple.com/app/id915056765";
+        await Linking.openURL(appStoreUrl);
+      }
+    } catch (error) {
+      console.error("Apple Maps 연동 중 오류 발생:", error);
+    }
+  };
+
+  const openNaverMap = async () => {
+    if (!contentData) return;
+    const { latitude, longitude, placeName } = contentData;
+    const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
+
+    try {
+      const supported = await Linking.canOpenURL(naverMapScheme);
+      if (supported) {
         await Linking.openURL(naverMapScheme);
       } else {
-        // 네이버 지도 앱이 설치되어 있지 않으면 앱 스토어로 이동
-        await Linking.openURL(naverMapStoreURL);
+        // 네이버 지도 앱이 설치되어 있지 않으면 스토어로 이동
+        const storeURL = Platform.OS === "ios" 
+          ? "https://itunes.apple.com/app/id311867728?mt=8"
+          : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
+        await Linking.openURL(storeURL);
       }
     } catch (error) {
       console.error("네이버 지도 연동 중 오류 발생:", error);
+    }
+  };
+
+  const handleNaverMapPress = () => {
+    if (!contentData) return;
+
+    if (Platform.OS === "ios") {
+      // iOS: ActionSheet로 지도 앱 선택
+      const options = ["Apple 지도", "네이버 지도", "취소"];
+      const cancelButtonIndex = 2;
+
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          title: "지도 앱 선택",
+          message: "길찾기에 사용할 지도 앱을 선택해주세요",
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) {
+            openAppleMaps();
+          } else if (buttonIndex === 1) {
+            openNaverMap();
+          }
+        }
+      );
+    } else {
+      // Android: 네이버 지도만 사용
+      openNaverMap();
     }
   };
 
@@ -383,9 +326,7 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 ${
-              Platform.OS === "web" ? "pt-10" : "pt-20"
-            } ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
@@ -405,7 +346,7 @@ export default function DetailScreen() {
             {showHeaderBackground && (
               <View
                 className="absolute left-0 right-0 items-center justify-center"
-                style={{ top: Platform.OS === "web" ? 80 : 72 }}
+                style={{ top: 72 }}
               >
                 <Text
                   className="text-lg font-semibold text-[#212121]"
@@ -429,10 +370,19 @@ export default function DetailScreen() {
             onScroll={handleScroll}
             contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
           >
-            {/* 상단 캐러셀 영역 */}
-            <DetailImageCarousel
+            {/* <DetailImageCarousel
               imageHeight={IMAGE_HEIGHT}
               onImagePress={handleImagePress}
+            /> */}
+
+            {/* 임시 상단 이미지 영역 */}
+            <Image
+              source={getImageSource(contentData.contentId)}
+              className="w-full"
+              style={{
+                height: IMAGE_HEIGHT,
+                resizeMode: "cover",
+              }}
             />
 
             {/* 정보 영역 */}
@@ -541,11 +491,18 @@ export default function DetailScreen() {
                     위치
                   </Text>
 
-                  {/*네이버지도 컴포넌트*/}
-                  <NaverMap
-                    latitude={contentData.latitude}
-                    longitude={contentData.longitude}
-                  />
+                  {/*지도 컴포넌트 - iOS는 AppleMap, Android는 NaverMap*/}
+                  {Platform.OS === "ios" ? (
+                    <AppleMap
+                      latitude={contentData.latitude}
+                      longitude={contentData.longitude}
+                    />
+                  ) : (
+                    <NaverMap
+                      latitude={contentData.latitude}
+                      longitude={contentData.longitude}
+                    />
+                  )}
 
                   <View className="mb-3 flex-row items-center">
                     <LocationIcon size={16} />
@@ -576,9 +533,6 @@ export default function DetailScreen() {
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-col items-center">
-                {/* 🌟 찜하기 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
-                {/* 지금은 찜하기 api만 연결 되어 있는데 찜 되어 있는 상태에서 찜 취소 버튼을 누르면 찜 취소 상태로 변경되어야 합니다. */}
-                {/* 기존에 찜 해둔 상태라면 다시 페이지 방문 시 찜 해둔 상태가 유지되어야 합니다. */}
                 <Pressable
                   className="items-center justify-center"
                   style={({ pressed }) => [
@@ -610,8 +564,6 @@ export default function DetailScreen() {
                 </Text>
               </View>
 
-              {/* 🌟 내 일정에 추가 버튼입니다. 비로그인 상태에서는 비활성화 상태여야 하고 로그인 시에 활성화 되어야 합니다. */}
-              {/* 🌟 이 부분도 찜 해둔 상태인지 여부를 likeId가 null인지 아닌지로 판단하는 것처럼 scheduleId가 null인지 아닌지로 판단하여 내 일정에 추가 버튼을 활성화 또는 비활성화 해두면 될 것 같습니다. */}
               <Pressable
                 className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
@@ -632,7 +584,7 @@ export default function DetailScreen() {
       )}
 
       {/* 날짜 선택 바텀 시트 */}
-      {contentData && (
+      {contentData && contentData.startDate && contentData.endDate && (
         <DatePickerBottomSheet
           isOpen={isDatePickerOpen}
           onClose={handleDatePickerClose}

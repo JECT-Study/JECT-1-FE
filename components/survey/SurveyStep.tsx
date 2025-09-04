@@ -1,14 +1,10 @@
-// 각 선택지의 질문과 선택지 받기
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { useNavigation } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-import SurveyAlert from "@/components/alert/SurveyAlert";
 import Chevron from "@/components/icons/Chevron";
 import { chunk } from "@/features/survey/chunkOption";
-
-import SurveyStepBar from "./SurveyStepBar";
 
 export default function SurveyStep({
   question,
@@ -23,28 +19,41 @@ export default function SurveyStep({
   options: string[];
   dividedOptions?: boolean;
   onNext: (answerIndex: number) => void;
-  onBack?: () => void;
+  onBack: () => void;
   total: number;
   currentStep: number;
 }) {
   const [selected, setSelected] = useState<number | null>(null);
+
+  const navigation = useNavigation();
+
   const optionRows = dividedOptions ? chunk(options, 2) : [];
+
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false,
+      swipeEnabled: false,
+    });
+  }, [navigation]);
+
   return (
-    <SafeAreaView className="w-full flex-1 justify-between bg-white">
-      <View className="h-[60px] items-center justify-center">
-        <SurveyStepBar current={currentStep} total={total} />
-        <Pressable
-          className="absolute left-4 top-1/2 -translate-y-1/2"
-          onPress={() => SurveyAlert()}
-        >
+    <View className="w-full flex-1 justify-between bg-white">
+      <View className="h-[60px] flex-row items-center px-4">
+        <Pressable onPress={onBack}>
           <Chevron direction="left" />
         </Pressable>
+        <View className="flex-1 flex-row justify-center">
+          {Array.from({ length: total }).map((_, i) => (
+            <View
+              key={i}
+              className={`mx-[3px] h-1.5 w-8 rounded-[3px] ${i < currentStep ? "bg-[#816BFF]" : "bg-[#DFE2E9]"}`}
+            />
+          ))}
+        </View>
+        <View className="w-7" />
       </View>
       <View className="flex items-center">
-        <Text className="justify-center text-[15px] text-[#9B9696]">
-          {currentStep}/{total}
-        </Text>
-        <Text className="mb-4 mt-8 text-center text-2xl font-semibold text-gray800">
+        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray800">
           {question}
         </Text>
       </View>
@@ -119,10 +128,10 @@ export default function SurveyStep({
               selected === null ? "text-gray500" : "text-white"
             }`}
           >
-            다음으로
+            다음
           </Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -5,11 +5,11 @@ export const ROUTES = {
   SCHEDULE: "/schedule",
   DETAIL: "/detail",
   MY: {
-    LIKE: "/my/like",
+    LIKE: "/like",
     INDEX: "/my",
-    TERMS: "/my/terms",
+    TERMS: "/terms",
     WITHDRAWAL: "/my/withdrawal",
-    EDIT_PROFILE: "/my/edit_profile",
-    PLAN: "/my/plan",
+    EDIT_PROFILE: "/edit-profile",
+    PLAN: "/plan",
   },
 } as const;

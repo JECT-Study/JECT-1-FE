@@ -1,70 +1,68 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
-import { useRouter } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Platform,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
+import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
-import { publicApi } from "@/features/axios/axiosInstance";
+import { authApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
-import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
-// 페이지네이션 상수
-const SCHEDULE_LIMIT = 8;
+const SCHEDULE_LIMIT = 10;
 
-const formatSelectedDateHeader = (date: string) => {
-  const dayOfWeek = [
-    "일요일",
-    "월요일",
-    "화요일",
-    "수요일",
-    "목요일",
-    "금요일",
-    "토요일",
-  ];
-
-  const selectedDay = dayjs(date);
-  const today = dayjs();
-  const isToday = selectedDay.isSame(today, "day");
-
-  const dayName = dayOfWeek[selectedDay.day()];
-  const dateText = `${selectedDay.date()}일 ${dayName}`;
-  return isToday ? `${dateText} (오늘)` : dateText;
+// 최소 로딩 시간 보장 함수
+const ensureMinLoadingTime = async (
+  startTime: number,
+  minTime: number = 500,
+) => {
+  const elapsedTime = dayjs().valueOf() - startTime;
+  if (elapsedTime < minTime) {
+    await new Promise((resolve) => setTimeout(resolve, minTime - elapsedTime));
+  }
 };
 
-export default function ScheduleScreen() {
+// 선택된 날짜 헤더 포맷팅 함수
+const formatSelectedDateHeader = (dateString: string) => {
+  const date = dayjs(dateString);
+  const today = dayjs();
+
+  if (date.isSame(today, "day")) {
+    return `오늘 ${date.format("M월 D일")}`;
+  } else if (date.isSame(today.add(1, "day"), "day")) {
+    return `내일 ${date.format("M월 D일")}`;
+  } else if (date.isSame(today.subtract(1, "day"), "day")) {
+    return `어제 ${date.format("M월 D일")}`;
+  } else {
+    return date.format("M월 D일");
+  }
+};
+
+export default function Plan() {
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format("YYYY-MM-DD"),
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true); // 초기 로딩 상태
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-
-  const router = useRouter();
-
-  // 탭 포커스 시 StatusBar 스타일 설정
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, []),
-  );
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
@@ -86,8 +84,8 @@ export default function ScheduleScreen() {
           }
         }
 
-        const response = await publicApi.get<ScheduleApiResponse>(
-          `${BACKEND_URL}/schedules`,
+        const response = await authApi.get<ScheduleApiResponse>(
+          `${BACKEND_URL}/users/schedules`,
           {
             params: {
               page: page,
@@ -110,17 +108,17 @@ export default function ScheduleScreen() {
           setHasMoreData(number < totalPages);
 
           console.log(
-            `스케줄 데이터 로딩 완료: ${date}, 페이지 ${number}/${totalPages}`,
+            `사용자 스케줄 데이터 로딩 완료: ${date}, 페이지 ${number}/${totalPages}`,
           );
         } else {
           if (!isLoadMore) {
             setSchedules([]);
           }
           setHasMoreData(false);
-          console.log("스케줄 데이터 없음 또는 API 오류");
+          console.log("사용자 스케줄 데이터 없음 또는 API 오류");
         }
       } catch (error) {
-        console.error("스케줄 데이터 로딩 실패:", error);
+        console.error("사용자 스케줄 데이터 로딩 실패:", error);
         if (!isLoadMore) {
           setSchedules([]);
         }
@@ -134,7 +132,7 @@ export default function ScheduleScreen() {
           setIsLoading(false);
         }
         if (isInitial) {
-          setIsInitialLoading(false); // 초기 로딩 완료
+          setIsInitialLoading(false);
         }
       }
     },
@@ -143,7 +141,7 @@ export default function ScheduleScreen() {
 
   // 초기 데이터 로딩
   useEffect(() => {
-    fetchScheduleData(selectedDate, 0, false, true); // 초기 로딩 플래그 true
+    fetchScheduleData(selectedDate, 0, false, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -152,7 +150,7 @@ export default function ScheduleScreen() {
     if (hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
       console.log(`다음 페이지 로딩: ${nextPage}`);
-      fetchScheduleData(selectedDate, nextPage, true, false); // 무한스크롤은 초기 로딩 아님
+      fetchScheduleData(selectedDate, nextPage, true, false);
     }
   }, [
     hasMoreData,
@@ -168,30 +166,39 @@ export default function ScheduleScreen() {
       setSelectedDate(date);
       setCurrentPage(1);
       setHasMoreData(true);
-      fetchScheduleData(date, 0, false, false); // 날짜 변경은 초기 로딩 아님
+      fetchScheduleData(date, 0, false, false);
     },
     [fetchScheduleData],
   );
 
   // 스케줄 아이템 클릭 핸들러
-  const handleScheduleItemPress = useCallback(
-    (contentId: number) => {
-      router.push(`/detail/${contentId}`);
-    },
-    [router],
-  );
+  const handleScheduleItemPress = useCallback((contentId: number) => {
+    router.push(`/detail/${contentId}`);
+  }, []);
+
+  // 새로고침 핸들러
+  const onRefresh = useCallback(() => {
+    setRefresh(true);
+    setCurrentPage(1);
+    setHasMoreData(true);
+    fetchScheduleData(selectedDate, 0, false, false).finally(() => {
+      setRefresh(false);
+    });
+  }, [selectedDate, fetchScheduleData]);
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
+    <SafeAreaView className="flex-1 bg-white">
+      <CustomHeader
+        title="나의 일정"
+        isCommit={false}
+        cancel={() => {
+          router.back();
+        }}
+      />
+
       <View
         className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
       >
-        <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-          <Text className="text-center text-lg font-medium text-[#212121]">
-            컨텐츠 일정
-          </Text>
-        </View>
-
         <CalendarProvider date={selectedDate}>
           {isInitialLoading ? (
             <View className="flex-1 items-center justify-center py-20">
@@ -227,13 +234,15 @@ export default function ScheduleScreen() {
               )
             }
             ListHeaderComponent={
-              schedules.length > 0 ? (
-                <View className="mb-4">
-                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                    {formatSelectedDateHeader(selectedDate)}
-                  </Text>
-                </View>
-              ) : null
+              schedules.length > 0
+                ? () => (
+                    <View className="mb-4">
+                      <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                        {formatSelectedDateHeader(selectedDate)}
+                      </Text>
+                    </View>
+                  )
+                : null
             }
             ListFooterComponent={
               isLoadingMore ? (
@@ -260,9 +269,12 @@ export default function ScheduleScreen() {
             removeClippedSubviews={true}
             initialNumToRender={10}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+            }
           />
         </CalendarProvider>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

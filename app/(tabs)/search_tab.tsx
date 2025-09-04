@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,7 +14,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import Chevron from "@/components/icons/Chevron";
 import FilterIcon from "@/components/icons/FilterIcon";
@@ -23,6 +23,7 @@ import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 
 const SEARCH_LIMIT = 8; // 페이지당 검색 결과 개수
 
@@ -153,11 +154,7 @@ function EventCard({ item, onPress }: EventCardProps) {
     >
       <View className="h-[164px] w-full overflow-hidden rounded-[11px] bg-gray-200">
         <Image
-          source={{
-            uri:
-              item.thumbnailUrl ||
-              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-          }}
+          source={getImageSource(item.id)}
           className="h-full w-full"
           resizeMode="cover"
         />
@@ -199,6 +196,13 @@ export default function SearchScreen() {
   const [isFilterSearchMode, setIsFilterSearchMode] = useState<boolean>(false); // 필터 검색 모드 여부 (카테고리 또는 지역 필터 적용 시)
   const [filterSearchPage, setFilterSearchPage] = useState<number>(1); // 필터 검색 페이지
   const [filterHasMoreData, setFilterHasMoreData] = useState<boolean>(true); // 필터 검색 더 불러올 데이터 있는지
+
+  // 탭 포커스 시 StatusBar 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -546,9 +550,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-
+    <View className="flex-1 bg-white pt-[65px]">
       <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
         <View className="flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 py-3">
           <SearchIcon size={20} color="#6C4DFF" />
@@ -732,6 +734,6 @@ export default function SearchScreen() {
         selectedRegion={selectedRegion}
         onRegionSelect={handleRegionSelect}
       />
-    </SafeAreaView>
+    </View>
   );
 }

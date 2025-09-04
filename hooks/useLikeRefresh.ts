@@ -1,15 +1,21 @@
 import { useCallback, useState } from "react";
 
-export default function useLikeRefresh() {
+export default function useLikeRefresh(refetchFunction?: () => Promise<void>) {
   const [refresh, setRefresh] = useState(false);
-  const onRefresh = useCallback(() => {
+
+  const onRefresh = useCallback(async () => {
+    if (!refetchFunction) return;
+
     setRefresh(true);
-    // TODO : 실제 과정에선 API 요청하고 응답하는 시간을 고려한 로직 재설정 필요
-    setTimeout(() => {
-      console.log("데이터 새로고침");
+    try {
+      await refetchFunction();
+    } catch (error) {
+      console.error("새로고침 실패:", error);
+    } finally {
       setRefresh(false);
-    }, 2000);
-  }, []);
+    }
+  }, [refetchFunction]);
+
   return {
     refresh,
     onRefresh,

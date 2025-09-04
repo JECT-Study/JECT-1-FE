@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { StatusBar } from "expo-status-bar";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -20,7 +21,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
@@ -33,6 +33,7 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
+import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -80,22 +81,47 @@ const categoryConfig = [
 
 const Card = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="flex-row" onPress={handlePress}>
-      <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
-        className="h-[111px] w-[111px] rounded-[10px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[10px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[10px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[10px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="ml-3.5 flex-1">
         <Text className="mb-1 text-base font-semibold text-[#424242]">
           {item.title}
@@ -111,6 +137,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 
 const HotCard = ({ item }: { item: CustomContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
@@ -122,17 +149,41 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
     return categoryItem ? categoryItem.label : "기타";
   };
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
-      <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
-        className="h-[154px] w-[154px] rounded-[14px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[14px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[14px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[14px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="mt-2">
         <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
           <Text className="text-sm font-medium text-[#707070]">
@@ -152,22 +203,47 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
 
 const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="flex-row" onPress={handlePress}>
-      <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
-        className="h-[90px] w-[120px] rounded-lg"
-        resizeMode="cover"
-      />
+      <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-lg"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-lg ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-lg"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="ml-3.5 flex-1">
         <Text className="mb-1 text-base font-semibold text-[#424242]">
           {item.title}
@@ -185,22 +261,47 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
 
 const MoreCard = ({ item }: { item: CategoryContentItem }) => {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
+  const imageSource = getImageSource(item.contentId);
+  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
-      <Image
-        source={{
-          uri:
-            item.image ||
-            "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-        }}
-        className="h-[92px] w-full rounded-[14px]"
-        resizeMode="cover"
-      />
+      <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
+        {/* Placeholder 이미지 - 항상 표시 */}
+        <Image
+          source={require("../../assets/images/content_placeholder.png")}
+          className="absolute inset-0 h-full w-full rounded-[14px]"
+          resizeMode="cover"
+        />
+
+        {/* 실제 이미지 - 로딩 완료 시 표시 */}
+        {isRemoteImage && (
+          <Image
+            source={imageSource}
+            className={`absolute inset-0 h-full w-full rounded-[14px] ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+        )}
+
+        {/* 로컬 이미지인 경우 바로 표시 */}
+        {!isRemoteImage && (
+          <Image
+            source={imageSource}
+            className="absolute inset-0 h-full w-full rounded-[14px]"
+            resizeMode="cover"
+          />
+        )}
+      </View>
       <View className="mt-2">
         <Text className="text-base font-semibold text-[#424242]">
           {item.title}
@@ -230,40 +331,20 @@ const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
 
 const getWeekDays = () => {
   const today = dayjs();
-  const startOfWeek = today.startOf("week").add(1, "day"); // 월요일부터 시작
 
-  // 이번 주의 모든 날짜 생성 (월요일부터 일요일까지)
+  // 오늘부터 7일간의 연속된 날짜 생성
   const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = startOfWeek.add(i, "day");
+    const day = today.add(i, "day");
     return {
       dayOfIndex: i,
       date: day.format("D"),
       dayName: day.format("ddd"),
       fullDate: day.format("YYYY-MM-DD"),
-      isToday: day.isSame(today, "day"),
+      isToday: i === 0, // 첫 번째 날짜가 항상 오늘
     };
   });
 
-  // 오늘 날짜 찾기
-  const todayIndex = weekDays.findIndex((day) => day.isToday);
-
-  if (todayIndex === -1) {
-    // 오늘이 이번 주에 없으면 기본 순서 반환
-    return weekDays.map((day, index) => ({ ...day, dayOfIndex: index }));
-  }
-
-  // 오늘을 첫 번째로, 나머지를 순서대로 배치
-  const reorderedDays = [
-    weekDays[todayIndex],
-    ...weekDays.slice(0, todayIndex), // 오늘 이전 날짜들
-    ...weekDays.slice(todayIndex + 1), // 오늘 이후 날짜들
-  ];
-
-  // dayOfIndex를 새로운 순서에 맞게 재설정
-  return reorderedDays.map((day, index) => ({
-    ...day,
-    dayOfIndex: index,
-  }));
+  return weekDays;
 };
 
 export default function HomeScreen() {
@@ -296,41 +377,30 @@ export default function HomeScreen() {
 
   const router = useRouter();
 
-  // 플랫폼별 토큰 조회 함수
-  const getTokenAsync = useCallback(
-    async (key: string): Promise<string | null> => {
-      if (Platform.OS === "web") {
-        return localStorage.getItem(key);
-      } else {
-        return await SecureStore.getItemAsync(key);
-      }
-    },
-    [],
+  useFocusEffect(
+    useCallback(() => {
+      // StatusBar 스타일을 light로 설정
+      setStatusBarStyle("light");
+
+      const checkLoginStatus = async () => {
+        try {
+          const accessToken = await SecureStore.getItemAsync("accessToken");
+          const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+          if (accessToken && refreshToken) {
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+          }
+        } catch (error) {
+          console.log("❌ 토큰 확인 중 에러:", error);
+          setIsLoggedIn(false);
+        }
+      };
+
+      checkLoginStatus();
+    }, []),
   );
-
-  // 토큰 존재 여부로 로그인 상태 확인
-  const checkLoginStatus = useCallback(async () => {
-    try {
-      const accessToken = await getTokenAsync("accessToken");
-      const refreshToken = await getTokenAsync("refreshToken");
-
-      console.log("🔍 토큰 확인:", {
-        accessToken: accessToken ? "존재" : "없음",
-        refreshToken: refreshToken ? "존재" : "없음",
-        nickname,
-        isLoggedIn: !!accessToken,
-      });
-
-      setIsLoggedIn(!!accessToken);
-    } catch (error) {
-      console.log("❌ 토큰 확인 중 에러:", error);
-      setIsLoggedIn(false);
-    }
-  }, [nickname, getTokenAsync]);
-
-  useEffect(() => {
-    checkLoginStatus();
-  }, [checkLoginStatus]);
 
   const weekDays = getWeekDays();
 
@@ -510,9 +580,7 @@ export default function HomeScreen() {
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
-      <StatusBar style="light" />
-
+    <View className="flex-1 bg-white">
       {/* 기본 헤더 - 고정 */}
       <LinearGradient
         colors={["#816BFF", "#5E47E3"]}
@@ -657,7 +725,7 @@ export default function HomeScreen() {
                     <LockIcon />
                     <View>
                       <Text className="text-center text-lg font-medium text-[#212121]">
-                        회원가입하고
+                        로그인하고
                       </Text>
                       <Text className="text-center text-lg font-medium text-[#212121]">
                         맞춤 컨텐츠를 확인해보세요!
@@ -685,7 +753,7 @@ export default function HomeScreen() {
                         }}
                       >
                         <Text className="font-base text-sm text-white">
-                          회원가입하기
+                          로그인하기
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
@@ -828,6 +896,6 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
