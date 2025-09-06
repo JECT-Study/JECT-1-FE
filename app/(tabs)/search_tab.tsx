@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
-import axios from "axios";
 import { router } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
 import {
@@ -10,6 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -46,17 +46,12 @@ const getRegionKeyword = (regionKey: string): string => {
   return regionMap[regionKey] || "";
 };
 
-// 기본 데이터 인터페이스 (HomeScreen API)
-interface DefaultContentItem {
-  contentId: number;
-  title: string;
-  image: string;
-  contentType: string;
-  address: string;
-  longitude: number;
-  latitude: number;
-  startDate: string;
-  endDate: string;
+// 최근 검색어 API 응답 인터페이스
+interface RecentSearchResponse {
+  isSuccess: boolean;
+  code: number;
+  message: string;
+  result: string[];
 }
 
 // 검색 결과 인터페이스 (Search API)
@@ -176,10 +171,8 @@ function EventCard({ item, onPress }: EventCardProps) {
 
 export default function SearchScreen() {
   const [searchText, setSearchText] = useState<string>("");
-  const [defaultData, setDefaultData] = useState<SearchContentItem[]>([]);
   const [searchResults, setSearchResults] = useState<SearchContentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasSearched, setHasSearched] = useState<boolean>(false); // 사용자가 한 번이라도 검색을 수행했는지 여부 (기본 데이터 vs 검색 결과 구분용)
   const [currentPage, setCurrentPage] = useState<number>(1); // 현재 검색 결과의 페이지 번호 (무한스크롤로 다음 페이지 요청 시 사용)
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false); // 무한스크롤로 추가 데이터를 불러오는 중인지 여부 (하단 로딩 인디케이터 표시용)
   const [hasMoreData, setHasMoreData] = useState<boolean>(true); // 더 불러올 데이터가 있는지 여부 (무한스크롤 중단 조건)
@@ -197,53 +190,72 @@ export default function SearchScreen() {
   const [filterSearchPage, setFilterSearchPage] = useState<number>(1); // 필터 검색 페이지
   const [filterHasMoreData, setFilterHasMoreData] = useState<boolean>(true); // 필터 검색 더 불러올 데이터 있는지
 
+  const [recentSearches, setRecentSearches] = useState<string[]>([]); // 최근 검색어
+
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
     useCallback(() => {
       setStatusBarStyle("dark");
+      fetchRecentSearches();
     }, []),
   );
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        setIsLoading(true);
-
-        const response = await axios.get(
-          `${BACKEND_URL}/home/festival/hot?category=PERFORMANCE`,
-        );
-
-        if (response.data.isSuccess && response.data.result) {
-          // 기본 데이터를 SearchContentItem 형식으로 변환
-          const transformedData = response.data.result.map(
-            (item: DefaultContentItem) => ({
-              id: item.contentId,
-              title: item.title,
-              thumbnailUrl: item.image,
-              category: item.contentType,
-              address: item.address,
-              date: item.startDate,
-              views: 0, // 기본 데이터에는 views가 없으므로 0으로 설정
-            }),
-          );
-          setDefaultData(transformedData);
-        }
-      } catch (error) {
-        console.error("기본 데이터 로딩 실패:", error);
-        setDefaultData([]);
-      } finally {
-        setIsLoading(false);
+  const fetchRecentSearches = async () => {
+    try {
+      const response = await authApi.get<RecentSearchResponse>(
+        `${BACKEND_URL}/search/recent`,
+      );
+      if (response.data.isSuccess && response.data.result) {
+        console.log(response.data);
+        setRecentSearches(response.data.result);
       }
-    };
-    fetchInitialData();
-  }, []);
+    } catch (error) {
+      console.error("최근 검색어 로딩 실패:", error);
+      setRecentSearches([]);
+    }
+  };
+
+  // 최근 검색어 클릭 처리
+  const handleRecentSearchClick = (keyword: string) => {
+    setSearchText(keyword);
+    setCurrentPage(1);
+    setHasMoreData(true);
+    searchContent(keyword, 1, false);
+  };
+
+  // 최근 검색어 삭제 처리
+  const handleDeleteRecentSearch = async (keyword: string) => {
+    try {
+      const response = await authApi.delete(
+        `${BACKEND_URL}/search/keywords/${encodeURIComponent(keyword)}`,
+      );
+      if (response.data.isSuccess) {
+        // 삭제 성공 시 목록에서 제거
+        setRecentSearches((prev) => prev.filter((item) => item !== keyword));
+      }
+    } catch (error) {
+      console.error("최근 검색어 삭제 실패:", error);
+    }
+  };
+
+  // 최근 검색어 전체 삭제 처리
+  const handleDeleteAllRecentSearches = async () => {
+    try {
+      const response = await authApi.delete(`${BACKEND_URL}/search/keywords`);
+      if (response.data.isSuccess) {
+        // 전체 삭제 성공 시 목록 비우기
+        setRecentSearches([]);
+      }
+    } catch (error) {
+      console.error("최근 검색어 전체 삭제 실패:", error);
+    }
+  };
 
   // 키워드 검색 함수
   const searchContent = useCallback(
     async (keyword: string, page: number = 1, isLoadMore: boolean = false) => {
       if (!keyword.trim()) {
         // 검색어가 없으면 검색 상태 초기화
-        setHasSearched(false);
         setSearchResults([]);
         setCurrentPage(1);
         setHasMoreData(true);
@@ -255,7 +267,6 @@ export default function SearchScreen() {
           setIsLoadingMore(true);
         } else {
           setIsLoading(true);
-          setHasSearched(true);
         }
 
         const response = await authApi.get(`${BACKEND_URL}/search`, {
@@ -345,7 +356,6 @@ export default function SearchScreen() {
         } else {
           setIsLoading(true);
           setIsFilterSearchMode(true);
-          setHasSearched(false); // 키워드 검색 모드 해제
         }
 
         const regionKeyword = getRegionKeyword(region);
@@ -451,7 +461,6 @@ export default function SearchScreen() {
         // 둘 다 ALL 선택 시 필터 검색 모드 해제
         setIsFilterSearchMode(false);
         setFilterSearchResults([]);
-        setHasSearched(false);
       }
     },
     [searchByFilters, selectedRegion],
@@ -480,7 +489,6 @@ export default function SearchScreen() {
         // 둘 다 ALL 선택 시 필터 검색 모드 해제
         setIsFilterSearchMode(false);
         setFilterSearchResults([]);
-        setHasSearched(false);
       }
     },
     [searchByFilters, selectedCategory],
@@ -494,7 +502,7 @@ export default function SearchScreen() {
       console.log(`필터 검색 다음 페이지 로딩: ${nextPage}`);
       searchByFilters(selectedCategory, selectedRegion, nextPage, true);
     } else if (
-      hasSearched &&
+      searchResults.length > 0 &&
       hasMoreData &&
       !isLoadingMore &&
       searchText.trim()
@@ -510,7 +518,7 @@ export default function SearchScreen() {
     filterSearchPage,
     selectedCategory,
     selectedRegion,
-    hasSearched,
+    searchResults.length,
     hasMoreData,
     isLoadingMore,
     searchText,
@@ -520,11 +528,7 @@ export default function SearchScreen() {
   ]);
 
   // 검색 상태에 따라 표시할 데이터 결정
-  const displayData = isFilterSearchMode
-    ? filterSearchResults
-    : hasSearched
-      ? searchResults
-      : defaultData;
+  const displayData = isFilterSearchMode ? filterSearchResults : searchResults;
 
   // 카드 클릭 핸들러
   const handleCardPress = useCallback(
@@ -563,9 +567,11 @@ export default function SearchScreen() {
             value={searchText}
             onChangeText={setSearchText}
             onSubmitEditing={() => {
-              setCurrentPage(1);
-              setHasMoreData(true);
-              searchContent(searchText, 1, false);
+              if (searchText.trim()) {
+                setCurrentPage(1);
+                setHasMoreData(true);
+                searchContent(searchText, 1, false);
+              }
             }}
             returnKeyType="search"
             style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
@@ -661,8 +667,67 @@ export default function SearchScreen() {
 
       <Divider />
 
+      {/* 최근 검색어 영역 */}
+      {searchResults.length === 0 && !isFilterSearchMode && (
+        <View className="px-4 py-4">
+          <View className="mb-3 flex-row items-center justify-between">
+            <Text className="text-[15px] font-medium text-gray-800">
+              최근 검색어
+            </Text>
+            {recentSearches.length > 0 && (
+              <Pressable onPress={handleDeleteAllRecentSearches}>
+                <Text className="text-[13px] text-gray-500">전체삭제</Text>
+              </Pressable>
+            )}
+          </View>
+
+          {recentSearches.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="-mx-4 px-4"
+            >
+              <View className="flex-row gap-2">
+                {recentSearches.map((keyword, index) => (
+                  <View
+                    key={index}
+                    className="flex-row items-center rounded-full bg-[#F3F0FF] px-3 py-2"
+                  >
+                    <Pressable
+                      onPress={() => handleRecentSearchClick(keyword)}
+                      className="mr-2"
+                    >
+                      <Text className="text-[14px] text-[#6C4DFF]">
+                        {keyword}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => handleDeleteRecentSearch(keyword)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text className="text-[16px] text-[#6C4DFF]">×</Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          ) : (
+            <View className="flex-1 items-center justify-center py-12">
+              <Text className="text-center text-[16px] font-medium text-gray-800">
+                최근 검색어가 없어요.
+              </Text>
+              <Text className="mt-1 text-center text-[14px] text-gray-500">
+                관심사를 검색해보세요!
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
       <FlatList
-        className="pt-8"
+        className={
+          searchResults.length === 0 && !isFilterSearchMode ? "" : "pt-8"
+        }
         data={displayData}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
@@ -682,22 +747,29 @@ export default function SearchScreen() {
             <View className="flex-1 items-center justify-center py-20">
               <ActivityIndicator size="large" color="#6C4DFF" />
               <Text className="mt-4 text-center text-gray-500">
-                {isFilterSearchMode
-                  ? "필터 검색 중..."
-                  : hasSearched
-                    ? "검색 중..."
-                    : "데이터를 불러오는 중..."}
+                {isFilterSearchMode ? "필터 검색 중..." : "검색 중..."}
               </Text>
             </View>
           ) : (
             <View className="flex-1 items-center justify-center py-20">
-              <Text className="text-center text-gray-500">
-                {isFilterSearchMode
-                  ? "필터 검색 결과가 없습니다."
-                  : hasSearched
-                    ? "검색 결과가 없습니다."
-                    : "데이터가 없습니다."}
-              </Text>
+              {isFilterSearchMode ? (
+                <Text className="text-center text-gray-500">
+                  필터 검색 결과가 없습니다.
+                </Text>
+              ) : searchText ? (
+                <Text className="text-center text-gray-500">
+                  일치하는 검색 결과가 없어요.
+                </Text>
+              ) : recentSearches.length === 0 ? (
+                <>
+                  <Text className="text-center text-[16px] font-medium text-gray-800">
+                    최근 검색어가 없어요.
+                  </Text>
+                  <Text className="mt-1 text-center text-[14px] text-gray-500">
+                    관심사를 검색해보세요!
+                  </Text>
+                </>
+              ) : null}
             </View>
           )
         }
@@ -714,7 +786,7 @@ export default function SearchScreen() {
                 모든 필터 검색 결과를 불러왔습니다.
               </Text>
             </View>
-          ) : hasSearched && !hasMoreData && searchResults.length > 0 ? (
+          ) : searchResults.length > 0 && !hasMoreData ? (
             <View className="items-center justify-center py-4">
               <Text className="text-sm text-gray-500">
                 모든 검색 결과를 불러왔습니다.
