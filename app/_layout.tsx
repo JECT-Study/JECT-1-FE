@@ -91,7 +91,11 @@ export default function RootLayout() {
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen
-                  name="search/index"
+                  name="search-keywords/index"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="search-results/index"
                   options={{ headerShown: false }}
                 />
                 <Stack.Screen
