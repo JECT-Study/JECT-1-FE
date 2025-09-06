@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import BackArrow from "@/components/icons/BackArrow";
+import ClearIcon from "@/components/icons/ClearIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
@@ -152,6 +153,15 @@ export default function SearchKeywords() {
               returnKeyType="search"
               style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
             />
+            {searchWord.trim() && (
+              <Pressable
+                onPress={() => setSearchWord("")}
+                className="ml-2"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <ClearIcon />
+              </Pressable>
+            )}
           </View>
         </View>
       </View>

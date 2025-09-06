@@ -14,6 +14,7 @@ import {
 
 import BackArrow from "@/components/icons/BackArrow";
 import Chevron from "@/components/icons/Chevron";
+import ClearIcon from "@/components/icons/ClearIcon";
 import FilterIcon from "@/components/icons/FilterIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import FilterBottomSheet from "@/components/search/FilterBottomSheet";
@@ -404,6 +405,15 @@ export default function SearchResults() {
               returnKeyType="search"
               style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
             />
+            {searchText.trim() && (
+              <Pressable
+                onPress={() => setSearchText("")}
+                className="ml-2"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <ClearIcon />
+              </Pressable>
+            )}
           </View>
         </View>
       </View>
