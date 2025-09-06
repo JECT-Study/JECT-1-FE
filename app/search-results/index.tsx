@@ -508,13 +508,14 @@ export default function SearchResults() {
       <Divider />
 
       <FlatList
-        className="pt-8"
+        className="flex-1 pt-8"
         data={searchResults}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 100,
+          flexGrow: 1,
         }}
         columnWrapperStyle={{
           justifyContent: "space-between",
@@ -530,21 +531,13 @@ export default function SearchResults() {
               <Text className="mt-4 text-center text-gray-500">검색 중...</Text>
             </View>
           ) : (
-            <View className="flex-1 items-center justify-center py-20">
-              {searchText ? (
-                <Text className="text-center text-gray-500">
-                  일치하는 검색 결과가 없어요.
-                </Text>
-              ) : (
-                <>
-                  <Text className="text-center text-[16px] font-medium text-gray-800">
-                    검색어를 입력해주세요.
-                  </Text>
-                  <Text className="mt-1 text-center text-[14px] text-gray-500">
-                    관심사를 검색해보세요!
-                  </Text>
-                </>
-              )}
+            <View className="mt-[-70px] flex-1 items-center justify-center">
+              <Text className="text-center text-xl font-medium text-gray-700">
+                일치하는 검색결과가 없어요.
+              </Text>
+              <Text className="mt-1 text-center text-lg text-gray-500">
+                검색어를 변경해 보세요!
+              </Text>
             </View>
           )
         }
