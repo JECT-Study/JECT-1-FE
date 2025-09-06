@@ -14,6 +14,8 @@ interface RegionBottomSheetProps {
   selectedRegion: string;
   /** 지역 선택 함수 */
   onRegionSelect: (region: string) => void;
+  /** 검색 버튼 클릭 함수 */
+  onSearch: (region: string) => void;
 }
 
 const regions = [
@@ -36,6 +38,7 @@ export default function RegionBottomSheet({
   onClose,
   selectedRegion,
   onRegionSelect,
+  onSearch,
 }: RegionBottomSheetProps) {
   const [tempSelectedRegion, setTempSelectedRegion] =
     useState<string>(selectedRegion);
@@ -65,9 +68,9 @@ export default function RegionBottomSheet({
 
   // 검색 버튼 처리
   const handleSearch = useCallback(() => {
-    onRegionSelect(tempSelectedRegion);
+    onSearch(tempSelectedRegion);
     onClose();
-  }, [tempSelectedRegion, onRegionSelect, onClose]);
+  }, [tempSelectedRegion, onSearch, onClose]);
 
   return (
     <BottomSheet

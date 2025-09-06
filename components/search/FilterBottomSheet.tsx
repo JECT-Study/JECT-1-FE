@@ -14,6 +14,8 @@ interface FilterBottomSheetProps {
   selectedCategory: string;
   /** 카테고리 선택 함수 */
   onCategorySelect: (category: string) => void;
+  /** 검색 버튼 클릭 함수 */
+  onSearch: (category: string) => void;
 }
 
 const categories = [
@@ -29,6 +31,7 @@ export default function FilterBottomSheet({
   onClose,
   selectedCategory,
   onCategorySelect,
+  onSearch,
 }: FilterBottomSheetProps) {
   const [tempSelectedCategory, setTempSelectedCategory] =
     useState<string>(selectedCategory);
@@ -58,9 +61,9 @@ export default function FilterBottomSheet({
 
   // 검색 버튼 처리
   const handleSearch = useCallback(() => {
-    onCategorySelect(tempSelectedCategory);
+    onSearch(tempSelectedCategory);
     onClose();
-  }, [tempSelectedCategory, onCategorySelect, onClose]);
+  }, [tempSelectedCategory, onSearch, onClose]);
 
   return (
     <BottomSheet

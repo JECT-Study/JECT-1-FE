@@ -191,6 +191,7 @@ export default function SearchScreen() {
   const [filterHasMoreData, setFilterHasMoreData] = useState<boolean>(true); // 필터 검색 더 불러올 데이터 있는지
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]); // 최근 검색어
+  const [hasInitialSearched, setHasInitialSearched] = useState<boolean>(false); // 최초 검색 여부
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -206,7 +207,6 @@ export default function SearchScreen() {
         `${BACKEND_URL}/search/recent`,
       );
       if (response.data.isSuccess && response.data.result) {
-        console.log(response.data);
         setRecentSearches(response.data.result);
       }
     } catch (error) {
@@ -251,7 +251,7 @@ export default function SearchScreen() {
     }
   };
 
-  // 키워드 검색 함수
+  // 최초 검색 함수 (/search API)
   const searchContent = useCallback(
     async (keyword: string, page: number = 1, isLoadMore: boolean = false) => {
       if (!keyword.trim()) {
@@ -269,55 +269,83 @@ export default function SearchScreen() {
           setIsLoading(true);
         }
 
-        const response = await authApi.get(`${BACKEND_URL}/search`, {
-          params: {
-            keyword: keyword,
-            page: page, // 정상 페이지네이션
-            // page: 1, // [테스트용] 임시로 항상 첫 페이지 호출
-            limit: SEARCH_LIMIT,
-            sort: "latest",
-            ...(selectedCategory !== "ALL" && { category: selectedCategory }),
-          },
-        });
+        let response;
 
-        if (
-          response.data.isSuccess &&
-          response.data.result &&
-          response.data.result.contents
-        ) {
-          const newResults = response.data.result.contents;
-          const totalCount = response.data.result.totalCount;
-          const currentPage = response.data.result.currentPage;
+        // 최초 검색인지 확인
+        if (!hasInitialSearched) {
+          // 최초 검색: /search API 사용
+          response = await authApi.get(`${BACKEND_URL}/search`, {
+            params: {
+              keyword: keyword,
+              page: page,
+              limit: SEARCH_LIMIT,
+              sort: "latest",
+            },
+          });
 
-          if (isLoadMore) {
-            // 정상 로직: API에서 받은 데이터를 그대로 추가
-            setSearchResults((prev) => [...prev, ...newResults]);
+          if (!isLoadMore) {
+            setHasInitialSearched(true); // 최초 검색 완료 표시
+          }
+        } else {
+          // 최초 검색 이후: /search/results API 사용
+          const regionKeyword =
+            selectedRegion !== "ALL" ? getRegionKeyword(selectedRegion) : "";
 
-            // [테스트용] ID 중복 방지를 위해 페이지 번호만큼 더해서 새로운 ID 생성
-            // const modifiedResults = newResults.map((item: any) => ({
-            //   ...item,
-            //   id: item.id + page * 1000, // 페이지별로 1000씩 더해서 ID 중복 방지
-            // }));
-            // setSearchResults((prev) => [...prev, ...modifiedResults]);
-            // console.log("추가된 결과 (ID 수정됨):", modifiedResults);
+          response = await authApi.get(`${BACKEND_URL}/search/results`, {
+            params: {
+              keyword: keyword,
+              ...(selectedCategory !== "ALL" && { category: selectedCategory }),
+              ...(selectedRegion !== "ALL" && { region: regionKeyword }),
+              page: page,
+              size: SEARCH_LIMIT,
+            },
+          });
+        }
+
+        if (response.data.isSuccess && response.data.result) {
+          let newResults, totalPages, currentPageNum;
+
+          if (!hasInitialSearched) {
+            // /search API 응답 처리
+            if (response.data.result.contents) {
+              newResults = response.data.result.contents;
+              const totalCount = response.data.result.totalCount;
+              currentPageNum = response.data.result.currentPage;
+              totalPages = Math.ceil(totalCount / SEARCH_LIMIT);
+            } else {
+              newResults = [];
+              totalPages = 0;
+              currentPageNum = 1;
+            }
           } else {
-            // 새로운 검색 결과로 교체
-            setSearchResults(newResults);
+            // /search/results API 응답 처리
+            const { contentList, pageInfo } = response.data.result;
+            newResults = contentList.map((item: CategorySearchItem) => ({
+              id: item.id,
+              title: item.title,
+              thumbnailUrl: item.thumbnailUrl || "",
+              category: item.category,
+              address: item.address,
+              date: "",
+              views: 0,
+            }));
+            currentPageNum = pageInfo.currentPage;
+            totalPages = pageInfo.totalPages;
           }
 
-          setCurrentPage(currentPage);
+          if (isLoadMore) {
+            setSearchResults((prev) => [...prev, ...newResults]);
+          } else {
+            setSearchResults(newResults);
+            setIsFilterSearchMode(false); // 필터 검색 모드 해제
+            setFilterSearchResults([]); // 필터 검색 결과 초기화
+          }
 
-          // 정상 로직: API 응답 기반으로 더 불러올 데이터 확인
-          const totalPages = Math.ceil(totalCount / SEARCH_LIMIT);
-          setHasMoreData(currentPage < totalPages);
-
-          // [테스트용] 임시로 최대 5페이지까지만 로딩 가능하도록 설정
-          // setHasMoreData(page < 5);
+          setCurrentPage(currentPageNum);
+          setHasMoreData(currentPageNum < totalPages);
 
           console.log("검색 결과:", newResults);
-          console.log(
-            `페이지: ${currentPage}/${totalPages}, 총 ${totalCount}개`,
-          );
+          console.log(`페이지: ${currentPageNum}/${totalPages}`);
         } else {
           if (!isLoadMore) {
             setSearchResults([]);
@@ -339,7 +367,7 @@ export default function SearchScreen() {
         }
       }
     },
-    [selectedCategory],
+    [hasInitialSearched, selectedCategory, selectedRegion],
   );
 
   // 통합 필터 검색 함수 (카테고리와 지역 교집합 검색)
@@ -362,6 +390,7 @@ export default function SearchScreen() {
 
         // API 파라미터 구성
         const params: any = {
+          keyword: searchText, // 사용자 입력 키워드 사용
           page: page,
           size: SEARCH_LIMIT,
         };
@@ -372,11 +401,7 @@ export default function SearchScreen() {
         }
 
         if (region !== "ALL") {
-          params.keyword = regionKeyword;
           params.region = regionKeyword;
-        } else if (category !== "ALL") {
-          // 카테고리만 선택된 경우 빈 키워드
-          params.keyword = "";
         }
 
         const response = await authApi.get<CategorySearchResponse>(
@@ -404,6 +429,7 @@ export default function SearchScreen() {
             setFilterSearchResults((prev) => [...prev, ...transformedResults]);
           } else {
             setFilterSearchResults(transformedResults);
+            setSearchResults([]); // 일반 검색 결과 지우기
           }
 
           setFilterSearchPage(pageInfo.currentPage);
@@ -411,9 +437,6 @@ export default function SearchScreen() {
 
           console.log("필터 검색 결과:", transformedResults);
           console.log("필터 검색 파라미터:", params);
-          console.log(
-            `페이지: ${pageInfo.currentPage}/${pageInfo.totalPages}, 총 ${pageInfo.totalElements}개`,
-          );
         } else {
           if (!isLoadMore) {
             setFilterSearchResults([]);
@@ -435,10 +458,9 @@ export default function SearchScreen() {
         }
       }
     },
-    [],
+    [searchText],
   );
 
-  // 필터 바텀시트 열기/닫기 함수
   const handleFilterOpen = useCallback(() => {
     setIsCategoryFilterOpen(true);
   }, []);
@@ -448,25 +470,21 @@ export default function SearchScreen() {
   }, []);
 
   // 카테고리 선택 처리
-  const handleCategorySelect = useCallback(
+  const handleCategorySelect = useCallback((category: string) => {
+    setSelectedCategory(category);
+  }, []);
+
+  // 카테고리 바텀시트에서 검색 버튼 클릭 시
+  const handleCategorySearchPress = useCallback(
     (category: string) => {
       setSelectedCategory(category);
-
-      // 필터 검색 실행 (카테고리 또는 지역이 ALL이 아닌 경우)
-      if (category !== "ALL" || selectedRegion !== "ALL") {
-        setFilterSearchPage(1);
-        setFilterHasMoreData(true);
+      if (hasInitialSearched && searchText.trim()) {
         searchByFilters(category, selectedRegion, 1, false);
-      } else {
-        // 둘 다 ALL 선택 시 필터 검색 모드 해제
-        setIsFilterSearchMode(false);
-        setFilterSearchResults([]);
       }
     },
-    [searchByFilters, selectedRegion],
+    [hasInitialSearched, searchText, selectedRegion, searchByFilters],
   );
 
-  // 지역 바텀시트 열기/닫기 함수
   const handleRegionFilterOpen = useCallback(() => {
     setIsRegionFilterOpen(true);
   }, []);
@@ -476,22 +494,19 @@ export default function SearchScreen() {
   }, []);
 
   // 지역 선택 처리
-  const handleRegionSelect = useCallback(
+  const handleRegionSelect = useCallback((region: string) => {
+    setSelectedRegion(region);
+  }, []);
+
+  // 지역 바텀시트에서 검색 버튼 클릭 시
+  const handleRegionSearchPress = useCallback(
     (region: string) => {
       setSelectedRegion(region);
-
-      // 필터 검색 실행 (카테고리 또는 지역이 ALL이 아닌 경우)
-      if (region !== "ALL" || selectedCategory !== "ALL") {
-        setFilterSearchPage(1);
-        setFilterHasMoreData(true);
+      if (hasInitialSearched && searchText.trim()) {
         searchByFilters(selectedCategory, region, 1, false);
-      } else {
-        // 둘 다 ALL 선택 시 필터 검색 모드 해제
-        setIsFilterSearchMode(false);
-        setFilterSearchResults([]);
       }
     },
-    [searchByFilters, selectedCategory],
+    [hasInitialSearched, searchText, selectedCategory, searchByFilters],
   );
 
   // 무한스크롤 핸들러
@@ -499,7 +514,6 @@ export default function SearchScreen() {
     if (isFilterSearchMode && filterHasMoreData && !isLoadingMore) {
       // 필터 검색 모드에서의 무한스크롤
       const nextPage = filterSearchPage + 1;
-      console.log(`필터 검색 다음 페이지 로딩: ${nextPage}`);
       searchByFilters(selectedCategory, selectedRegion, nextPage, true);
     } else if (
       searchResults.length > 0 &&
@@ -509,7 +523,6 @@ export default function SearchScreen() {
     ) {
       // 키워드 검색 모드에서의 무한스크롤
       const nextPage = currentPage + 1;
-      console.log(`키워드 검색 다음 페이지 로딩: ${nextPage}`);
       searchContent(searchText, nextPage, true);
     }
   }, [
@@ -579,154 +592,163 @@ export default function SearchScreen() {
         </View>
       </View>
 
-      <View className="flex-row items-center px-4 pb-4">
-        <View className="mr-4 flex-row items-center">
-          <FilterIcon
-            size={19}
-            color={isRegionFilterOpen ? "#9CA3AF" : "#424242"}
-          />
-          <Text
-            className={`ml-2 text-[14px] ${
-              isRegionFilterOpen ? "text-[#9CA3AF]" : "text-[#424242]"
-            }`}
-          >
-            필터
-          </Text>
-        </View>
-
-        <Pressable
-          className={`mr-3 flex-row items-center rounded-full px-3 py-2 ${
-            isCategoryFilterOpen
-              ? "border border-[#6C4DFF] bg-[#DFD8FD]"
-              : isRegionFilterOpen
-                ? "border border-[#E0E0E0] bg-gray-100"
-                : "border border-[#E0E0E0] bg-white"
-          } ${isRegionFilterOpen ? "opacity-50" : "opacity-100"}`}
-          onPress={!isRegionFilterOpen ? handleFilterOpen : undefined}
-          disabled={isRegionFilterOpen}
-        >
-          <Text
-            className={`mr-1 text-[14px] ${
-              isCategoryFilterOpen
-                ? "text-[#6C4DFF]"
-                : isRegionFilterOpen
-                  ? "text-[#9CA3AF]"
-                  : "text-[#424242]"
-            }`}
-          >
-            {getCategoryLabel(selectedCategory)}
-          </Text>
-          <Chevron
-            direction="down"
-            size={12}
-            color={
-              isCategoryFilterOpen
-                ? "#6C4DFF"
-                : isRegionFilterOpen
-                  ? "#9CA3AF"
-                  : "#424242"
-            }
-          />
-        </Pressable>
-
-        <Pressable
-          className={`flex-row items-center rounded-full px-3 py-2 ${
-            isRegionFilterOpen
-              ? "border border-[#6C4DFF] bg-[#DFD8FD]"
-              : isCategoryFilterOpen
-                ? "border border-[#E0E0E0] bg-gray-100"
-                : "border border-[#E0E0E0] bg-white"
-          } ${isCategoryFilterOpen ? "opacity-50" : "opacity-100"}`}
-          onPress={!isCategoryFilterOpen ? handleRegionFilterOpen : undefined}
-          disabled={isCategoryFilterOpen}
-        >
-          <Text
-            className={`mr-1 text-[14px] ${
-              isRegionFilterOpen
-                ? "text-[#6C4DFF]"
-                : isCategoryFilterOpen
-                  ? "text-[#9CA3AF]"
-                  : "text-[#424242]"
-            }`}
-          >
-            {getRegionLabel(selectedRegion)}
-          </Text>
-          <Chevron
-            direction="down"
-            size={12}
-            color={
-              isRegionFilterOpen
-                ? "#6C4DFF"
-                : isCategoryFilterOpen
-                  ? "#9CA3AF"
-                  : "#424242"
-            }
-          />
-        </Pressable>
-      </View>
-
-      <Divider />
-
-      {/* 최근 검색어 영역 */}
-      {searchResults.length === 0 && !isFilterSearchMode && (
-        <View className="px-4 py-4">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-[15px] font-medium text-gray-800">
-              최근 검색어
+      {/* 필터 영역 - 최초 검색 이후에만 표시 */}
+      {hasInitialSearched && (
+        <View className="flex-row items-center px-4 pb-4">
+          <View className="mr-4 flex-row items-center">
+            <FilterIcon
+              size={19}
+              color={isRegionFilterOpen ? "#9CA3AF" : "#424242"}
+            />
+            <Text
+              className={`ml-2 text-[14px] ${
+                isRegionFilterOpen ? "text-[#9CA3AF]" : "text-[#424242]"
+              }`}
+            >
+              필터
             </Text>
-            {recentSearches.length > 0 && (
-              <Pressable onPress={handleDeleteAllRecentSearches}>
-                <Text className="text-[13px] text-gray-500">전체삭제</Text>
-              </Pressable>
-            )}
           </View>
 
-          {recentSearches.length > 0 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="-mx-4 px-4"
+          <Pressable
+            className={`mr-3 flex-row items-center rounded-full px-3 py-2 ${
+              isCategoryFilterOpen || selectedCategory !== "ALL"
+                ? "border border-[#6C4DFF] bg-[#DFD8FD]"
+                : isRegionFilterOpen
+                  ? "border border-[#E0E0E0] bg-gray-100"
+                  : "border border-[#E0E0E0] bg-white"
+            } ${isRegionFilterOpen ? "opacity-50" : "opacity-100"}`}
+            onPress={!isRegionFilterOpen ? handleFilterOpen : undefined}
+            disabled={isRegionFilterOpen}
+          >
+            <Text
+              className={`mr-1 text-[14px] ${
+                isCategoryFilterOpen || selectedCategory !== "ALL"
+                  ? "text-[#6C4DFF]"
+                  : isRegionFilterOpen
+                    ? "text-[#9CA3AF]"
+                    : "text-[#424242]"
+              }`}
             >
-              <View className="flex-row gap-2">
-                {recentSearches.map((keyword, index) => (
-                  <View
-                    key={index}
-                    className="flex-row items-center rounded-full bg-[#F3F0FF] px-3 py-2"
-                  >
-                    <Pressable
-                      onPress={() => handleRecentSearchClick(keyword)}
-                      className="mr-2"
-                    >
-                      <Text className="text-[14px] text-[#6C4DFF]">
-                        {keyword}
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleDeleteRecentSearch(keyword)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                      <Text className="text-[16px] text-[#6C4DFF]">×</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          ) : (
-            <View className="flex-1 items-center justify-center py-12">
-              <Text className="text-center text-[16px] font-medium text-gray-800">
-                최근 검색어가 없어요.
-              </Text>
-              <Text className="mt-1 text-center text-[14px] text-gray-500">
-                관심사를 검색해보세요!
-              </Text>
-            </View>
-          )}
+              {getCategoryLabel(selectedCategory)}
+            </Text>
+            <Chevron
+              direction="down"
+              size={12}
+              color={
+                isCategoryFilterOpen || selectedCategory !== "ALL"
+                  ? "#6C4DFF"
+                  : isRegionFilterOpen
+                    ? "#9CA3AF"
+                    : "#424242"
+              }
+            />
+          </Pressable>
+
+          <Pressable
+            className={`flex-row items-center rounded-full px-3 py-2 ${
+              isRegionFilterOpen || selectedRegion !== "ALL"
+                ? "border border-[#6C4DFF] bg-[#DFD8FD]"
+                : isCategoryFilterOpen
+                  ? "border border-[#E0E0E0] bg-gray-100"
+                  : "border border-[#E0E0E0] bg-white"
+            } ${isCategoryFilterOpen ? "opacity-50" : "opacity-100"}`}
+            onPress={!isCategoryFilterOpen ? handleRegionFilterOpen : undefined}
+            disabled={isCategoryFilterOpen}
+          >
+            <Text
+              className={`mr-1 text-[14px] ${
+                isRegionFilterOpen || selectedRegion !== "ALL"
+                  ? "text-[#6C4DFF]"
+                  : isCategoryFilterOpen
+                    ? "text-[#9CA3AF]"
+                    : "text-[#424242]"
+              }`}
+            >
+              {getRegionLabel(selectedRegion)}
+            </Text>
+            <Chevron
+              direction="down"
+              size={12}
+              color={
+                isRegionFilterOpen || selectedRegion !== "ALL"
+                  ? "#6C4DFF"
+                  : isCategoryFilterOpen
+                    ? "#9CA3AF"
+                    : "#424242"
+              }
+            />
+          </Pressable>
         </View>
       )}
 
+      <Divider />
+
+      {/* 최근 검색어 영역 - 최초 검색 전에만 표시 */}
+      {!hasInitialSearched &&
+        searchResults.length === 0 &&
+        !isFilterSearchMode && (
+          <View className="px-4 py-4">
+            <View className="mb-3 flex-row items-center justify-between">
+              <Text className="text-[15px] font-medium text-gray-800">
+                최근 검색어
+              </Text>
+              {recentSearches.length > 0 && (
+                <Pressable onPress={handleDeleteAllRecentSearches}>
+                  <Text className="text-[13px] text-gray-500">전체삭제</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {recentSearches.length > 0 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="-mx-4 px-4"
+              >
+                <View className="flex-row gap-2">
+                  {recentSearches.map((keyword, index) => (
+                    <View
+                      key={index}
+                      className="flex-row items-center rounded-full bg-[#F3F0FF] px-3 py-2"
+                    >
+                      <Pressable
+                        onPress={() => handleRecentSearchClick(keyword)}
+                        className="mr-2"
+                      >
+                        <Text className="text-[14px] text-[#6C4DFF]">
+                          {keyword}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => handleDeleteRecentSearch(keyword)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Text className="text-[16px] text-[#6C4DFF]">×</Text>
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            ) : (
+              <View className="flex-1 items-center justify-center py-12">
+                <Text className="text-center text-[16px] font-medium text-gray-800">
+                  최근 검색어가 없어요.
+                </Text>
+                <Text className="mt-1 text-center text-[14px] text-gray-500">
+                  관심사를 검색해보세요!
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
       <FlatList
         className={
-          searchResults.length === 0 && !isFilterSearchMode ? "" : "pt-8"
+          !hasInitialSearched &&
+          searchResults.length === 0 &&
+          !isFilterSearchMode
+            ? ""
+            : "pt-8"
         }
         data={displayData}
         keyExtractor={(item) => item.id.toString()}
@@ -801,6 +823,7 @@ export default function SearchScreen() {
         onClose={handleFilterClose}
         selectedCategory={selectedCategory}
         onCategorySelect={handleCategorySelect}
+        onSearch={handleCategorySearchPress}
       />
 
       <RegionBottomSheet
@@ -808,6 +831,7 @@ export default function SearchScreen() {
         onClose={handleRegionFilterClose}
         selectedRegion={selectedRegion}
         onRegionSelect={handleRegionSelect}
+        onSearch={handleRegionSearchPress}
       />
     </View>
   );

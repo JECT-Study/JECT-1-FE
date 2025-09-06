@@ -266,9 +266,10 @@ export default function DetailScreen() {
         await Linking.openURL(naverMapScheme);
       } else {
         // 네이버 지도 앱이 설치되어 있지 않으면 스토어로 이동
-        const storeURL = Platform.OS === "ios" 
-          ? "https://itunes.apple.com/app/id311867728?mt=8"
-          : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
+        const storeURL =
+          Platform.OS === "ios"
+            ? "https://itunes.apple.com/app/id311867728?mt=8"
+            : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
         await Linking.openURL(storeURL);
       }
     } catch (error) {
@@ -297,7 +298,7 @@ export default function DetailScreen() {
           } else if (buttonIndex === 1) {
             openNaverMap();
           }
-        }
+        },
       );
     } else {
       // Android: 네이버 지도만 사용
