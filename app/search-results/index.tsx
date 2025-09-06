@@ -392,8 +392,8 @@ export default function SearchResults() {
           >
             <SearchIcon size={20} color="#6C4DFF" />
             <TextInput
-              className="ml-3 flex-1 text-[16px] text-gray-700"
-              placeholder="이번 주말, 뭐할까?"
+              className="ml-3 flex-1 text-[15px] text-gray-700"
+              placeholder="검색어를 입력해주세요."
               placeholderTextColor="#9CA3AF"
               value={searchText}
               onChangeText={setSearchText}

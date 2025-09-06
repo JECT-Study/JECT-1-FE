@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -14,8 +14,8 @@ import {
 
 import BackArrow from "@/components/icons/BackArrow";
 import ClearIcon from "@/components/icons/ClearIcon";
+import CloseIcon from "@/components/icons/CloseIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
-import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 
@@ -41,25 +41,23 @@ export default function SearchKeywords() {
   useFocusEffect(
     useCallback(() => {
       setStatusBarStyle("dark");
+      fetchRecentSearches();
     }, []),
   );
 
-  useEffect(() => {
-    const fetchRecentSearches = async () => {
-      try {
-        const response = await authApi.get<RecentSearchResponse>(
-          `${BACKEND_URL}/search/recent`,
-        );
-        if (response.data.isSuccess && response.data.result) {
-          setRecentSearchWords(response.data.result);
-        }
-      } catch (error) {
-        console.error("최근 검색어 로딩 실패:", error);
-        setRecentSearchWords([]);
+  const fetchRecentSearches = async () => {
+    try {
+      const response = await authApi.get<RecentSearchResponse>(
+        `${BACKEND_URL}/search/recent`,
+      );
+      if (response.data.isSuccess && response.data.result) {
+        setRecentSearchWords(response.data.result);
       }
-    };
-    fetchRecentSearches();
-  }, []);
+    } catch (error) {
+      console.error("최근 검색어 로딩 실패:", error);
+      setRecentSearchWords([]);
+    }
+  };
 
   // 최근 검색어 클릭 처리
   const handleRecentSearchClick = (keyword: string) => {
@@ -134,6 +132,7 @@ export default function SearchKeywords() {
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
+      {/* 검색바 영역 */}
       <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
@@ -144,8 +143,8 @@ export default function SearchKeywords() {
           >
             <SearchIcon size={20} color="#6C4DFF" />
             <TextInput
-              className="ml-3 flex-1 text-[16px] text-gray-700"
-              placeholder="이번 주말, 뭐할까?"
+              className="ml-3 flex-1 text-[15px] text-gray-700"
+              placeholder="검색어를 입력해주세요."
               placeholderTextColor="#9CA3AF"
               value={searchWord}
               onChangeText={setSearchWord}
@@ -153,6 +152,7 @@ export default function SearchKeywords() {
               returnKeyType="search"
               style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
             />
+
             {searchWord.trim() && (
               <Pressable
                 onPress={() => setSearchWord("")}
@@ -166,22 +166,18 @@ export default function SearchKeywords() {
         </View>
       </View>
 
-      <Divider />
-
       {/* 최근 검색어 영역 */}
-      <View className="px-4 py-4">
-        <View className="mb-3 flex-row items-center justify-between">
-          <Text className="text-[15px] font-medium text-gray-800">
-            최근 검색어
-          </Text>
-          {recentSearchWords.length > 0 && (
+      {recentSearchWords.length > 0 ? (
+        <View className="px-4 py-4">
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-xl font-medium text-gray-800">
+              최근 검색어
+            </Text>
             <Pressable onPress={handleDeleteAllRecentSearches}>
-              <Text className="text-[13px] text-gray-500">전체삭제</Text>
+              <Text className="text-base text-gray-500">전체삭제</Text>
             </Pressable>
-          )}
-        </View>
+          </View>
 
-        {recentSearchWords.length > 0 ? (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -191,37 +187,32 @@ export default function SearchKeywords() {
               {recentSearchWords.map((keyword, index) => (
                 <View
                   key={index}
-                  className="flex-row items-center rounded-full bg-[#F3F0FF] px-3 py-2"
+                  className="flex-row items-center gap-x-1 rounded-full bg-[#F4F2FF] px-3 py-1.5"
                 >
-                  <Pressable
-                    onPress={() => handleRecentSearchClick(keyword)}
-                    className="mr-2"
-                  >
-                    <Text className="text-[14px] text-[#6C4DFF]">
-                      {keyword}
-                    </Text>
+                  <Pressable onPress={() => handleRecentSearchClick(keyword)}>
+                    <Text className="text-base text-[#6C4DFF]">{keyword}</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => handleDeleteRecentSearch(keyword)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Text className="text-[16px] text-[#6C4DFF]">×</Text>
+                    <CloseIcon size={16} />
                   </Pressable>
                 </View>
               ))}
             </View>
           </ScrollView>
-        ) : (
-          <View className="flex-1 items-center justify-center py-12">
-            <Text className="text-center text-[16px] font-medium text-gray-800">
-              최근 검색어가 없어요.
-            </Text>
-            <Text className="mt-1 text-center text-[14px] text-gray-500">
-              관심사를 검색해보세요!
-            </Text>
-          </View>
-        )}
-      </View>
+        </View>
+      ) : (
+        <View className="mt-[-100px] flex-1 items-center justify-center">
+          <Text className="text-center text-xl font-medium text-gray-700">
+            최근 검색어가 없어요.
+          </Text>
+          <Text className="mt-1 text-center text-lg text-gray-500">
+            관심사를 검색해보세요!
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
