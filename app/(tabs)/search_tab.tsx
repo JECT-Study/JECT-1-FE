@@ -40,21 +40,21 @@ function EventCard({ item, onPress }: EventCardProps) {
       className="mb-6 flex w-[48%] items-center"
       onPress={() => onPress(item.id)}
     >
-      <View className="h-[164px] w-full overflow-hidden rounded-[11px] bg-gray-200">
+      <View className="h-[208px] w-full overflow-hidden rounded-[11px] bg-gray-200">
         <Image
           source={getImageSource(item.id)}
           className="h-full w-full"
           resizeMode="cover"
         />
       </View>
-      <View className="mt-2 w-full">
+      <View className="mt-3 w-full">
         <Text
-          className="text-[16px] font-semibold leading-5 text-gray-800"
+          className="text-lg font-semibold leading-5 text-gray-800"
           numberOfLines={2}
         >
           {item.title}
         </Text>
-        <Text className="mt-1 text-[13px] text-gray-500" numberOfLines={1}>
+        <Text className="mt-1 text-sm text-gray-500" numberOfLines={1}>
           {item.address}
         </Text>
       </View>
