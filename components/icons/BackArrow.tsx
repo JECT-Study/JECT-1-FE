@@ -2,15 +2,16 @@ import Svg, { Path } from "react-native-svg";
 
 interface Props {
   color?: string;
+  size?: number;
 }
 
-export default function BackArrow({ color = "#111111" }: Props) {
+export default function BackArrow({ color = "#212121", size = 20 }: Props) {
   return (
-    <Svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 20 20" fill="none">
       <Path
-        d="M18.6666 23.3327L9.33325 13.9993L18.6666 4.66602"
+        d="M13.3327 16.6673L6.66602 10.0006L13.3327 3.33398"
         stroke={color}
-        strokeWidth="2"
+        strokeWidth="1.66667"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 
+import BackArrow from "@/components/icons/BackArrow";
 import SearchIcon from "@/components/icons/SearchIcon";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
@@ -133,20 +134,25 @@ export default function SearchKeywords() {
   return (
     <View className="flex-1 bg-white pt-[65px]">
       <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
-        <View
-          className={`flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 ${Platform.OS === "ios" ? "py-3" : ""}`}
-        >
-          <SearchIcon size={20} color="#6C4DFF" />
-          <TextInput
-            className="ml-3 flex-1 text-[16px] text-gray-700"
-            placeholder="이번 주말, 뭐할까?"
-            placeholderTextColor="#9CA3AF"
-            value={searchWord}
-            onChangeText={setSearchWord}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
-            style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
-          />
+        <View className="flex-row items-center">
+          <Pressable onPress={() => router.back()} className="mr-3">
+            <BackArrow />
+          </Pressable>
+          <View
+            className={`flex-1 flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 ${Platform.OS === "ios" ? "py-3" : ""}`}
+          >
+            <SearchIcon size={20} color="#6C4DFF" />
+            <TextInput
+              className="ml-3 flex-1 text-[16px] text-gray-700"
+              placeholder="이번 주말, 뭐할까?"
+              placeholderTextColor="#9CA3AF"
+              value={searchWord}
+              onChangeText={setSearchWord}
+              onSubmitEditing={handleSearch}
+              returnKeyType="search"
+              style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
+            />
+          </View>
         </View>
       </View>
 
