@@ -18,14 +18,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-
-// 최근 검색어 API 응답 인터페이스
-interface RecentSearchResponse {
-  isSuccess: boolean;
-  code: number;
-  message: string;
-  result: string[];
-}
+import { RecentSearchResponse } from "@/types/search";
 
 export default function SearchKeywords() {
   const [searchWord, setSearchWord] = useState<string>("");
