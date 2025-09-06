@@ -575,7 +575,7 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
-  const handleSearchPress = () => router.push("/(tabs)/search_tab");
+  const handleSearchPress = () => router.push("/search-keywords");
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 

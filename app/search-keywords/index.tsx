@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   Platform,
   Pressable,
@@ -32,6 +34,13 @@ export default function SearchKeywords() {
 
   console.log("받은 카테고리:", category);
   console.log("받은 지역:", region);
+
+  // 탭 포커스 시 StatusBar 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
 
   useEffect(() => {
     const fetchRecentSearches = async () => {
