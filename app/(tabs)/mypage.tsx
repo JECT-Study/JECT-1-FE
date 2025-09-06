@@ -12,7 +12,6 @@ import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import Chevron from "@/components/icons/Chevron";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
-import { authApi } from "@/features/axios/axiosInstance";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
 
@@ -50,27 +49,21 @@ export default function MyScreen() {
           onPress: async () => {
             try {
               // 로그아웃 API 호출
-              const response = await authApi.post("/auth/logout");
+              // const response = await authApi.post("/auth/logout");
 
-              if (response.data.isSuccess) {
-                // 로컬 저장소에서 토큰 및 사용자 정보 삭제
-                await SecureStore.deleteItemAsync("accessToken");
-                await SecureStore.deleteItemAsync("refreshToken");
-                await SecureStore.deleteItemAsync("nickname");
-                await SecureStore.deleteItemAsync("profileImage");
+              // 로컬 저장소에서 토큰 및 사용자 정보 삭제
+              await SecureStore.deleteItemAsync("accessToken");
+              await SecureStore.deleteItemAsync("refreshToken");
+              await SecureStore.deleteItemAsync("nickname");
+              await SecureStore.deleteItemAsync("profileImage");
 
-                const { clearUserInfo } = useUserStore.getState().action;
-                clearUserInfo();
+              const { clearUserInfo } = useUserStore.getState().action;
+              clearUserInfo();
 
-                alert("로그아웃이 완료되었습니다.");
+              alert("로그아웃이 완료되었습니다.");
 
-                router.dismissAll();
-                router.push("/");
-              } else {
-                alert(
-                  `로그아웃에 실패했습니다. ${response.data.message || "알 수 없는 오류"}`,
-                );
-              }
+              router.dismissAll();
+              router.push("/");
             } catch (error) {
               const axiosError = error as AxiosError;
               alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
