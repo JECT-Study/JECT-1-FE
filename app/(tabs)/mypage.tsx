@@ -14,6 +14,7 @@ import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import LogoutAlert from "@/components/user/LogoutAlert";
+import LogoutStatusModal from "@/components/user/LogoutStatusModal";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
 
@@ -22,6 +23,11 @@ export default function MyScreen() {
   const [nickname, setNickname] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>("");
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
+  const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
+  const [statusModalType, setStatusModalType] = useState<"success" | "error">(
+    "success",
+  );
+  const [statusModalMessage, setStatusModalMessage] = useState<string>("");
 
   const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
     usePageNavigation();
@@ -52,15 +58,29 @@ export default function MyScreen() {
       const { clearUserInfo } = useUserStore.getState().action;
       clearUserInfo();
 
-      alert("로그아웃이 완료되었습니다.");
-
       setShowLogoutAlert(false);
-      router.dismissAll();
-      router.push("/");
+
+      // 성공 모달 표시
+      setStatusModalType("success");
+      setStatusModalMessage("로그아웃이 완료되었습니다.");
+      setShowStatusModal(true);
+
+      // 모달 표시 후 화면 이동
+      setTimeout(() => {
+        setShowStatusModal(false);
+        router.dismissAll();
+        router.push("/");
+      }, 1500);
     } catch (error) {
       const axiosError = error as AxiosError;
-      alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
       setShowLogoutAlert(false);
+
+      // 에러 모달 표시
+      setStatusModalType("error");
+      setStatusModalMessage(
+        `로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`,
+      );
+      setShowStatusModal(true);
     }
   };
 
@@ -308,6 +328,14 @@ export default function MyScreen() {
         isVisible={showLogoutAlert}
         onConfirm={handleLogoutConfirm}
         onCancel={handleLogoutCancel}
+      />
+
+      {/* 로그아웃 상태 모달 */}
+      <LogoutStatusModal
+        isVisible={showStatusModal}
+        type={statusModalType}
+        message={statusModalMessage}
+        onClose={() => setShowStatusModal(false)}
       />
     </View>
   );
