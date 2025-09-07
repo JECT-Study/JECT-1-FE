@@ -3,6 +3,7 @@ import React from "react";
 import dayjs from "dayjs";
 import { Image, Pressable, Text, View } from "react-native";
 
+import DotsIcon from "@/components/icons/DotsIcon";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { getImageSource } from "@/utils/imageUtils";
 
@@ -51,10 +52,10 @@ export default function ScheduleItem({
             {showMenuButton && (
               <Pressable
                 onPress={() => onMenuPress?.(item.contentId)}
-                className="p-1"
+                className="px-3.5 py-1"
                 hitSlop={8}
               >
-                <Text className="text-lg text-[#757575]">⋮</Text>
+                <DotsIcon size={4} color="#757575" />
               </Pressable>
             )}
           </View>

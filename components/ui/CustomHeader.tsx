@@ -25,7 +25,7 @@ export default function CustomHeader({
   return (
     <View
       aria-label={`${title} header`}
-      className={`relative z-50 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
+      className={`relative z-0 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
     >
       {cancel ? (
         <Pressable onPress={cancel} className="w-[60px] items-start">

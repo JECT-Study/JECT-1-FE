@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   RefreshControl,
   Text,
   View,
@@ -20,6 +19,7 @@ import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
+import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -70,6 +70,7 @@ export default function Plan() {
   const [selectedContentId, setSelectedContentId] = useState<number | null>(
     null,
   );
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
@@ -232,6 +233,8 @@ export default function Plan() {
           prev.filter((item) => item.contentId !== selectedContentId),
         );
         console.log("일정 삭제 성공:", selectedContentId);
+        // 토스트 표시
+        setShowToast(true);
       } else {
         console.error("일정 삭제 실패:", response.data.message);
       }
@@ -249,19 +252,23 @@ export default function Plan() {
     setSelectedContentId(null);
   }, []);
 
+  // 토스트 숨김 핸들러
+  const handleToastHide = useCallback(() => {
+    setShowToast(false);
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <CustomHeader
         title="나의 일정"
         isCommit={false}
+        separator
         cancel={() => {
           router.back();
         }}
       />
 
-      <View
-        className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
-      >
+      <View className="flex-1 bg-white">
         <CalendarProvider date={selectedDate}>
           <CommonCalendar
             selectedDate={selectedDate}
@@ -352,6 +359,13 @@ export default function Plan() {
         isVisible={showDeleteAlert}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      {/* 토스트 */}
+      <Toast
+        visible={showToast}
+        message="일정이 삭제되었습니다."
+        onHide={handleToastHide}
       />
     </SafeAreaView>
   );
