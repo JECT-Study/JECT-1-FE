@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 export default {
-  name: "mycode",
+  name: "마이코드",
   slug: "mycode",
   owner: "donggukim",
   version: "1.0.2",
