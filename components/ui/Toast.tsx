@@ -18,6 +18,7 @@ export default function Toast({
 }: ToastProps) {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(100));
+
   const insets = useSafeAreaInsets();
 
   const showToast = useCallback(() => {
@@ -71,7 +72,7 @@ export default function Toast({
     <Animated.View
       className="absolute left-4 right-4 z-50"
       style={{
-        bottom: 100 + insets.bottom,
+        bottom: 80 + insets.bottom,
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }],
       }}

@@ -67,6 +67,7 @@ export default function DetailScreen() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
   const [showToast, setShowToast] = useState<boolean>(false);
+  const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -153,6 +154,7 @@ export default function DetailScreen() {
   const handleCopyAddress = async () => {
     try {
       await Clipboard.setStringAsync(contentData!.address);
+      setShowCopyToast(true);
       console.log("주소가 복사되었습니다.");
     } catch (error) {
       console.error("복사 오류:", error);
@@ -251,6 +253,11 @@ export default function DetailScreen() {
   // 토스트 숨김 핸들러
   const handleToastHide = () => {
     setShowToast(false);
+  };
+
+  // 복사 토스트 숨김 핸들러
+  const handleCopyToastHide = () => {
+    setShowCopyToast(false);
   };
 
   const openAppleMaps = async () => {
@@ -440,7 +447,7 @@ export default function DetailScreen() {
                       주소
                     </Text>
                     <View className="flex-row flex-wrap items-center gap-x-1">
-                      <Text className="flex-1 pr-4 text-base text-gray-600">
+                      <Text className="pr-4 text-base text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
@@ -666,11 +673,18 @@ export default function DetailScreen() {
         />
       )}
 
-      {/* 토스트 */}
+      {/* 일정 토스트 */}
       <Toast
         visible={showToast}
         message="일정에 추가되었습니다."
         onHide={handleToastHide}
+      />
+
+      {/* 복사 토스트 */}
+      <Toast
+        visible={showCopyToast}
+        message="주소가 복사되었습니다."
+        onHide={handleCopyToastHide}
       />
     </>
   );
