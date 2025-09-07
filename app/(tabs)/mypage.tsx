@@ -10,14 +10,11 @@ import { Alert, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import Chevron from "@/components/icons/Chevron";
+import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
-
-// 기본 프로필 이미지 (회색)
-const DEFAULT_PROFILE_IMAGE =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iOTQiIHZpZXdCb3g9IjAgMCA5NCA5NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDciIGN5PSI0NyIgcj0iNDciIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeD0iMjciIHk9IjI3Ij4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCAxMiA3LjU4MTcyIDEyIDEyQzEyIDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEM5IDI0IDAgMzMgMCA0NEg0MEMzNjAgMzMgMzEgMjQgMjAgMjRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+";
 
 export default function MyScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -138,11 +135,9 @@ export default function MyScreen() {
   // 프로필 이미지 결정 로직
   const getProfileImageSource = () => {
     if (!isLoggedIn) {
-      return DEFAULT_PROFILE_IMAGE;
+      return null;
     }
-    return profileImage && profileImage.trim() !== ""
-      ? profileImage
-      : DEFAULT_PROFILE_IMAGE;
+    return profileImage && profileImage.trim() !== "" ? profileImage : null;
   };
 
   // 닉네임 결정 로직
@@ -221,14 +216,18 @@ export default function MyScreen() {
 
   return (
     <View className="w-full flex-1 bg-white pt-[65px]">
-      <Text className="ml-6 mt-4 text-[18px]">마이페이지</Text>
+      <Text className="ml-6 mt-4 text-xl font-medium">마이페이지</Text>
 
-      <View aria-label="user-info" className="ml-6 mt-6 flex h-[60px] flex-row">
+      <View aria-label="user-info" className="ml-6 mt-7 flex h-[60px] flex-row">
         <View className="size-[60px] overflow-hidden rounded-full">
-          <Image
-            source={getProfileImageSource()}
-            style={{ width: 60, height: 60 }}
-          />
+          {getProfileImageSource() ? (
+            <Image
+              source={getProfileImageSource()}
+              style={{ width: 60, height: 60 }}
+            />
+          ) : (
+            <DefaultProfileIcon size={60} />
+          )}
         </View>
         <View className="ml-2 h-full justify-center p-2">
           <Text className="mr-1 text-[16px]">{getDisplayName()}</Text>
@@ -239,7 +238,7 @@ export default function MyScreen() {
         className="mx-6 mt-6 flex h-[32px] items-center justify-center rounded-[4px] bg-gray-100"
         onPress={handleEditProfile}
       >
-        <Text className="text-[12px]">프로필 수정</Text>
+        <Text className="text-sm font-medium">프로필 수정</Text>
       </Pressable>
 
       {/* MyMenus 통합 */}
@@ -249,7 +248,7 @@ export default function MyScreen() {
           className="m-2 flex h-[70px] w-[105px] items-center justify-center"
         >
           <DiaryIcon />
-          <Text className="m-[3.25px] text-[13px]">나의일정</Text>
+          <Text className="m-[3.25px] text-sm">나의일정</Text>
         </Pressable>
         <View
           aria-label="seperator"
@@ -259,8 +258,8 @@ export default function MyScreen() {
           onPress={handleLike}
           className="m-2 flex h-[70px] w-[105px] items-center justify-center"
         >
-          <HeartIcon size={24} />
-          <Text className="m-[3.25px] text-[13px]">관심목록</Text>
+          <HeartIcon />
+          <Text className="m-[3.25px] text-sm">관심목록</Text>
         </Pressable>
         <View
           aria-label="seperator"
@@ -271,7 +270,7 @@ export default function MyScreen() {
           className="m-2 flex h-[70px] w-[105px] items-center justify-center"
         >
           <CalendarEditIcon />
-          <Text className="m-[3.25px] text-[13px]">취향 분석하기</Text>
+          <Text className="m-[3.25px] text-sm">취향 분석하기</Text>
         </Pressable>
       </View>
 
@@ -301,7 +300,7 @@ export default function MyScreen() {
         {isLoggedIn && (
           <Pressable
             onPress={() => goWithdrawal()}
-            className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+            className="flex h-[50px] w-full flex-row items-center justify-between"
           >
             <Text className="text-[14px]">회원탈퇴</Text>
             <Chevron direction={"right"} />

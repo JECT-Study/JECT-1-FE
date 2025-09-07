@@ -33,7 +33,6 @@ interface PostBlockProps {
 export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
-  const [likeCount, setLikeCount] = useState<number>(0);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   // 플랫폼별 토큰 조회 함수
@@ -61,37 +60,10 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
     checkAuthStatus();
   }, []);
 
-  // 컨텐츠 상세 정보 가져오기 (좋아요 개수 포함)
+  // 초기 좋아요 상태 설정
   useEffect(() => {
-    const fetchContentDetail = async () => {
-      if (!info.contentId) return;
-
-      try {
-        const response = await authApi.get(
-          `${BACKEND_URL}/contents/${info.contentId}`,
-        );
-
-        if (response.data.isSuccess) {
-          const contentDetail = response.data.result;
-          setLikeCount(contentDetail.likes || 0);
-        }
-      } catch (error) {
-        console.error("컨텐츠 상세 정보 로딩 실패:", error);
-        // 실패 시 기본값 사용
-        setLikeCount(info.likes || 0);
-      }
-    };
-
-    // 초기 좋아요 상태 설정
     if (info) {
       setIsLiked(info.likeId !== null && info.likeId !== undefined);
-
-      // 좋아요 개수가 전달되지 않은 경우 API에서 가져오기
-      if (info.likes !== undefined) {
-        setLikeCount(info.likes);
-      } else {
-        fetchContentDetail();
-      }
     }
   }, [info]);
 
@@ -120,24 +92,16 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
       }
 
       if (response.data.isSuccess) {
-        const { result } = response.data;
-
-        // 좋아요 추가 시: result = { likeId: number, likeCount: number }
-        // 좋아요 취소 시: result = number (likeCount)
-        const isAddAction = !currentIsLiked;
-        const newLikeCount = isAddAction ? result.likeCount : result;
-
         // UI 상태 업데이트
         setIsLiked(!currentIsLiked);
-        setLikeCount(newLikeCount);
 
         // 부모 컴포넌트에 변경사항 알리기
         if (onLikeChange) {
-          onLikeChange(info.contentId, !currentIsLiked, newLikeCount);
+          onLikeChange(info.contentId, !currentIsLiked, 0);
         }
 
         console.log(
-          `좋아요 ${isAddAction ? "추가" : "취소"} 완료: ${info.title}`,
+          `좋아요 ${!currentIsLiked ? "추가" : "취소"} 완료: ${info.title}`,
         );
       }
     } catch (error) {
@@ -193,12 +157,6 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
               />
             )}
           </Pressable>
-          <Text
-            className="text-sm font-medium"
-            style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
-          >
-            {likeCount}
-          </Text>
         </View>
       </View>
       <View className="px-2">

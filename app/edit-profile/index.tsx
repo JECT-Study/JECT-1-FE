@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import CameraIcon from "@/components/icons/CameraIcon";
+import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import XIcon from "@/components/icons/X";
 import CustomHeader from "@/components/ui/CustomHeader";
 import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
@@ -25,10 +26,6 @@ import {
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
 import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
-
-// 기본 프로필 이미지 (회색)
-const DEFAULT_PROFILE_IMAGE =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iOTQiIHZpZXdCb3g9IjAgMCA5NCA5NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDciIGN5PSI0NyIgcj0iNDciIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeD0iMjciIHk9IjI3Ij4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCAxMiA3LjU4MTcyIDEyIDEyQzEyIDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEM5IDI0IDAgMzMgMCA0NEg0MEMzNiAzMyAzMSAyNCAyMCAyNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
@@ -198,9 +195,9 @@ export default function EditProfile() {
       return currentProfileImage;
     }
 
-    // 3. 둘 다 없으면 기본 이미지 사용
-    console.log("✅ 기본 이미지 사용");
-    return DEFAULT_PROFILE_IMAGE;
+    // 3. 둘 다 없으면 null 반환 (기본 아이콘 사용)
+    console.log("✅ 기본 아이콘 사용");
+    return null;
   };
 
   const imageSource = getImageSource();
@@ -224,10 +221,14 @@ export default function EditProfile() {
           aria-label="profile_image"
           className="relative size-[94px] rounded-full"
         >
-          <Image
-            source={imageSource}
-            style={{ width: 94, height: 94, borderRadius: "100%" }}
-          />
+          {imageSource ? (
+            <Image
+              source={imageSource}
+              style={{ width: 94, height: 94, borderRadius: "100%" }}
+            />
+          ) : (
+            <DefaultProfileIcon size={94} />
+          )}
           <Pressable
             onPress={onPress}
             disabled={isLoading}
