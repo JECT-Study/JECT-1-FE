@@ -139,7 +139,7 @@ export default function CommonCalendar({
   }, [isCalendarExpanded]);
 
   return (
-    <View>
+    <View className="z-0">
       <ExpandableCalendar
         ref={calendarRef}
         key={isInitialized ? "initialized" : "loading"}
