@@ -83,8 +83,6 @@ export default function CategoryBottomSheet({
     [onClose],
   );
 
-  console.log(insets.bottom);
-
   return (
     <BottomSheet
       ref={bottomSheetRef}
