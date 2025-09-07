@@ -68,6 +68,8 @@ export default function DetailScreen() {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
+  console.log(contentData);
+
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();

@@ -13,6 +13,8 @@ import {
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import DeleteScheduleAlert from "@/components/schedule/DeleteScheduleAlert";
+import DeleteScheduleBottomSheet from "@/components/schedule/DeleteScheduleBottomSheet";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
@@ -62,6 +64,12 @@ export default function Plan() {
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [showBottomSheet, setShowBottomSheet] = useState<boolean>(false);
+
+  const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
+  const [selectedContentId, setSelectedContentId] = useState<number | null>(
+    null,
+  );
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
@@ -177,6 +185,70 @@ export default function Plan() {
     });
   }, [selectedDate, fetchScheduleData]);
 
+  // 메뉴 버튼 클릭 핸들러
+  const handleMenuPress = useCallback((contentId: number) => {
+    console.log("메뉴 버튼 클릭됨. contentId:", contentId);
+    setSelectedContentId(contentId);
+    setShowBottomSheet(true);
+  }, []);
+
+  // 바텀시트 삭제 클릭 핸들러
+  const handleBottomSheetDelete = useCallback(() => {
+    console.log(
+      "바텀시트 삭제 버튼 클릭. selectedContentId:",
+      selectedContentId,
+    );
+    setShowBottomSheet(false);
+    setShowDeleteAlert(true);
+    // selectedContentId는 여기서 null로 설정하지 않음 (Alert에서 사용해야 하므로)
+  }, [selectedContentId]);
+
+  // 바텀시트 취소 핸들러
+  const handleBottomSheetCancel = useCallback(() => {
+    setShowBottomSheet(false);
+    setSelectedContentId(null);
+  }, []);
+
+  // 삭제 확인 핸들러
+  const handleDeleteConfirm = useCallback(async () => {
+    console.log("삭제 확인. selectedContentId:", selectedContentId);
+    if (!selectedContentId) {
+      console.log("selectedContentId가 null입니다");
+      return;
+    }
+
+    try {
+      console.log(
+        "삭제 API 호출:",
+        `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
+      );
+      const response = await authApi.delete(
+        `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
+      );
+
+      if (response.data.isSuccess) {
+        // 삭제 성공 시 목록에서 해당 아이템 제거
+        setSchedules((prev) =>
+          prev.filter((item) => item.contentId !== selectedContentId),
+        );
+        console.log("일정 삭제 성공:", selectedContentId);
+      } else {
+        console.error("일정 삭제 실패:", response.data.message);
+      }
+    } catch (error) {
+      console.error("일정 삭제 API 호출 실패:", error);
+    } finally {
+      setShowDeleteAlert(false);
+      setSelectedContentId(null);
+    }
+  }, [selectedContentId]);
+
+  // 삭제 취소 핸들러
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteAlert(false);
+    setSelectedContentId(null);
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <CustomHeader
@@ -200,7 +272,12 @@ export default function Plan() {
             className="mx-4 mt-7 flex-1"
             data={schedules}
             renderItem={({ item }) => (
-              <ScheduleItem item={item} onPress={handleScheduleItemPress} />
+              <ScheduleItem
+                item={item}
+                onPress={handleScheduleItemPress}
+                onMenuPress={handleMenuPress}
+                showMenuButton={true}
+              />
             )}
             keyExtractor={(item) => item.contentId.toString()}
             ListEmptyComponent={
@@ -257,6 +334,25 @@ export default function Plan() {
           />
         </CalendarProvider>
       </View>
+
+      {/* 삭제 바텀 시트 */}
+      <DeleteScheduleBottomSheet
+        isOpen={showBottomSheet}
+        onDelete={handleBottomSheetDelete}
+        onClose={() => {
+          console.log("바텀시트 onClose 호출됨 - selectedContentId 유지");
+          setShowBottomSheet(false);
+          // selectedContentId는 건드리지 않음
+        }}
+        onCancel={handleBottomSheetCancel}
+      />
+
+      {/* 삭제 확인 Alert */}
+      <DeleteScheduleAlert
+        isVisible={showDeleteAlert}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </SafeAreaView>
   );
 }

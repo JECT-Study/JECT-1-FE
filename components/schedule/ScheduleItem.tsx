@@ -9,6 +9,8 @@ import { getImageSource } from "@/utils/imageUtils";
 interface ScheduleItemProps {
   item: ScheduleItemType;
   onPress?: (contentId: number) => void;
+  onMenuPress?: (contentId: number) => void;
+  showMenuButton?: boolean;
 }
 
 const formatDateRange = (startDate: string, endDate: string) => {
@@ -22,7 +24,12 @@ const formatDateRange = (startDate: string, endDate: string) => {
   }
 };
 
-export default function ScheduleItem({ item, onPress }: ScheduleItemProps) {
+export default function ScheduleItem({
+  item,
+  onPress,
+  onMenuPress,
+  showMenuButton = false,
+}: ScheduleItemProps) {
   return (
     <Pressable
       onPress={() => onPress?.(item.contentId)}
@@ -35,9 +42,22 @@ export default function ScheduleItem({ item, onPress }: ScheduleItemProps) {
           resizeMode="cover"
         />
         <View className="flex-1 py-2.5">
-          <Text className="mb-1 text-base font-semibold text-[#212121]">
-            {item.title}
-          </Text>
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1">
+              <Text className="mb-1 text-base font-semibold text-[#212121]">
+                {item.title}
+              </Text>
+            </View>
+            {showMenuButton && (
+              <Pressable
+                onPress={() => onMenuPress?.(item.contentId)}
+                className="p-1"
+                hitSlop={8}
+              >
+                <Text className="text-lg text-[#757575]">⋮</Text>
+              </Pressable>
+            )}
+          </View>
           <Text className="mb-0.5 text-[13px] font-normal text-[#9E9E9E]">
             {item.address}
           </Text>
