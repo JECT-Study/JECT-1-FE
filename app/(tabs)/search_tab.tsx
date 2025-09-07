@@ -16,7 +16,7 @@ import {
 import Chevron from "@/components/icons/Chevron";
 import FilterIcon from "@/components/icons/FilterIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
-import FilterBottomSheet from "@/components/search/FilterBottomSheet";
+import CategoryBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
@@ -424,7 +424,7 @@ export default function SearchScreen() {
         }
       />
 
-      <FilterBottomSheet
+      <CategoryBottomSheet
         isOpen={isCategoryFilterOpen}
         onClose={handleFilterClose}
         selectedCategory={selectedCategory}

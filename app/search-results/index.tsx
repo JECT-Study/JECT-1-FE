@@ -17,7 +17,7 @@ import Chevron from "@/components/icons/Chevron";
 import ClearIcon from "@/components/icons/ClearIcon";
 import FilterIcon from "@/components/icons/FilterIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
-import FilterBottomSheet from "@/components/search/FilterBottomSheet";
+import FilterBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
