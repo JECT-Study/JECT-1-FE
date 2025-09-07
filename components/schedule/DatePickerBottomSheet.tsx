@@ -232,7 +232,6 @@ export default function DatePickerBottomSheet({
       }}
     >
       <BottomSheetView
-        className="px-4"
         style={{
           paddingBottom: 16 + insets.bottom,
           paddingHorizontal: 0,
@@ -258,7 +257,7 @@ export default function DatePickerBottomSheet({
           dayComponent={CustomDay}
         />
 
-        <View className="px-4 py-2">
+        <View className="mt-2 px-4 py-2">
           <Text className="text-center text-lg font-medium text-gray-700">
             선택한 날:{" "}
             {selectedDate && dayjs(selectedDate).format("MM월 DD일 (ddd)")}
