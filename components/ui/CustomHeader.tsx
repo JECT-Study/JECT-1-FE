@@ -36,7 +36,7 @@ export default function CustomHeader({
       )}
 
       <View className="flex-1 items-center">
-        <Text className="text-2xl font-semibold text-[#383535]">{title}</Text>
+        <Text className="text-xl font-semibold text-[#383535]">{title}</Text>
       </View>
 
       {isCommit ? (

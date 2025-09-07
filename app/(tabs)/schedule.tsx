@@ -170,7 +170,7 @@ export default function ScheduleScreen() {
     <View className="flex-1 bg-white pt-[65px]">
       <View className="flex-1 bg-white">
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-          <Text className="text-center text-lg font-medium text-[#212121]">
+          <Text className="text-center text-xl font-medium text-[#212121]">
             컨텐츠 일정
           </Text>
         </View>
@@ -193,7 +193,7 @@ export default function ScheduleScreen() {
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                   <Text className="mt-4 text-center text-gray-500">
-                    스케줄을 불러오는 중...
+                    일정을 불러오는 중...
                   </Text>
                 </View>
               ) : (
@@ -210,14 +210,14 @@ export default function ScheduleScreen() {
               ) : null
             }
             ListFooterComponent={
-              isLoadingMore ? (
+              isLoadingMore && !isLoading ? (
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : !hasMoreData && schedules.length > 0 ? (
                 <View className="items-center justify-center py-4">
                   <Text className="text-sm text-gray-500">
-                    모든 스케줄을 불러왔습니다.
+                    모든 일정을 불러왔습니다.
                   </Text>
                 </View>
               ) : null

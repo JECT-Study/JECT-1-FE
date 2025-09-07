@@ -600,7 +600,7 @@ export default function HomeScreen() {
               onPress={handleSearchPress}
             >
               <Text className="text-[#6E6E6E]">
-                6월에 안가면 손해! 고창 수박 축제
+                이번 주말, 뭐 할지 검색해 볼까?
               </Text>
               <SearchIcon size={24} color="#6B51FB" />
             </Pressable>

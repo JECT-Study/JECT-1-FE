@@ -292,7 +292,7 @@ export default function Plan() {
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                   <Text className="mt-4 text-center text-gray-500">
-                    스케줄을 불러오는 중...
+                    나의 일정을 불러오는 중...
                   </Text>
                 </View>
               ) : (
@@ -311,14 +311,14 @@ export default function Plan() {
                 : null
             }
             ListFooterComponent={
-              isLoadingMore ? (
+              isLoadingMore && !isLoading ? (
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : !hasMoreData && schedules.length > 0 ? (
                 <View className="items-center justify-center py-4">
                   <Text className="text-sm text-gray-500">
-                    모든 스케줄을 불러왔습니다.
+                    모든 일정을 불러왔습니다.
                   </Text>
                 </View>
               ) : null
