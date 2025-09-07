@@ -15,9 +15,10 @@ import {
 import CameraIcon from "@/components/icons/CameraIcon";
 import XIcon from "@/components/icons/X";
 import CustomHeader from "@/components/ui/CustomHeader";
+import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import useImagePicker from "@/features/user/imagePicker";
+import useCustomImagePicker from "@/features/user/useCustomImagePicker";
 import {
   useCancelEditProfile,
   useInitializeFromUserStore,
@@ -39,7 +40,8 @@ export default function EditProfile() {
   const [isLoading, setIsLoading] = useState(false);
 
   // 프로필 이미지 관련
-  const { onPress } = useImagePicker();
+  const { onPress, isBottomSheetOpen, onCloseBottomSheet, onLibrary } =
+    useCustomImagePicker();
   const profileUri = useTempImageUri();
 
   // 닉네임 관련 - 직접 상태 관리
@@ -208,6 +210,7 @@ export default function EditProfile() {
       <CustomHeader
         title="프로필 수정"
         isCommit={true}
+        separator
         commit={handleUpdateProfile}
         cancel={() => {
           cancelEdit();
@@ -270,6 +273,13 @@ export default function EditProfile() {
           </Text>
         )}
       </View>
+
+      {/* 이미지 피커 바텀시트 */}
+      <ImagePickerBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={onCloseBottomSheet}
+        onLibrary={onLibrary}
+      />
     </SafeAreaView>
   );
 }
