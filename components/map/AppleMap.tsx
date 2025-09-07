@@ -12,7 +12,7 @@ export default function AppleMap({ latitude, longitude }: AppleMapProps) {
   const lng = longitude || 126.9784147;
 
   return (
-    <View className="mb-5 h-48 w-full overflow-hidden rounded-lg">
+    <View className="h-48 w-full overflow-hidden rounded-lg">
       <AppleMaps.View
         style={{ flex: 1 }}
         cameraPosition={{

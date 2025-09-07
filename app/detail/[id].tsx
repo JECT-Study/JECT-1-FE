@@ -403,67 +403,44 @@ export default function DetailScreen() {
               }}
             />
 
-            {/* 정보 영역 */}
-            <View className="mt-[-20px] rounded-t-2xl bg-white pt-6">
-              {/* 제목 섹션 */}
-              <View className="mb-3 px-5">
-                <View className="mb-3.5 flex-row items-center justify-between">
-                  <View className="flex-1 gap-1 pr-4">
-                    <Text className="text-xl font-semibold text-[#212121]">
-                      {contentData.title}
+            {/* 대표 정보 영역 */}
+            <View className="mt-[-20px] rounded-t-2xl bg-white px-4 pt-6">
+              <View className="mb-3.5 flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-2xl font-semibold text-[#212121]">
+                    {contentData.title}
+                  </Text>
+                  <Text className="mt-1 text-lg font-medium text-[#424242]">
+                    {contentData.placeName}
+                  </Text>
+                  <Text className="mt-3.5 text-lg text-[#424242]">
+                    {contentData.description}
+                  </Text>
+                </View>
+              </View>
+
+              <Divider />
+
+              {/* 상세 정보 섹션 */}
+              <View>
+                <View className="my-6 flex-col gap-y-2">
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      기간
                     </Text>
-                    <Text className="text-[#424242]">
-                      {contentData.placeName}
-                    </Text>
-                    <Text className="text-[#424242]">
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
                       {contentData.startDate && contentData.endDate
                         ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
                         : ""}
                     </Text>
                   </View>
-                </View>
-
-                {/* <Pressable
-                  className="h-[43px] flex-1 justify-center rounded border-[0.5px] border-gray-300 p-2.5"
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                >
-                  <Text className="text-center font-medium text-black">
-                    전시 홈페이지
-                  </Text>
-                </Pressable> */}
-              </View>
-
-              <Divider />
-
-              {/* 정보 섹션 */}
-              <View>
-                <View className="my-5 flex-col gap-y-2 px-5">
-                  <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
-                      관람시간
-                    </Text>
-                    <Text className="text-sm text-gray-700">
-                      {contentData.isAlwaysOpen
-                        ? "24시간 운영"
-                        : contentData.openingHour && contentData.closedHour
-                          ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
-                          : ""}
-                    </Text>
-                  </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
-                      전화번호
-                    </Text>
-                    <Text className="text-sm text-gray-700">031-770-3232</Text>
-                  </View>
-
-                  <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
+                    <Text className="w-24 text-base font-medium text-gray-600">
                       주소
                     </Text>
                     <View className="flex-row flex-wrap items-center gap-x-1">
-                      <Text className="text-sm text-gray-700">
+                      <Text className="flex-1 pr-4 text-base text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
@@ -473,39 +450,95 @@ export default function DetailScreen() {
                           { opacity: pressed ? 0.7 : 1 },
                         ]}
                       >
-                        <CopyIcon size={14} />
-                        <Text className="ml-1 text-xs text-blue-600">복사</Text>
+                        <CopyIcon />
+                        <Text className="ml-1 text-base text-[#186ADE]">
+                          복사
+                        </Text>
                       </Pressable>
                     </View>
                   </View>
 
-                  <View className="flex-row">
-                    <Text className="mt-0.5 w-20 font-semibold text-gray-800">
-                      행사소개
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      관람시간
                     </Text>
-                    <Text className="flex-1 text-sm text-gray-700">
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                      {contentData.isAlwaysOpen
+                        ? "24시간 운영"
+                        : contentData.openingHour && contentData.closedHour
+                          ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
+                          : ""}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      전화번호
+                    </Text>
+                    {/* 전화번호 데이터 없어서 임시 주석 처리 */}
+                    {/* <Text className="flex-1 pr-4 text-base text-gray-600">
+                      031-770-3232
+                    </Text> */}
+                    <Text className="text-base text-gray-600">-</Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      링크
+                    </Text>
+                    {/* 링크 데이터 없어서 임시 주석 처리 */}
+                    {/* <Pressable
+                      className="rounded border border-gray-300 bg-white px-2 py-1"
+                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                      onPress={() => {
+                        // 링크 클릭 처리 로직
+                        console.log("전시 홈페이지 링크 클릭");
+                      }}
+                    >
+                      <Text className="text-sm text-gray-700">
+                        전시 홈페이지
+                      </Text>
+                    </Pressable> */}
+                    <Text className="text-base text-gray-600">-</Text>
+                  </View>
+
+                  <View className="flex-row">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      행사내용
+                    </Text>
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
                       {contentData.introduction}
                     </Text>
                   </View>
                 </View>
 
-                <Divider />
+                <Divider className="mb-4" />
 
-                <View className="my-5 px-5">
-                  <Text className="mb-3 font-semibold text-gray-800">
-                    행사내용
+                <View className="my-6">
+                  <Text className="mb-4 text-xl font-semibold text-gray-800">
+                    컨텐츠 키워드
                   </Text>
-                  <View className="flex-row flex-wrap gap-y-1">
-                    <Text className="text-gray-700">
-                      {contentData.description}
-                    </Text>
+                  {/* 더미 데이터 임시 표시 */}
+                  <View className="flex-row flex-wrap gap-2">
+                    {[
+                      "혼자 휴식",
+                      "조용한 휴식",
+                      "오감체험",
+                      "가족이랑",
+                      "감성가득",
+                    ].map((tag, index) => (
+                      <View
+                        key={index}
+                        className="rounded-md border border-gray-300 bg-white px-2 py-1"
+                      >
+                        <Text className="text-sm text-gray-700">#{tag}</Text>
+                      </View>
+                    ))}
                   </View>
                 </View>
 
-                <Divider height="h-2" bg="bg-[#F5F5F5]" />
-
-                <View className="my-5 px-5">
-                  <Text className="mb-4 text-lg font-semibold text-gray-800">
+                <View className="my-5">
+                  <Text className="mb-4 text-xl font-semibold text-gray-800">
                     위치
                   </Text>
 
@@ -522,9 +555,9 @@ export default function DetailScreen() {
                     />
                   )}
 
-                  <View className="mb-3 flex-row items-center">
-                    <LocationIcon size={16} />
-                    <Text className="ml-1.5 flex-1 text-sm text-black">
+                  <View className="my-3 flex-row items-center">
+                    <LocationIcon size={18} />
+                    <Text className="ml-1.5 text-base text-black">
                       {contentData.address}
                     </Text>
                   </View>
@@ -534,7 +567,7 @@ export default function DetailScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     onPress={handleNaverMapPress}
                   >
-                    <LocationPinIcon size={14} />
+                    <LocationPinIcon size={16} />
                     <Text className="ml-1.5 text-center font-medium text-black">
                       길찾기
                     </Text>
@@ -546,7 +579,7 @@ export default function DetailScreen() {
 
           {/* 하단 고정 바 */}
           <View
-            className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3"
+            className="absolute bottom-0 left-0 right-0 border-t border-[#E5E5E5] bg-white px-5 pt-3"
             style={{ paddingBottom: 12 + insets.bottom }}
           >
             <View className="flex-row items-center justify-between">
@@ -575,8 +608,8 @@ export default function DetailScreen() {
                   )}
                 </Pressable>
                 <Text
-                  className="text-lg font-medium"
-                  style={{ color: !isLoggedIn ? "#E0E0E0" : "#6b7280" }}
+                  className="text-sm"
+                  style={{ color: !isLoggedIn ? "#E0E0E0" : "#111111" }}
                 >
                   {likeCount !== null ? likeCount : contentData?.likes || 0}
                 </Text>
