@@ -14,6 +14,7 @@ export default function SurveyStep({
   total,
   currentStep,
   dividedOptions,
+  selectedValue,
 }: {
   question: string;
   options: string[];
@@ -22,8 +23,11 @@ export default function SurveyStep({
   onBack: () => void;
   total: number;
   currentStep: number;
+  selectedValue?: number;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(
+    selectedValue ?? null,
+  );
 
   const navigation = useNavigation();
 
@@ -35,6 +39,11 @@ export default function SurveyStep({
       swipeEnabled: false,
     });
   }, [navigation]);
+
+  // selectedValue가 변경되면 selected 상태도 업데이트
+  useEffect(() => {
+    setSelected(selectedValue ?? null);
+  }, [selectedValue]);
 
   return (
     <View className="w-full flex-1 justify-between bg-white">

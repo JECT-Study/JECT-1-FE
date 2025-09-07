@@ -107,6 +107,7 @@ export default function SurveyScreen() {
             total={totalQuestions}
             currentStep={1}
             dividedOptions={true}
+            selectedValue={context.step1}
           />
         )}
         step2={({ history, context }) => (
@@ -119,6 +120,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step1", context)}
             total={totalQuestions}
             currentStep={2}
+            selectedValue={context.step2}
           />
         )}
         step3={({ history, context }) => (
@@ -131,6 +133,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step2", context)}
             total={totalQuestions}
             currentStep={3}
+            selectedValue={context.step3}
           />
         )}
         step4={({ history, context }) => (
@@ -143,6 +146,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step3", context)}
             total={totalQuestions}
             currentStep={4}
+            selectedValue={context.step4}
           />
         )}
         step5={({ history, context }) => (
@@ -155,6 +159,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step4", context)}
             total={totalQuestions}
             currentStep={5}
+            selectedValue={context.step5}
           />
         )}
         step6={({ history, context }) => (
@@ -167,6 +172,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step5", context)}
             total={totalQuestions}
             currentStep={6}
+            selectedValue={context.step6}
           />
         )}
         done={({ context, history }) => (
