@@ -13,6 +13,7 @@ import Chevron from "@/components/icons/Chevron";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
+import LogoutAlert from "@/components/user/LogoutAlert";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
 
@@ -20,6 +21,7 @@ export default function MyScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [nickname, setNickname] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>("");
+  const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
 
   const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
     usePageNavigation();
@@ -32,45 +34,38 @@ export default function MyScreen() {
       return;
     }
 
-    // 로그인된 상태면 로그아웃 확인 다이얼로그 표시
-    Alert.alert(
-      "로그아웃",
-      "정말 로그아웃 하시겠어요?",
-      [
-        {
-          text: "취소",
-          style: "default",
-        },
-        {
-          text: "로그아웃",
-          onPress: async () => {
-            try {
-              // 로그아웃 API 호출
-              // const response = await authApi.post("/auth/logout");
+    // 로그인된 상태면 로그아웃 확인 모달 표시
+    setShowLogoutAlert(true);
+  };
 
-              // 로컬 저장소에서 토큰 및 사용자 정보 삭제
-              await SecureStore.deleteItemAsync("accessToken");
-              await SecureStore.deleteItemAsync("refreshToken");
-              await SecureStore.deleteItemAsync("nickname");
-              await SecureStore.deleteItemAsync("profileImage");
+  const handleLogoutConfirm = async () => {
+    try {
+      // 로그아웃 API 호출
+      // const response = await authApi.post("/auth/logout");
 
-              const { clearUserInfo } = useUserStore.getState().action;
-              clearUserInfo();
+      // 로컬 저장소에서 토큰 및 사용자 정보 삭제
+      await SecureStore.deleteItemAsync("accessToken");
+      await SecureStore.deleteItemAsync("refreshToken");
+      await SecureStore.deleteItemAsync("nickname");
+      await SecureStore.deleteItemAsync("profileImage");
 
-              alert("로그아웃이 완료되었습니다.");
+      const { clearUserInfo } = useUserStore.getState().action;
+      clearUserInfo();
 
-              router.dismissAll();
-              router.push("/");
-            } catch (error) {
-              const axiosError = error as AxiosError;
-              alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
-            }
-          },
-          style: "default",
-        },
-      ],
-      { cancelable: true },
-    );
+      alert("로그아웃이 완료되었습니다.");
+
+      setShowLogoutAlert(false);
+      router.dismissAll();
+      router.push("/");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      alert(`로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`);
+      setShowLogoutAlert(false);
+    }
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutAlert(false);
   };
 
   // 화면 포커스 시 실행 (마운트 시도 포함)
@@ -307,6 +302,13 @@ export default function MyScreen() {
           </Pressable>
         )}
       </View>
+
+      {/* 로그아웃 확인 모달 */}
+      <LogoutAlert
+        isVisible={showLogoutAlert}
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+      />
     </View>
   );
 }
