@@ -627,11 +627,11 @@ export default function HomeScreen() {
           }
         >
           {/* 카테고리 버튼 */}
-          <View className="px-6 pb-[11px] pt-6">
+          <View className="mb-7 px-6 pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
                 <Pressable
-                  className="gap-y-1.5"
+                  className="gap-y-1"
                   key={item.id}
                   onPress={() => {
                     router.push({
@@ -646,16 +646,18 @@ export default function HomeScreen() {
                 >
                   <View className="flex h-20 w-20 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
                     {item.iconType === "performance" && (
-                      <PerformanceIcon width={36} height={36} />
+                      <PerformanceIcon width={55} height={55} />
                     )}
                     {item.iconType === "exhibition" && (
-                      <ExhibitionIcon width={36} height={33} />
+                      <ExhibitionIcon width={72} height={72} />
                     )}
                     {item.iconType === "festival" && (
-                      <FestivalIcon width={52} height={52} />
+                      <View className="mt-[-8px]">
+                        <FestivalIcon width={52} height={52} />
+                      </View>
                     )}
                     {item.iconType === "event" && (
-                      <EventIcon width={58} height={58} />
+                      <EventIcon width={70} height={70} />
                     )}
                   </View>
                   <Text className="text-center text-base text-[#424242]">
