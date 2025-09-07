@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -23,6 +23,7 @@ import { RecentSearchResponse } from "@/types/search";
 export default function SearchKeywords() {
   const [searchWord, setSearchWord] = useState<string>("");
   const [recentSearchWords, setRecentSearchWords] = useState<string[]>([]);
+  const inputRef = useRef<TextInput>(null);
 
   // URL 파라미터에서 카테고리와 지역 값 받기
   const { category = "ALL", region = "ALL" } = useLocalSearchParams();
@@ -37,6 +38,15 @@ export default function SearchKeywords() {
       fetchRecentSearches();
     }, []),
   );
+
+  // 페이지 진입 0.6초 후 자동 포커스
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchRecentSearches = async () => {
     try {
@@ -136,6 +146,7 @@ export default function SearchKeywords() {
           >
             <SearchIcon size={20} color="#6C4DFF" />
             <TextInput
+              ref={inputRef}
               className="ml-3 flex-1 text-[15px] text-gray-700"
               placeholder="검색어를 입력해주세요."
               placeholderTextColor="#9CA3AF"
