@@ -612,6 +612,14 @@ export default function DetailScreen() {
         </View>
       )}
 
+      {/* 날짜 선택 바텀 시트 오버레이 */}
+      {isDatePickerOpen && (
+        <Pressable
+          className="absolute inset-0 z-0 flex-1 items-center justify-center bg-black/50"
+          onPress={handleDatePickerClose}
+        />
+      )}
+
       {/* 날짜 선택 바텀 시트 */}
       {contentData && contentData.startDate && contentData.endDate && (
         <DatePickerBottomSheet

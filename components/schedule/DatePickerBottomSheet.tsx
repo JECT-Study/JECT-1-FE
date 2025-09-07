@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
-import { Alert, Platform, Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -228,14 +228,14 @@ export default function DatePickerBottomSheet({
         width: 40,
         height: 4,
         borderRadius: 2,
-        marginTop: 8,
+        marginTop: 4,
       }}
     >
       <BottomSheetView
         className="px-4"
         style={{
           paddingBottom: 16 + insets.bottom,
-          paddingHorizontal: Platform.OS === "web" ? 10 : 0,
+          paddingHorizontal: 0,
         }}
       >
         <Calendar
@@ -258,13 +258,12 @@ export default function DatePickerBottomSheet({
           dayComponent={CustomDay}
         />
 
-        {selectedDate && (
-          <View className="px-4 py-2">
-            <Text className="text-base font-medium text-gray-700">
-              선택한 날: {dayjs(selectedDate).format("MM월 DD일 (ddd)")}
-            </Text>
-          </View>
-        )}
+        <View className="px-4 py-2">
+          <Text className="text-center text-lg font-medium text-gray-700">
+            선택한 날:{" "}
+            {selectedDate && dayjs(selectedDate).format("MM월 DD일 (ddd)")}
+          </Text>
+        </View>
 
         <View className="p-4">
           <Pressable
@@ -277,7 +276,7 @@ export default function DatePickerBottomSheet({
               { opacity: pressed && selectedDate ? 0.8 : 1 },
             ]}
           >
-            <Text className="text-center text-base font-medium text-white">
+            <Text className="text-center text-lg font-semibold text-white">
               내 일정에 추가하기
             </Text>
           </Pressable>
