@@ -26,7 +26,7 @@ import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
 import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
 import { FestivalIcon } from "@/components/icons/FestivalIcon";
-import LockIcon from "@/components/icons/LockIcon";
+import LockWithSparkles from "@/components/icons/LockWithSparkles";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
@@ -736,14 +736,14 @@ export default function HomeScreen() {
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   <View className="absolute inset-0 bg-white/95" />
-                  <View className="items-center gap-y-2.5">
-                    <LockIcon />
+                  <View className="items-center gap-y-3">
+                    <LockWithSparkles width={144} height={117} />
                     <View>
-                      <Text className="text-center text-lg font-medium text-[#212121]">
-                        로그인하고
+                      <Text className="text-center text-xl font-semibold text-gray-800">
+                        이 공간은 잠시 비공개예요!
                       </Text>
-                      <Text className="text-center text-lg font-medium text-[#212121]">
-                        맞춤 컨텐츠를 확인해보세요!
+                      <Text className="text-center text-lg text-gray-600">
+                        내게 꼭 맞는 전시, 로그인하면 바로 보여드려요.
                       </Text>
                     </View>
                     <Pressable
@@ -764,11 +764,11 @@ export default function HomeScreen() {
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: 4,
+                          gap: 6,
                         }}
                       >
-                        <Text className="font-base text-sm text-white">
-                          로그인하기
+                        <Text className="text-base text-white">
+                          로그인하러 가기
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
