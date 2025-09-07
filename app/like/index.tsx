@@ -135,6 +135,7 @@ export default function Like() {
       <CustomHeader
         title="관심 목록"
         isCommit={false}
+        separator
         cancel={() => {
           router.back();
         }}
@@ -150,13 +151,13 @@ export default function Like() {
                 key={key}
                 className={`flex h-[33px] w-[49px] items-center justify-center rounded-[20px] text-[14px] ${
                   selectedCategory === key
-                    ? "bg-[#816BFF] text-white"
-                    : "border-[1px] border-[#816BFF] bg-white"
+                    ? "bg-[#6C4DFF] text-white"
+                    : "border-[1px] border-[#6C4DFF] bg-white"
                 } `}
               >
                 <Text
                   className={`${
-                    selectedCategory === key ? "text-white" : "text-[#816BFF]"
+                    selectedCategory === key ? "text-white" : "text-[#6C4DFF]"
                   }`}
                 >
                   {value}
