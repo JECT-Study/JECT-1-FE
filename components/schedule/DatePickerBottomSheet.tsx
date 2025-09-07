@@ -139,7 +139,6 @@ export default function DatePickerBottomSheet({
             onScheduleAdded(scheduleId);
           }
           onClose();
-          Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
         } else {
           throw new Error("일정 생성에 실패했습니다.");
         }

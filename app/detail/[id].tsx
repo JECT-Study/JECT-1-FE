@@ -28,6 +28,7 @@ import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
+import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import { getImageSource } from "@/utils/imageUtils";
@@ -65,6 +66,7 @@ export default function DetailScreen() {
   const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -242,6 +244,13 @@ export default function DetailScreen() {
   const handleScheduleAdded = (scheduleId: number) => {
     // contentData의 scheduleId 업데이트
     setContentData((prev) => (prev ? { ...prev, scheduleId } : null));
+    // 토스트 표시
+    setShowToast(true);
+  };
+
+  // 토스트 숨김 핸들러
+  const handleToastHide = () => {
+    setShowToast(false);
   };
 
   const openAppleMaps = async () => {
@@ -615,6 +624,13 @@ export default function DetailScreen() {
           onScheduleAdded={handleScheduleAdded}
         />
       )}
+
+      {/* 토스트 */}
+      <Toast
+        visible={showToast}
+        message="일정에 추가되었습니다."
+        onHide={handleToastHide}
+      />
     </>
   );
 }
