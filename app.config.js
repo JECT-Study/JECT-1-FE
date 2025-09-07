@@ -4,18 +4,20 @@ export default {
   name: "mycode",
   slug: "mycode",
   owner: "donggukim",
-  version: "1.0.1",
+  version: "1.0.2",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
   scheme: "mycode",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  backgroundColor: "#6B51FB",
 
   ios: {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "18",
+    buildNumber: "19",
+    backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
     },
@@ -43,9 +45,10 @@ export default {
     package: process.env.MYCODE_BUNDLE_IDENTIFIER,
     edgeToEdgeEnabled: true,
     icon: "./assets/mycode_icon.png",
+    backgroundColor: "#111111",
     adaptiveIcon: {
       foregroundImage: "./assets/mycode_icon.png",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#6B51FB",
     },
     intentFilters: [
       {
