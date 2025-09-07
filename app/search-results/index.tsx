@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -92,6 +94,13 @@ export default function SearchResults() {
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false);
 
+  // 탭 포커스 시 StatusBar 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
+
   // 검색 실행 함수
   const executeSearch = useCallback(
     async (
@@ -99,13 +108,6 @@ export default function SearchResults() {
       page: number = 1,
       isLoadMore: boolean = false,
     ) => {
-      if (!searchKeyword.trim()) {
-        setSearchResults([]);
-        setCurrentPage(1);
-        setHasMoreData(true);
-        return;
-      }
-
       try {
         if (isLoadMore) {
           setIsLoadingMore(true);
@@ -116,7 +118,7 @@ export default function SearchResults() {
         const regionKeyword = getRegionKeyword(selectedRegion);
 
         const params: any = {
-          keyword: searchKeyword,
+          keyword: searchKeyword || "", // 빈 문자열도 허용
           page: page,
           limit: SEARCH_LIMIT,
         };
@@ -187,10 +189,15 @@ export default function SearchResults() {
 
   // 페이지 로드 시 자동 검색 실행
   useEffect(() => {
-    if (keyword && (keyword as string).trim()) {
-      executeSearch(keyword as string, 1, false);
+    // keyword가 있거나, 카테고리나 지역 필터가 설정된 경우 검색 실행
+    if (
+      (keyword && (keyword as string).trim()) ||
+      selectedCategory !== "ALL" ||
+      selectedRegion !== "ALL"
+    ) {
+      executeSearch((keyword as string) || "", 1, false);
     }
-  }, [keyword, executeSearch]);
+  }, [keyword, selectedCategory, selectedRegion, executeSearch]);
 
   const handleFilterOpen = useCallback(() => {
     setIsCategoryFilterOpen(true);
@@ -209,9 +216,7 @@ export default function SearchResults() {
   const handleCategorySearchPress = useCallback(
     (category: string) => {
       setSelectedCategory(category);
-      if (searchText.trim()) {
-        executeSearch(searchText, 1, false);
-      }
+      executeSearch(searchText, 1, false);
     },
     [searchText, executeSearch],
   );
@@ -233,21 +238,14 @@ export default function SearchResults() {
   const handleRegionSearchPress = useCallback(
     (region: string) => {
       setSelectedRegion(region);
-      if (searchText.trim()) {
-        executeSearch(searchText, 1, false);
-      }
+      executeSearch(searchText, 1, false);
     },
     [searchText, executeSearch],
   );
 
   // 무한스크롤 핸들러
   const handleLoadMore = useCallback(() => {
-    if (
-      searchResults.length > 0 &&
-      hasMoreData &&
-      !isLoadingMore &&
-      searchText.trim()
-    ) {
+    if (searchResults.length > 0 && hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
       executeSearch(searchText, nextPage, true);
     }
@@ -301,9 +299,7 @@ export default function SearchResults() {
               value={searchText}
               onChangeText={setSearchText}
               onSubmitEditing={() => {
-                if (searchText.trim()) {
-                  executeSearch(searchText, 1, false);
-                }
+                executeSearch(searchText, 1, false);
               }}
               returnKeyType="search"
               style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
