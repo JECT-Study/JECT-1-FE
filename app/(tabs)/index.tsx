@@ -123,7 +123,7 @@ const Card = ({ item }: { item: CustomContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-base font-semibold text-[#424242]">
+        <Text className="mb-1 text-lg font-semibold text-[#424242]">
           {item.title}
         </Text>
         <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
@@ -190,7 +190,7 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
             {getContentTypeLabel(item.contentType)}
           </Text>
         </View>
-        <Text className="mb-1.5 text-base font-semibold text-[#424242]">
+        <Text className="mb-1.5 text-lg font-semibold text-[#424242]">
           {item.title}
         </Text>
         <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
@@ -245,7 +245,7 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-base font-semibold text-[#424242]">
+        <Text className="mb-1 text-lg font-semibold text-[#424242]">
           {item.title}
         </Text>
         <Text className="text-sm font-normal text-[#9E9E9E]">
@@ -303,7 +303,7 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
         )}
       </View>
       <View className="mt-2">
-        <Text className="text-base font-semibold text-[#424242]">
+        <Text className="text-lg font-semibold text-[#424242]">
           {item.title}
         </Text>
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
@@ -630,22 +630,22 @@ export default function HomeScreen() {
           <View className="px-6 pb-[11px] pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
-                <View className="gap-y-[7px]" key={item.id}>
-                  <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
+                <View className="gap-y-1.5" key={item.id}>
+                  <View className="flex h-20 w-20 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
                     {item.iconType === "performance" && (
-                      <PerformanceIcon width={32} height={32} />
+                      <PerformanceIcon width={36} height={36} />
                     )}
                     {item.iconType === "exhibition" && (
-                      <ExhibitionIcon width={32} height={29} />
+                      <ExhibitionIcon width={36} height={33} />
                     )}
                     {item.iconType === "festival" && (
-                      <FestivalIcon width={48} height={48} />
+                      <FestivalIcon width={52} height={52} />
                     )}
                     {item.iconType === "event" && (
-                      <EventIcon width={54} height={54} />
+                      <EventIcon width={58} height={58} />
                     )}
                   </View>
-                  <Text className="text-center text-sm text-black">
+                  <Text className="text-center text-base text-[#424242]">
                     {item.label}
                   </Text>
                 </View>
@@ -656,7 +656,7 @@ export default function HomeScreen() {
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
             <View className="relative px-[18px] py-2.5">
-              <Text className="text-xl font-semibold text-black">
+              <Text className="text-xl font-semibold text-[#424242]">
                 {isLoggedIn && nickname
                   ? `${nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
