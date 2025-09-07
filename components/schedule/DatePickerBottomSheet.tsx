@@ -56,6 +56,8 @@ interface DatePickerBottomSheetProps {
   eventTitle?: string;
   /** 콘텐츠 ID */
   contentId: string;
+  /** 일정 추가 성공 콜백 */
+  onScheduleAdded?: (scheduleId: number) => void;
 }
 
 export default function DatePickerBottomSheet({
@@ -65,6 +67,7 @@ export default function DatePickerBottomSheet({
   endDate,
   eventTitle,
   contentId,
+  onScheduleAdded,
 }: DatePickerBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<string>(() => {
@@ -130,6 +133,11 @@ export default function DatePickerBottomSheet({
         );
 
         if (response.data.isSuccess) {
+          const scheduleId = response.data.result.scheduleId;
+          // 성공 콜백 호출
+          if (onScheduleAdded) {
+            onScheduleAdded(scheduleId);
+          }
           onClose();
           Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
         } else {
@@ -140,7 +148,7 @@ export default function DatePickerBottomSheet({
         Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
       }
     }
-  }, [selectedDate, onClose, contentId]);
+  }, [selectedDate, onClose, contentId, onScheduleAdded]);
 
   // 커스텀 헤더 렌더링
   const renderHeader = useCallback(() => {

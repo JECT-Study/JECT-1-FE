@@ -238,6 +238,12 @@ export default function DetailScreen() {
     setIsDatePickerOpen(false);
   };
 
+  // 일정 추가 성공 시 호출되는 콜백
+  const handleScheduleAdded = (scheduleId: number) => {
+    // contentData의 scheduleId 업데이트
+    setContentData((prev) => (prev ? { ...prev, scheduleId } : null));
+  };
+
   const openAppleMaps = async () => {
     if (!contentData) return;
     const { latitude, longitude, placeName } = contentData;
@@ -550,18 +556,18 @@ export default function DetailScreen() {
                   {isLiked ? (
                     <HeartFilledIcon
                       size={28}
-                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                      color={!isLoggedIn ? "#E0E0E0" : undefined}
                     />
                   ) : (
                     <HeartOutlineIcon
                       size={28}
-                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                      color={!isLoggedIn ? "#E0E0E0" : undefined}
                     />
                   )}
                 </Pressable>
                 <Text
                   className="text-lg font-medium"
-                  style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
+                  style={{ color: !isLoggedIn ? "#E0E0E0" : "#6b7280" }}
                 >
                   {likeCount !== null ? likeCount : contentData?.likes || 0}
                 </Text>
@@ -569,16 +575,27 @@ export default function DetailScreen() {
 
               <Pressable
                 className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
-                  isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
+                  isLoggedIn && contentData.scheduleId === null
+                    ? "bg-[#6C4DFF]"
+                    : "bg-gray-300"
                 }`}
                 style={({ pressed }) => [
-                  { opacity: !isLoggedIn ? 0.6 : pressed ? 0.9 : 1 },
+                  {
+                    opacity:
+                      !isLoggedIn || contentData.scheduleId !== null
+                        ? 0.6
+                        : pressed
+                          ? 0.9
+                          : 1,
+                  },
                 ]}
                 onPress={handleAddToSchedule}
-                disabled={!isLoggedIn}
+                disabled={!isLoggedIn || contentData.scheduleId !== null}
               >
                 <Text className="text-center text-lg font-semibold text-white">
-                  내 일정에 추가
+                  {contentData.scheduleId !== null
+                    ? "이미 추가됨"
+                    : "내 일정에 추가"}
                 </Text>
               </Pressable>
             </View>
@@ -595,6 +612,7 @@ export default function DetailScreen() {
           endDate={contentData.endDate}
           eventTitle={contentData.title}
           contentId={id as string}
+          onScheduleAdded={handleScheduleAdded}
         />
       )}
     </>
