@@ -14,19 +14,17 @@ export default function SurveyBalloon({ type, onNext }: Props) {
   return (
     <View className="flex-1 justify-between bg-white">
       <CustomHeader
-        title={"취향 분석"}
+        title="취향 분석"
         isCommit={false}
         cancel={type === "END" ? undefined : () => router.back()}
       />
       {type === "END" ? <Confetti /> : null}
-      <View className="w-full items-center pt-20">
-        <Text className="text-[24px] font-semibold text-[#816BFF]">
-          {type === "INTRO" ? "나의 콘텐츠 취향" : "설문이 끝났습니다."}
+      <View className="w-full items-center pt-16">
+        <Text className="text-3xl font-semibold text-[#6C4DFF]">
+          {type === "INTRO" ? "나의 전시·공연 취향," : "설문이 끝났습니다."}
         </Text>
-        <Text className="text-[24px] font-semibold text-[#816BFF]">
-          {type === "INTRO"
-            ? "지금 바로 알아볼까요?"
-            : "지금 결과를 확인해보세요!"}
+        <Text className="text-3xl font-semibold text-[#6C4DFF]">
+          {type === "INTRO" ? "지금 알아볼까요?" : "지금 결과를 확인해보세요!"}
         </Text>
       </View>
       <View className="flex-1 items-center justify-center">
@@ -36,18 +34,18 @@ export default function SurveyBalloon({ type, onNext }: Props) {
         />
       </View>
       <View className="px-4 py-6">
-        {type === "INTRO" ? (
+        {type === "INTRO" && (
           <View className="mx-auto">
-            <Text className="w-full p-5 font-normal text-[#8A8A8A]">
+            <Text className="w-full p-5 text-lg font-normal text-[#9E9E9E]">
               6문항으로 나만의 콘텐츠 리스트 완성!
             </Text>
           </View>
-        ) : null}
+        )}
         <Pressable
-          className={`z-50 h-[47px] w-full items-center justify-center rounded-[6px] bg-[#6C4DFF]`}
+          className="z-50 h-[52px] w-full items-center justify-center rounded-md bg-[#6C4DFF]"
           onPress={() => onNext()}
         >
-          <Text className={`text-[15px] text-white`}>
+          <Text className="text-lg font-medium text-white">
             {type === "INTRO" ? "취향 분석 시작" : "마이코드 시작하기"}
           </Text>
         </Pressable>

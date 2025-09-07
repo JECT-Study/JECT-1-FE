@@ -53,7 +53,7 @@ export default function SurveyStep({
         <View className="w-7" />
       </View>
       <View className="flex items-center">
-        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray800">
+        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray-800">
           {question}
         </Text>
       </View>
@@ -72,14 +72,14 @@ export default function SurveyStep({
                         className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
                           selected === globalIndex
                             ? "border-[2px] border-main bg-sub"
-                            : "bg-gray100"
+                            : "bg-gray-100"
                         }`}
                       >
                         <Text
-                          className={`text-center text-[16px] ${
+                          className={`text-center text-lg ${
                             selected === globalIndex
                               ? "font-semibold text-main"
-                              : "text-gray600"
+                              : "text-gray-600"
                           }`}
                         >
                           {label}

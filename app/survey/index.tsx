@@ -1,9 +1,11 @@
+import { useState } from "react";
+
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
+import SurveyExitAlert from "@/components/survey/SurveyExitAlert";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
 
@@ -19,6 +21,7 @@ interface SurveyResult {
 const totalQuestions = 6;
 
 export default function SurveyScreen() {
+  const [showExitAlert, setShowExitAlert] = useState(false);
   const funnel = useFunnel<{
     intro: SurveyResult;
     step1: SurveyResult;
@@ -99,21 +102,7 @@ export default function SurveyScreen() {
               history.push("step2", { ...context, step1: answerIndex })
             }
             onBack={() => {
-              Alert.alert(
-                "취향 분석을 그만 두시겠어요?",
-                "선택한 내용은 저장되지 않아요.",
-                [
-                  {
-                    text: "계속 진행",
-                    style: "cancel",
-                  },
-                  {
-                    text: "네, 그만둘게요.",
-                    style: "destructive",
-                    onPress: () => router.back(),
-                  },
-                ],
-              );
+              setShowExitAlert(true);
             }}
             total={totalQuestions}
             currentStep={1}
@@ -183,6 +172,16 @@ export default function SurveyScreen() {
         done={({ context, history }) => (
           <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
         )}
+      />
+
+      {/* 설문 종료 확인 모달 */}
+      <SurveyExitAlert
+        isVisible={showExitAlert}
+        onConfirm={() => {
+          setShowExitAlert(false);
+          router.back();
+        }}
+        onCancel={() => setShowExitAlert(false)}
       />
     </SafeAreaView>
   );
