@@ -124,19 +124,11 @@ export default function CommonCalendar({
     );
   }, [selectedDate, onDateChange]);
 
-  // 초기 렌더링 시 캘린더 강제 초기화
+  // 초기 렌더링 시 캘린더 초기화
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialized(true);
-      // 캘린더가 축소된 상태로 시작하는 경우 강제로 펼침
-      if (calendarRef.current && !isCalendarExpanded) {
-        calendarRef.current.toggleCalendarPosition();
-        setIsCalendarExpanded(true);
-      }
-    }, 100);
-
+    const timer = setTimeout(() => setIsInitialized(true), 100);
     return () => clearTimeout(timer);
-  }, [isCalendarExpanded]);
+  }, []);
 
   return (
     <View className="z-0">
