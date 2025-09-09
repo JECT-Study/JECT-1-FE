@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { Pressable, View } from "react-native";
 import {
   DateData,
@@ -14,8 +16,11 @@ import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 
-// dayjs 플러그인 확장
+// dayjs 플러그인 확장 및 타임존 설정
+dayjs.extend(utc);
+dayjs.extend(timezone);
 dayjs.extend(isSameOrBefore);
+dayjs.tz.setDefault("Asia/Seoul");
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {

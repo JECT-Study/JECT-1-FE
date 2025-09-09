@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { Alert, Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,6 +13,11 @@ import { CustomDay } from "@/components/ui/CustomDay";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 import { authApi } from "@/features/axios/axiosInstance";
+
+// dayjs 플러그인 확장 및 타임존 설정
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Seoul");
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {
@@ -166,9 +173,13 @@ export default function DatePickerBottomSheet({
     const marked: { [key: string]: any } = {};
 
     try {
-      // 선택 가능한 날짜 범위 설정
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
+      // 선택 가능한 날짜 범위 설정 - 한국 시간대로 명시적 처리
+      const start = dayjs
+        .tz(startDate, "YYYY-MM-DD", "Asia/Seoul")
+        .startOf("day");
+      const end = dayjs.tz(endDate, "YYYY-MM-DD", "Asia/Seoul").endOf("day");
+
+      console.log(start);
 
       if (!start.isValid() || !end.isValid()) {
         return marked;
@@ -177,7 +188,7 @@ export default function DatePickerBottomSheet({
       let current = start;
 
       // 시작일부터 종료일까지 모든 날짜를 활성화
-      while (current.isSameOrBefore(end)) {
+      while (current.isSameOrBefore(end, "day")) {
         const dateString = current.format("YYYY-MM-DD");
         marked[dateString] = {
           disabled: false,
