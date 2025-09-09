@@ -28,6 +28,7 @@ import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
 import Divider from "@/components/ui/Divider";
+import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -68,6 +69,7 @@ export default function DetailScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
   const [showToast, setShowToast] = useState<boolean>(false);
   const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -235,7 +237,11 @@ export default function DetailScreen() {
   };
 
   const handleAddToSchedule = () => {
-    setIsDatePickerOpen(true);
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+    } else if (contentData?.scheduleId === null) {
+      setIsDatePickerOpen(true);
+    }
   };
 
   const handleDatePickerClose = () => {
@@ -626,20 +632,18 @@ export default function DetailScreen() {
                 className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn && contentData.scheduleId === null
                     ? "bg-[#6C4DFF]"
-                    : "bg-gray-300"
+                    : contentData.scheduleId !== null
+                      ? "bg-gray-300"
+                      : "bg-[#6C4DFF]"
                 }`}
                 style={({ pressed }) => [
                   {
                     opacity:
-                      !isLoggedIn || contentData.scheduleId !== null
-                        ? 0.6
-                        : pressed
-                          ? 0.9
-                          : 1,
+                      contentData.scheduleId !== null ? 0.6 : pressed ? 0.9 : 1,
                   },
                 ]}
                 onPress={handleAddToSchedule}
-                disabled={!isLoggedIn || contentData.scheduleId !== null}
+                disabled={contentData.scheduleId !== null}
               >
                 <Text className="text-center text-lg font-semibold text-white">
                   {contentData.scheduleId !== null
@@ -685,6 +689,12 @@ export default function DetailScreen() {
         visible={showCopyToast}
         message="주소가 복사되었습니다."
         onHide={handleCopyToastHide}
+      />
+
+      {/* 로그인 안내 모달 */}
+      <LoginPromptModal
+        visible={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
       />
     </>
   );
