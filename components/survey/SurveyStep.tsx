@@ -80,7 +80,7 @@ export default function SurveyStep({
                         onPress={() => setSelected(globalIndex)}
                         className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
                           selected === globalIndex
-                            ? "border-[2px] border-main bg-sub"
+                            ? "border-[1.5px] border-main bg-sub"
                             : "bg-gray-100"
                         }`}
                       >
