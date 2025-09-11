@@ -9,10 +9,10 @@ import { setStatusBarStyle } from "expo-status-bar";
 import { Alert, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
-import Chevron from "@/components/icons/Chevron";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
+import NewChevronRight from "@/components/icons/NewChevronRight";
 import LogoutAlert from "@/components/user/LogoutAlert";
 import LogoutStatusModal from "@/components/user/LogoutStatusModal";
 import usePageNavigation from "@/hooks/usePageNavigation";
@@ -300,25 +300,27 @@ export default function MyScreen() {
           onPress={() => goTerms()}
           className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
         >
-          <Text className="text-[14px]">이용약관</Text>
-          <Chevron direction={"right"} />
+          <Text className="text-base">이용약관</Text>
+          <NewChevronRight />
         </Pressable>
         <Pressable
           onPress={handleAuthAction}
-          className="flex h-[50px] w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+          className={`flex h-[50px] w-full flex-row items-center justify-between ${
+            isLoggedIn ? "border-b-[1px] border-[#E5E5EC]" : ""
+          }`}
         >
-          <Text className="text-[14px]">
+          <Text className="text-base">
             {isLoggedIn ? "로그아웃" : "로그인"}
           </Text>
-          <Chevron direction={"right"} />
+          <NewChevronRight />
         </Pressable>
         {isLoggedIn && (
           <Pressable
             onPress={() => goWithdrawal()}
             className="flex h-[50px] w-full flex-row items-center justify-between"
           >
-            <Text className="text-[14px]">회원탈퇴</Text>
-            <Chevron direction={"right"} />
+            <Text className="text-base">회원탈퇴</Text>
+            <NewChevronRight />
           </Pressable>
         )}
       </View>
