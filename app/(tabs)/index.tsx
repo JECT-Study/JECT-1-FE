@@ -6,7 +6,6 @@ import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
@@ -32,6 +31,7 @@ import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import useDataStore from "@/stores/useDataStore";
 import useUserStore from "@/stores/useUserStore";
 import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
@@ -351,16 +351,21 @@ export default function HomeScreen() {
   const [selectedRecommendationsCategory, setSelectedRecommendationsCategory] =
     useState<CategoryType>("PERFORMANCE");
   const [selectedWeekDayIndex, setSelectedWeekDayIndex] = useState<number>(0); // 오늘이 첫 번째(인덱스 0)에 위치
+
+  // 프리로딩된 데이터 사용
+  const { homeData, userInfo } = useDataStore();
   const [recommendationsData, setRecommendationsData] = useState<
     CustomContentItem[]
-  >([]);
+  >(homeData.recommendations);
   const [hotFestivalData, setHotFestivalData] = useState<CustomContentItem[]>(
-    [],
+    homeData.hotFestival,
   );
-  const [weekDayData, setWeekDayData] = useState<WeeklyContentItem[]>([]);
+  const [weekDayData, setWeekDayData] = useState<WeeklyContentItem[]>(
+    homeData.weeklyContent,
+  );
   const [categoryContentData, setCategoryContentData] = useState<
     CategoryContentItem[]
-  >([]);
+  >(homeData.categoryContent);
 
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
@@ -372,33 +377,24 @@ export default function HomeScreen() {
     useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(userInfo.isLoggedIn);
   const { nickname } = useUserStore();
 
   const router = useRouter();
+
+  // 프리로딩된 데이터 업데이트
+  useEffect(() => {
+    setRecommendationsData(homeData.recommendations);
+    setHotFestivalData(homeData.hotFestival);
+    setWeekDayData(homeData.weeklyContent);
+    setCategoryContentData(homeData.categoryContent);
+    setIsLoggedIn(userInfo.isLoggedIn);
+  }, [homeData, userInfo]);
 
   useFocusEffect(
     useCallback(() => {
       // StatusBar 스타일을 light로 설정
       setStatusBarStyle("light");
-
-      const checkLoginStatus = async () => {
-        try {
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(false);
-          }
-        } catch (error) {
-          console.log("❌ 토큰 확인 중 에러:", error);
-          setIsLoggedIn(false);
-        }
-      };
-
-      checkLoginStatus();
     }, []),
   );
 
@@ -513,20 +509,7 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // 초기 API 호출
-  useEffect(() => {
-    Promise.all([
-      fetchRecommendationsByCategory("PERFORMANCE"),
-      fetchHotFestivalData(),
-      fetchWeeklyContentData(0),
-      fetchCategoryContentData(),
-    ]);
-  }, [
-    fetchRecommendationsByCategory,
-    fetchHotFestivalData,
-    fetchWeeklyContentData,
-    fetchCategoryContentData,
-  ]);
+  // 초기 데이터 로딩은 _layout.tsx에서 이미 완료됨
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -672,8 +655,8 @@ export default function HomeScreen() {
             {/* 맞춤 콘텐츠 */}
             <View className="relative px-[18px] py-2.5">
               <Text className="text-xl font-semibold text-[#424242]">
-                {isLoggedIn && nickname
-                  ? `${nickname}님을 위한 맞춤 콘텐츠`
+                {isLoggedIn && (userInfo.nickname || nickname)
+                  ? `${userInfo.nickname || nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
               </Text>
 

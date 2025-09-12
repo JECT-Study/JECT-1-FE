@@ -15,6 +15,7 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
+import useDataStore from "@/stores/useDataStore";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // 페이지네이션 상수
@@ -41,9 +42,11 @@ const formatSelectedDateHeader = (date: string) => {
 };
 
 export default function ScheduleScreen() {
-  const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
+  // 프리로딩된 데이터 사용
+  const { scheduleData, currentDate } = useDataStore();
+  const [schedules, setSchedules] = useState<ScheduleItemType[]>(scheduleData);
   const [selectedDate, setSelectedDate] = useState<string>(
-    dayjs().format("YYYY-MM-DD"),
+    currentDate || dayjs().format("YYYY-MM-DD"),
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -126,11 +129,22 @@ export default function ScheduleScreen() {
     [],
   );
 
-  // 초기 데이터 로딩
+  // 프리로딩된 데이터 업데이트
   useEffect(() => {
-    fetchScheduleData(selectedDate, 0, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (scheduleData.length > 0) {
+      setSchedules(scheduleData);
+      // 초기 데이터가 SCHEDULE_LIMIT보다 적으면 더 불러올 데이터가 없음
+      setHasMoreData(scheduleData.length >= SCHEDULE_LIMIT);
+      setCurrentPage(0);
+    }
+    // 전역 currentDate가 업데이트되면 selectedDate도 업데이트
+    if (currentDate && selectedDate !== currentDate) {
+      setSelectedDate(currentDate);
+    }
+  }, [scheduleData, currentDate, selectedDate]);
+
+  // 초기 데이터 로딩은 _layout.tsx에서 이미 완료됨 (오늘 날짜 기준)
+  // 다른 날짜 선택 시에만 새로 로딩
 
   // 무한스크롤 핸들러
   const handleLoadMore = useCallback(() => {
@@ -153,9 +167,16 @@ export default function ScheduleScreen() {
       setSelectedDate(date);
       setCurrentPage(1);
       setHasMoreData(true);
-      fetchScheduleData(date, 0, false);
+
+      // 전역 currentDate와 다른 경우에만 새로 로딩
+      if (date !== currentDate) {
+        fetchScheduleData(date, 0, false);
+      } else {
+        // currentDate와 같은 경우 프리로딩된 데이터 사용
+        setSchedules(scheduleData);
+      }
     },
-    [fetchScheduleData],
+    [fetchScheduleData, scheduleData, currentDate],
   );
 
   // 스케줄 아이템 클릭 핸들러

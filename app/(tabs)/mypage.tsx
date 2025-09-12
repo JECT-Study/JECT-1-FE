@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
@@ -16,12 +16,17 @@ import HeartIcon from "@/components/icons/HeartIcon";
 import LogoutAlert from "@/components/user/LogoutAlert";
 import LogoutStatusModal from "@/components/user/LogoutStatusModal";
 import usePageNavigation from "@/hooks/usePageNavigation";
+import useDataStore from "@/stores/useDataStore";
 import useUserStore from "@/stores/useUserStore";
 
 export default function MyScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [nickname, setNickname] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>("");
+  // 프리로딩된 사용자 정보 사용
+  const { userInfo } = useDataStore();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(userInfo.isLoggedIn);
+  const [nickname, setNickname] = useState<string>(userInfo.nickname);
+  const [profileImage, setProfileImage] = useState<string>(
+    userInfo.profileImage,
+  );
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusModalType, setStatusModalType] = useState<"success" | "error">(
@@ -88,40 +93,18 @@ export default function MyScreen() {
     setShowLogoutAlert(false);
   };
 
+  // 프리로딩된 데이터 업데이트
+  useEffect(() => {
+    setIsLoggedIn(userInfo.isLoggedIn);
+    setNickname(userInfo.nickname);
+    setProfileImage(userInfo.profileImage);
+  }, [userInfo]);
+
   // 화면 포커스 시 실행 (마운트 시도 포함)
   useFocusEffect(
     useCallback(() => {
       // StatusBar 스타일을 dark로 설정
       setStatusBarStyle("dark");
-
-      const checkLoginStatus = async () => {
-        try {
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
-
-            // 로그인 상태일 때 사용자 정보도 SecureStore에서 로드
-            const savedNickname = await SecureStore.getItemAsync("nickname");
-            const savedProfileImage =
-              await SecureStore.getItemAsync("profileImage");
-
-            setNickname(savedNickname || "");
-            setProfileImage(savedProfileImage || "");
-          } else {
-            setIsLoggedIn(false);
-            setNickname("");
-            setProfileImage("");
-          }
-        } catch (error) {
-          console.log("❌ MyScreen 토큰 확인 중 에러:", error);
-          setIsLoggedIn(false);
-          setNickname("");
-          setProfileImage("");
-        }
-      };
-      checkLoginStatus();
     }, []),
   );
 
