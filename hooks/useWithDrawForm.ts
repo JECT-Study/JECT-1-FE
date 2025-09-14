@@ -22,7 +22,8 @@ export default function useWithDrawForm(defaultOpen = false, duration = 200) {
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
-    height: isOpen.value * contentHeight,
+    height: contentHeight > 0 ? isOpen.value * contentHeight : 0,
+    overflow: "hidden",
   }));
 
   const onLayoutContent = (e: LayoutChangeEvent) => {
