@@ -1,26 +1,95 @@
+import { useState } from "react";
+
 import { router } from "expo-router";
-import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
-import Animated from "react-native-reanimated";
+import * as SecureStore from "expo-secure-store";
+import {
+  LayoutChangeEvent,
+  Pressable,
+  SafeAreaView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
 import CustomHeader from "@/components/ui/CustomHeader";
 import Separator from "@/components/ui/Separator";
+import { WithdrawUrl } from "@/constants/ApiUrls";
 import { reason } from "@/constants/WithDrawal";
-import { withdraw } from "@/features/auth/withdraw";
-import useWithDrawForm from "@/hooks/useWithDrawForm";
+import { authApi } from "@/features/axios/axiosInstance";
+import useUserStore from "@/stores/useUserStore";
 
 export default function Withdrawal() {
-  const {
-    toggle,
-    selected,
-    setSelected,
-    animatedArrowRotation,
-    animatedStyle,
-    onLayoutContent,
-    setOtherReason,
-    otherReason,
-    checkSubmit,
-  } = useWithDrawForm();
+  const [contentHeight, setContentHeight] = useState<number>(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [otherReason, setOtherReason] = useState<string>("");
+
+  const isOpen = useSharedValue(0);
+
+  const toggle = () => {
+    isOpen.value = withTiming(isOpen.value === 0 ? 1 : 0, {
+      duration: 200,
+      easing: Easing.ease,
+    });
+  };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    height: contentHeight > 0 ? isOpen.value * contentHeight : 0,
+    overflow: "hidden",
+  }));
+
+  const onLayoutContent = (e: LayoutChangeEvent) => {
+    setContentHeight(e.nativeEvent.layout.height);
+  };
+
+  const animatedArrowRotation = useAnimatedStyle(() => {
+    const rotation = isOpen.value * 180;
+    return {
+      transform: [{ rotate: `${rotation}deg` }],
+    };
+  });
+
+  const checkSubmit = () => {
+    if (selected === null) return false;
+    if (selected === "기타") {
+      return otherReason.length > 0;
+    } else {
+      return true;
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (checkSubmit()) {
+      console.log("이유", selected);
+      console.log("상세 이유", otherReason);
+      try {
+        await authApi.delete(WithdrawUrl);
+
+        console.log("회원탈퇴 성공");
+
+        // 토큰 및 사용자 정보 삭제
+        await SecureStore.deleteItemAsync("accessToken");
+        await SecureStore.deleteItemAsync("refreshToken");
+        await SecureStore.deleteItemAsync("nickname");
+        await SecureStore.deleteItemAsync("profileImage");
+
+        // Store 초기화
+        const { clearUserInfo } = useUserStore.getState().action;
+        clearUserInfo();
+
+        // 로그인 화면으로 이동
+        router.replace("/");
+      } catch (error) {
+        console.error("회원탈퇴 실패:", error);
+      }
+    }
+  };
 
   return (
     <SafeAreaView className="w-full flex-1 bg-white">
@@ -108,17 +177,7 @@ export default function Withdrawal() {
             className={`flex h-[45px] w-full items-center justify-center rounded-lg ${
               checkSubmit() ? "bg-[#6C4DFF]" : "bg-[#E0E0E0]"
             }`}
-            onPress={async () => {
-              if (checkSubmit()) {
-                console.log("이유", selected);
-                console.log("상세 이유", otherReason);
-                try {
-                  await withdraw();
-                } catch (error) {
-                  console.error("회원탈퇴 실패:", error);
-                }
-              }
-            }}
+            onPress={handleWithdraw}
           >
             <Text className="text-center text-lg font-semibold text-white">
               제출
