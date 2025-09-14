@@ -2,37 +2,42 @@ import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Chevron from "@/components/icons/Chevron";
-import MyPageMenu from "@/components/mypage/MyPageMenu";
+import NewChevronRight from "@/components/icons/NewChevronRight";
+import CustomHeader from "@/components/ui/CustomHeader";
 
 export default function Terms() {
   return (
     <SafeAreaView className="w-full flex-1 bg-white">
-      <View className="relative h-[60px] items-center justify-center">
-        <Text className="text-[20px] text-[#383535]">이용약관</Text>
+      <CustomHeader
+        title="이용약관"
+        isCommit={false}
+        separator
+        cancel={() => router.back()}
+      />
+      <View className="mt-9 w-full">
         <Pressable
-          className="absolute left-4 top-1/2 -translate-y-1/2"
-          onPress={() => router.back()}
-        >
-          <Chevron direction="left" />
-        </Pressable>
-      </View>
-      <View className="w-full px-4">
-        <MyPageMenu
-          title="서비스 이용약관"
           onPress={() => router.push("/my/terms/service_terms")}
-          chevron={true}
-        />
-        <MyPageMenu
-          title="개인 정보 처리방침"
+          className="flex h-16 w-full flex-row items-center justify-between border-b border-[#DCDEE3] px-4"
+        >
+          <Text className="text-base text-[#212121]">서비스 이용약관</Text>
+          <NewChevronRight />
+        </Pressable>
+        <Pressable
           onPress={() => router.push("/my/terms/service_privacy")}
-          chevron={true}
-        />
-        <MyPageMenu
-          title="위치기반 서비스 이용약관"
+          className="flex h-16 w-full flex-row items-center justify-between border-b border-[#DCDEE3] px-4"
+        >
+          <Text className="text-base text-[#212121]">개인 정보 처리방침</Text>
+          <NewChevronRight />
+        </Pressable>
+        <Pressable
           onPress={() => router.push("/my/terms/service_location")}
-          chevron={true}
-        />
+          className="flex h-16 w-full flex-row items-center justify-between px-4"
+        >
+          <Text className="text-base text-[#212121]">
+            위치기반 서비스 이용약관
+          </Text>
+          <NewChevronRight />
+        </Pressable>
       </View>
     </SafeAreaView>
   );

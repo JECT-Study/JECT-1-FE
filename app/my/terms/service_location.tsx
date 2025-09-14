@@ -11,6 +11,7 @@ export default function ServicePrivacy() {
         title="위치정보 이용약관"
         isCommit={false}
         cancel={() => router.back()}
+        separator
       />
       <ScrollView className="flex-1 px-5 py-4">
         <Text className="text-sm leading-6 text-gray-800">
