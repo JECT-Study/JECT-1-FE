@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
@@ -79,12 +79,101 @@ export default function SearchScreen() {
   const [filterSearchPage, setFilterSearchPage] = useState<number>(1); // 필터 검색 페이지
   const [filterHasMoreData, setFilterHasMoreData] = useState<boolean>(true); // 필터 검색 더 불러올 데이터 있는지
 
+  // 기본 검색 상태 (둘 다 ALL일 때)
+  const [defaultSearchResults, setDefaultSearchResults] = useState<
+    SearchContentItem[]
+  >([]);
+  const [defaultSearchPage, setDefaultSearchPage] = useState<number>(1); // 기본 검색 페이지
+  const [defaultHasMoreData, setDefaultHasMoreData] = useState<boolean>(true); // 기본 검색 더 불러올 데이터 있는지
+
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
     useCallback(() => {
       setStatusBarStyle("dark");
     }, []),
   );
+
+  // 기본 검색 함수 (둘 다 ALL일 때)
+  const searchDefault = useCallback(
+    async (page: number = 1, isLoadMore: boolean = false) => {
+      try {
+        if (isLoadMore) {
+          setIsLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+
+        const response = await authApi.get(
+          `https://mycodemycode.site/search?page=${page}&limit=10&sort=latest`,
+        );
+
+        if (response.data.isSuccess && response.data.result) {
+          const { contents, currentPage, totalCount } = response.data.result;
+
+          console.log(response.data);
+
+          // contents가 빈 배열이면 더 이상 불러올 데이터가 없음
+          if (contents.length === 0 && isLoadMore) {
+            setDefaultHasMoreData(false);
+            return;
+          }
+
+          // API 응답을 SearchContentItem으로 변환
+          const transformedResults: SearchContentItem[] = contents.map(
+            (item: any) => ({
+              id: item.id,
+              title: item.title,
+              thumbnailUrl: item.thumbnailUrl || "",
+              category: item.category,
+              address: item.address,
+              date: item.date || "",
+              views: item.views || 0,
+            }),
+          );
+
+          if (isLoadMore) {
+            setDefaultSearchResults((prev) => [...prev, ...transformedResults]);
+          } else {
+            setDefaultSearchResults(transformedResults);
+          }
+
+          setDefaultSearchPage(currentPage);
+          // 현재 페이지와 총 페이지 수를 비교하거나, contents가 10개 미만이면 마지막 페이지
+          const totalPages = Math.ceil(totalCount / 10);
+          setDefaultHasMoreData(
+            currentPage < totalPages && contents.length === 10,
+          );
+        } else {
+          if (!isLoadMore) {
+            setDefaultSearchResults([]);
+          }
+          setDefaultHasMoreData(false);
+        }
+      } catch (error) {
+        console.error("기본 검색 실패:", error);
+        if (!isLoadMore) {
+          setDefaultSearchResults([]);
+        }
+        setDefaultHasMoreData(false);
+      } finally {
+        if (isLoadMore) {
+          setIsLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  // 컴포넌트 마운트 시 기본 검색 실행
+  useEffect(() => {
+    if (selectedCategory === "ALL" && selectedRegion === "ALL") {
+      searchDefault(1, false);
+      setIsFilterSearchMode(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, selectedRegion]);
 
   // 통합 필터 검색 함수 (카테고리와 지역 교집합 검색)
   const searchByFilters = useCallback(
@@ -218,10 +307,16 @@ export default function SearchScreen() {
 
   // 무한스크롤 핸들러
   const handleLoadMore = useCallback(() => {
-    if (isFilterSearchMode && filterHasMoreData && !isLoadingMore) {
+    if (isLoadingMore) return;
+
+    if (isFilterSearchMode && filterHasMoreData) {
       // 필터 검색 모드에서의 무한스크롤
       const nextPage = filterSearchPage + 1;
       searchByFilters(selectedCategory, selectedRegion, nextPage, true);
+    } else if (!isFilterSearchMode && defaultHasMoreData) {
+      // 기본 검색 모드에서의 무한스크롤
+      const nextPage = defaultSearchPage + 1;
+      searchDefault(nextPage, true);
     }
   }, [
     isFilterSearchMode,
@@ -231,6 +326,9 @@ export default function SearchScreen() {
     selectedRegion,
     isLoadingMore,
     searchByFilters,
+    defaultHasMoreData,
+    defaultSearchPage,
+    searchDefault,
   ]);
 
   // 카드 클릭 핸들러
@@ -255,6 +353,14 @@ export default function SearchScreen() {
     },
     [handleCardPress],
   );
+
+  // ListFooterComponent 조건 변수들
+  const isFilterSearchComplete =
+    isFilterSearchMode && !filterHasMoreData && filterSearchResults.length > 0;
+  const isDefaultSearchComplete =
+    !isFilterSearchMode &&
+    !defaultHasMoreData &&
+    defaultSearchResults.length > 0;
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
@@ -371,7 +477,7 @@ export default function SearchScreen() {
 
       <FlatList
         className="pt-8"
-        data={filterSearchResults}
+        data={isFilterSearchMode ? filterSearchResults : defaultSearchResults}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={{
@@ -401,20 +507,18 @@ export default function SearchScreen() {
                 </Text>
               ) : (
                 <Text className="text-center text-gray-500">
-                  필터를 선택해서 검색해보세요.
+                  검색 결과가 없습니다.
                 </Text>
               )}
             </View>
           )
         }
         ListFooterComponent={
-          isLoadingMore ? (
+          isLoadingMore && !isLoading ? (
             <View className="flex-row items-center justify-center py-4">
               <ActivityIndicator size="large" color="#6C4DFF" />
             </View>
-          ) : isFilterSearchMode &&
-            !filterHasMoreData &&
-            filterSearchResults.length > 0 ? (
+          ) : isFilterSearchComplete || isDefaultSearchComplete ? (
             <View className="items-center justify-center py-4">
               <Text className="text-sm text-gray-500">
                 모든 검색 결과를 불러왔습니다.
