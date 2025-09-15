@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { shareFeedTemplate } from "@react-native-kakao/share";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -8,6 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Platform,
   Pressable,
@@ -24,6 +26,7 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
+import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
@@ -126,28 +129,50 @@ export default function DetailScreen() {
 
   const showHeaderBackground = scrollY > 150;
 
-  // const handleKakaoShare = async () => {
-  //   if (!contentData) return;
+  const handleKakaoShare = async () => {
+    if (!contentData) return;
 
-  //   try {
-  //     await shareFeedTemplate({
-  //       template: {
-  //         content: {
-  //           title: contentData.title,
-  //           description: contentData.description,
-  //           imageUrl:
-  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
-  //           link: {
-  //             webUrl: "https://github.com/",
-  //             mobileWebUrl: "https://github.com/",
-  //           },
-  //         },
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("카카오톡 공유 오류:", error);
-  //   }
-  // };
+    try {
+      const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
+      const deepLinkUrl = `mycode://detail/${id}`;
+      console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
+
+      await shareFeedTemplate({
+        template: {
+          content: {
+            title: contentData.title,
+            description: contentData.description,
+            imageUrl:
+              getImageSource(contentData.contentId).uri ||
+              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+            link: {
+              // 앱이 설치된 경우 딥링크로 이동
+              mobileWebUrl: deepLinkUrl,
+              webUrl: appStoreUrl,
+              // 앱이 설치되지 않은 경우 앱스토어로 이동
+              androidExecutionParams: { target: "detail", id: String(id) },
+              iosExecutionParams: { target: "detail", id: String(id) },
+            },
+          },
+          buttons: [
+            {
+              title: "자세히 보기",
+              link: {
+                mobileWebUrl: deepLinkUrl,
+                webUrl: appStoreUrl,
+                androidExecutionParams: { target: "detail", id: String(id) },
+                iosExecutionParams: { target: "detail", id: String(id) },
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("카카오톡 공유 오류:", error);
+      // 사용자에게 오류 메시지 표시
+      Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleGoBack = () => {
     router.back();
@@ -221,20 +246,20 @@ export default function DetailScreen() {
     }
   };
 
-  const handleImagePress = (index: number) => {
-    const imageUrls = [
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-    ];
+  // const handleImagePress = (index: number) => {
+  //   const imageUrls = [
+  //     "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+  //     "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+  //   ];
 
-    router.push({
-      pathname: "/image-viewer",
-      params: {
-        initialIndex: index.toString(),
-        images: JSON.stringify(imageUrls),
-      },
-    });
-  };
+  //   router.push({
+  //     pathname: "/image-viewer",
+  //     params: {
+  //       initialIndex: index.toString(),
+  //       images: JSON.stringify(imageUrls),
+  //     },
+  //   });
+  // };
 
   const handleAddToSchedule = () => {
     if (!isLoggedIn) {
@@ -357,7 +382,7 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-3 pt-20 ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
@@ -368,29 +393,33 @@ export default function DetailScreen() {
               onPress={handleGoBack}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-              className="z-10"
             >
               <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
             </Pressable>
 
-            {/* 중앙 제목 텍스트 (절대 위치로 완전 중앙 정렬) */}
+            {/* 중앙 제목 텍스트 */}
             {showHeaderBackground && (
-              <View
-                className="absolute left-0 right-0 items-center justify-center"
-                style={{ top: 72 }}
+              <Text
+                className="text-lg font-semibold text-[#212121]"
+                numberOfLines={1}
+                style={{ maxWidth: "60%" }}
               >
-                <Text
-                  className="text-lg font-semibold text-[#212121]"
-                  numberOfLines={1}
-                  style={{ maxWidth: "60%" }}
-                >
-                  {contentData.title}
-                </Text>
-              </View>
+                {contentData.title}
+              </Text>
             )}
 
-            {/* 오른쪽 공간 (균형을 위한 투명 요소) */}
-            <View style={{ width: 24, height: 24 }} />
+            {/* 오른쪽 공유 버튼 */}
+            <Pressable
+              disabled
+              onPress={handleKakaoShare}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+            >
+              <ShareOutlineIcon
+                size={28}
+                color={showHeaderBackground ? "#000" : "#fff"}
+              />
+            </Pressable>
           </View>
 
           {/* 전체 스크롤 영역 */}
@@ -629,7 +658,7 @@ export default function DetailScreen() {
               </View>
 
               <Pressable
-                className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
+                className={`h-[50px] flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn && contentData.scheduleId === null
                     ? "bg-[#6C4DFF]"
                     : contentData.scheduleId !== null

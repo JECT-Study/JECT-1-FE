@@ -5,7 +5,7 @@ interface Props {
   size?: number;
 }
 
-export default function BackArrow({ color = "#212121", size = 20 }: Props) {
+export default function BackArrow({ color = "#212121", size = 28 }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 20 20" fill="none">
       <Path
