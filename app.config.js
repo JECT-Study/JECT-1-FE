@@ -16,7 +16,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "19",
+    buildNumber: "20",
     backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
