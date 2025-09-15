@@ -624,7 +624,7 @@ export default function DetailScreen() {
             className="absolute bottom-0 left-0 right-0 border-t border-[#E5E5E5] bg-white px-5 pt-3"
             style={{ paddingBottom: 12 + insets.bottom }}
           >
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between gap-x-4">
               <View className="flex-col items-center">
                 <Pressable
                   className="items-center justify-center"
