@@ -615,6 +615,7 @@ export default function HomeScreen() {
           className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
+          bounces={false}
           onScroll={handleScrollStateChange}
           scrollEventThrottle={16}
           refreshControl={
@@ -715,6 +716,7 @@ export default function HomeScreen() {
                   data={chunkedRecommendationsData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  bounces={false}
                   renderItem={({ item }) => (
                     <View className="w-[287px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -793,6 +795,7 @@ export default function HomeScreen() {
                   data={hotFestivalData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  bounces={false}
                   renderItem={({ item }) => <HotCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
@@ -810,6 +813,7 @@ export default function HomeScreen() {
                 data={weekDays}
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                bounces={false}
                 renderItem={({ item }) => (
                   <Pressable
                     className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
@@ -848,6 +852,7 @@ export default function HomeScreen() {
                   data={chunkedFilteredContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  bounces={false}
                   renderItem={({ item }) => (
                     <View className="w-[285px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -902,6 +907,7 @@ export default function HomeScreen() {
                   data={categoryContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  bounces={false}
                   renderItem={({ item }) => <MoreCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
