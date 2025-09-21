@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import { shareFeedTemplate } from "@react-native-kakao/share";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -10,6 +9,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -18,6 +18,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
@@ -26,6 +27,7 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
+import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
@@ -34,7 +36,6 @@ import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -50,14 +51,123 @@ interface ContentDetail {
   startDate: string;
   endDate: string;
   likes: number;
-  isAlwaysOpen: boolean;
-  openingHour: string;
-  closedHour: string;
+  isAlwaysOpen: boolean | null;
+  openingHour: string | null;
+  closedHour: string | null;
   address: string;
   introduction: string;
   description: string;
   longitude: number;
   latitude: number;
+  telNumber: string | null;
+  homepage: string | null;
+}
+
+function DetailImageCarousel({
+  imageHeight,
+  images,
+  onImagePress,
+}: {
+  imageHeight: number;
+  images: string[];
+  onImagePress?: (index: number) => void;
+}) {
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [imageLoadStates, setImageLoadStates] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  // 이미지가 없으면 placeholder 사용
+  const carouselData =
+    images.length > 0
+      ? images.map((url) => ({ uri: url }))
+      : [require("@/assets/images/content_placeholder.png")];
+
+  const renderCarouselItem = ({
+    item,
+    index,
+  }: {
+    item: any;
+    index: number;
+  }) => {
+    const isRemoteImage = typeof item === "object" && "uri" in item;
+    const isLoaded = imageLoadStates[index];
+
+    return (
+      <Pressable
+        onPress={() => onImagePress?.(index)}
+        style={{ height: imageHeight, position: "relative" }}
+      >
+        {isRemoteImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("@/assets/images/content_placeholder.png")}
+              className="absolute inset-0 w-full"
+              style={{
+                height: imageHeight,
+                resizeMode: "cover",
+              }}
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={item}
+              className={`absolute inset-0 w-full ${isLoaded ? "opacity-100" : "opacity-0"}`}
+              style={{
+                height: imageHeight,
+                resizeMode: "cover",
+              }}
+              onLoad={() =>
+                setImageLoadStates((prev) => ({ ...prev, [index]: true }))
+              }
+              onError={() =>
+                setImageLoadStates((prev) => ({ ...prev, [index]: false }))
+              }
+            />
+          </>
+        ) : (
+          /* 로컬 placeholder 이미지 */
+          <Image
+            source={item}
+            className="w-full"
+            style={{
+              height: imageHeight,
+              resizeMode: "cover",
+            }}
+          />
+        )}
+      </Pressable>
+    );
+  };
+
+  return (
+    <View
+      style={{
+        height: imageHeight,
+      }}
+    >
+      <Carousel
+        width={Dimensions.get("window").width}
+        height={imageHeight}
+        data={carouselData}
+        renderItem={renderCarouselItem}
+        loop={true}
+        scrollAnimationDuration={1000}
+        onSnapToItem={(index) => setCurrentIndex(index)}
+      />
+
+      <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
+        {carouselData.map((_, index) => (
+          <View
+            key={index}
+            className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
+              index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
+            }`}
+          />
+        ))}
+      </View>
+    </View>
+  );
 }
 
 export default function DetailScreen() {
@@ -74,8 +184,6 @@ export default function DetailScreen() {
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
-
-  console.log(contentData);
 
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -109,6 +217,7 @@ export default function DetailScreen() {
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
+            console.log(contentDetail);
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
@@ -126,52 +235,58 @@ export default function DetailScreen() {
     fetchContentDetail();
   }, [id]);
 
-  const showHeaderBackground = scrollY > 150;
+  const showHeaderBackground = scrollY > 300;
 
-  const handleKakaoShare = async () => {
-    if (!contentData) return;
-
-    try {
-      const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
-      const deepLinkUrl = `mycode://detail/${id}`;
-      console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
-
-      await shareFeedTemplate({
-        template: {
-          content: {
-            title: contentData.title,
-            description: contentData.description,
-            imageUrl:
-              getImageSource(contentData.contentId).uri ||
-              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-            link: {
-              // 앱이 설치된 경우 딥링크로 이동
-              mobileWebUrl: deepLinkUrl,
-              webUrl: appStoreUrl,
-              // 앱이 설치되지 않은 경우 앱스토어로 이동
-              androidExecutionParams: { target: "detail", id: String(id) },
-              iosExecutionParams: { target: "detail", id: String(id) },
-            },
-          },
-          buttons: [
-            {
-              title: "자세히 보기",
-              link: {
-                mobileWebUrl: deepLinkUrl,
-                webUrl: appStoreUrl,
-                androidExecutionParams: { target: "detail", id: String(id) },
-                iosExecutionParams: { target: "detail", id: String(id) },
-              },
-            },
-          ],
-        },
-      });
-    } catch (error) {
-      console.error("카카오톡 공유 오류:", error);
-      // 사용자에게 오류 메시지 표시
-      Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
-    }
+  const handleKakaoShare = () => {
+    Alert.alert("공유 기능은 준비중입니다", "", [
+      { text: "확인", style: "default" },
+    ]);
   };
+
+  // const handleKakaoShare = async () => {
+  //   if (!contentData) return;
+
+  //   try {
+  //     const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
+  //     const deepLinkUrl = `mycode://detail/${id}`;
+  //     console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
+
+  //     await shareFeedTemplate({
+  //       template: {
+  //         content: {
+  //           title: contentData.title,
+  //           description: contentData.description,
+  //           imageUrl:
+  //             getImageSource(contentData.contentId).uri ||
+  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+  //           link: {
+  //             // 앱이 설치된 경우 딥링크로 이동
+  //             mobileWebUrl: deepLinkUrl,
+  //             webUrl: appStoreUrl,
+  //             // 앱이 설치되지 않은 경우 앱스토어로 이동
+  //             androidExecutionParams: { target: "detail", id: String(id) },
+  //             iosExecutionParams: { target: "detail", id: String(id) },
+  //           },
+  //         },
+  //         buttons: [
+  //           {
+  //             title: "자세히 보기",
+  //             link: {
+  //               mobileWebUrl: deepLinkUrl,
+  //               webUrl: appStoreUrl,
+  //               androidExecutionParams: { target: "detail", id: String(id) },
+  //               iosExecutionParams: { target: "detail", id: String(id) },
+  //             },
+  //           },
+  //         ],
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("카카오톡 공유 오류:", error);
+  //     // 사용자에게 오류 메시지 표시
+  //     Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
+  //   }
+  // };
 
   const handleGoBack = () => {
     router.back();
@@ -245,20 +360,17 @@ export default function DetailScreen() {
     }
   };
 
-  // const handleImagePress = (index: number) => {
-  //   const imageUrls = [
-  //     "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-  //     "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-  //   ];
+  const handleImagePress = (index: number) => {
+    if (!contentData?.images || contentData.images.length === 0) return;
 
-  //   router.push({
-  //     pathname: "/image-viewer",
-  //     params: {
-  //       initialIndex: index.toString(),
-  //       images: JSON.stringify(imageUrls),
-  //     },
-  //   });
-  // };
+    router.push({
+      pathname: "/image-viewer",
+      params: {
+        initialIndex: index.toString(),
+        images: JSON.stringify(contentData.images),
+      },
+    });
+  };
 
   const handleAddToSchedule = () => {
     if (!isLoggedIn) {
@@ -408,7 +520,7 @@ export default function DetailScreen() {
             )}
 
             {/* 오른쪽 공유 버튼 */}
-            {/* <Pressable
+            <Pressable
               onPress={handleKakaoShare}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
@@ -417,7 +529,7 @@ export default function DetailScreen() {
                 size={28}
                 color={showHeaderBackground ? "#000" : "#fff"}
               />
-            </Pressable> */}
+            </Pressable>
           </View>
 
           {/* 전체 스크롤 영역 */}
@@ -428,19 +540,10 @@ export default function DetailScreen() {
             onScroll={handleScroll}
             contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
           >
-            {/* <DetailImageCarousel
+            <DetailImageCarousel
               imageHeight={IMAGE_HEIGHT}
+              images={contentData.images}
               onImagePress={handleImagePress}
-            /> */}
-
-            {/* 임시 상단 이미지 영역 */}
-            <Image
-              source={getImageSource(contentData.contentId)}
-              className="w-full"
-              style={{
-                height: IMAGE_HEIGHT,
-                resizeMode: "cover",
-              }}
             />
 
             {/* 대표 정보 영역 */}
@@ -475,17 +578,17 @@ export default function DetailScreen() {
                     </Text>
                   </View>
 
-                  <View className="flex-row items-center">
+                  <View className="flex-row">
                     <Text className="w-24 text-base font-medium text-gray-600">
                       주소
                     </Text>
-                    <View className="flex-row flex-wrap items-center gap-x-1">
-                      <Text className="pr-4 text-base text-gray-600">
+                    <View className="flex-1 flex-row items-start">
+                      <Text className="mr-2 flex-1 text-base text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
                         onPress={handleCopyAddress}
-                        className="flex-row items-center"
+                        className="flex-shrink-0 flex-row items-center"
                         style={({ pressed }) => [
                           { opacity: pressed ? 0.7 : 1 },
                         ]}
@@ -507,7 +610,7 @@ export default function DetailScreen() {
                         ? "24시간 운영"
                         : contentData.openingHour && contentData.closedHour
                           ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
-                          : ""}
+                          : "-"}
                     </Text>
                   </View>
 
@@ -515,31 +618,32 @@ export default function DetailScreen() {
                     <Text className="w-24 text-base font-medium text-gray-600">
                       전화번호
                     </Text>
-                    {/* 전화번호 데이터 없어서 임시 주석 처리 */}
-                    {/* <Text className="flex-1 pr-4 text-base text-gray-600">
-                      031-770-3232
-                    </Text> */}
-                    <Text className="text-base text-gray-600">-</Text>
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                      {contentData.telNumber || "-"}
+                    </Text>
                   </View>
 
                   <View className="flex-row items-center">
                     <Text className="w-24 text-base font-medium text-gray-600">
                       링크
                     </Text>
-                    {/* 링크 데이터 없어서 임시 주석 처리 */}
-                    {/* <Pressable
-                      className="rounded border border-gray-300 bg-white px-2 py-1"
-                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                      onPress={() => {
-                        // 링크 클릭 처리 로직
-                        console.log("전시 홈페이지 링크 클릭");
-                      }}
-                    >
-                      <Text className="text-sm text-gray-700">
-                        전시 홈페이지
-                      </Text>
-                    </Pressable> */}
-                    <Text className="text-base text-gray-600">-</Text>
+                    {contentData.homepage ? (
+                      <Pressable
+                        className="rounded border border-gray-300 bg-white px-2 py-1"
+                        style={({ pressed }) => [
+                          { opacity: pressed ? 0.7 : 1 },
+                        ]}
+                        onPress={() => {
+                          Linking.openURL(contentData.homepage!);
+                        }}
+                      >
+                        <Text className="text-sm text-gray-700">
+                          홈페이지 바로가기
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Text className="text-base text-gray-600">-</Text>
+                    )}
                   </View>
 
                   <View className="flex-row">
