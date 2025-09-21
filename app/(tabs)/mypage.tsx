@@ -231,7 +231,11 @@ export default function MyScreen() {
 
   return (
     <View className="w-full flex-1 bg-white pt-[65px]">
-      <Text className="ml-6 mt-4 text-xl font-medium">마이페이지</Text>
+      <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
+        <Text className="text-center text-xl font-medium text-[#212121]">
+          마이페이지
+        </Text>
+      </View>
 
       <View aria-label="user-info" className="ml-6 mt-7 flex h-[60px] flex-row">
         <View className="size-[60px] overflow-hidden rounded-full">

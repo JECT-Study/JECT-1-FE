@@ -1,5 +1,5 @@
 import "@/global.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
@@ -20,7 +20,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 SplashScreen.setOptions({
-  duration: 2000,
+  // duration: 1000,
   fade: true,
 });
 
@@ -32,12 +32,23 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
+  // 최소 1초 타이머 설정
   useEffect(() => {
-    if (loaded) {
+    const timer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
+  useEffect(() => {
+    if (loaded && minTimeElapsed) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, minTimeElapsed]);
 
   useEffect(() => {
     const handleDeepLink = async (url: string) => {
@@ -80,8 +91,8 @@ export default function RootLayout() {
     return () => subscription?.remove();
   }, [router]);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
+  if (!loaded || !minTimeElapsed) {
+    // 폰트 로딩이 완료되지 않았거나 최소 시간이 경과하지 않은 경우
     return null;
   }
 
