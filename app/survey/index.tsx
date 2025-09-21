@@ -2,12 +2,14 @@ import { useState } from "react";
 
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyExitAlert from "@/components/survey/SurveyExitAlert";
 import SurveyStep from "@/components/survey/SurveyStep";
 import { options, questions } from "@/constants/Surveys";
+import { authApi } from "@/features/axios/axiosInstance";
 
 interface SurveyResult {
   step1?: number;
@@ -50,12 +52,23 @@ export default function SurveyScreen() {
     const region = options.Q1[context.step1 ?? 0];
 
     const answers = [
-      { questionId: 1, optionId: (context.step1 ?? 0) + 1 },
-      { questionId: 2, optionId: (context.step2 ?? 0) + 1 },
-      { questionId: 3, optionId: (context.step3 ?? 0) + 1 },
-      { questionId: 4, optionId: (context.step4 ?? 0) + 1 },
-      { questionId: 5, optionId: (context.step5 ?? 0) + 1 },
-      { questionId: 6, optionId: answerIndex + 1 },
+      {
+        questionId: 1,
+        optionId: (context.step2 ?? 0) + 1,
+      },
+      {
+        questionId: 2,
+        optionId: (context.step3 ?? 0) + 5,
+      },
+      {
+        questionId: 3,
+        optionId: (context.step4 ?? 0) + 9,
+      },
+      {
+        questionId: 4,
+        optionId: (context.step5 ?? 0) + 13,
+      },
+      { questionId: 5, optionId: answerIndex + 17 },
     ];
 
     const requestBody = {
@@ -66,26 +79,26 @@ export default function SurveyScreen() {
     console.log("API 전송 데이터:", requestBody);
 
     // // API 호출
-    // try {
-    //   const response = await authApi.post("/trait-test", requestBody);
+    try {
+      const response = await authApi.post("/trait-test", requestBody);
 
-    //   if (response.data.isSuccess) {
-    //     console.log("설문 제출 성공:", response.data);
-    //     history.push("done", newContext);
-    //   } else {
-    //     throw new Error(response.data.message || "설문 제출 실패");
-    //   }
-    // } catch (error) {
-    //   console.error("설문 제출 중 오류 발생:", error);
-    //   Alert.alert(
-    //     "설문 제출 실패",
-    //     "설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
-    //     [{ text: "확인", style: "default" }],
-    //   );
-    // }
+      if (response.data.isSuccess) {
+        console.log("설문 제출 성공:", response.data);
+        history.push("done", newContext);
+      } else {
+        throw new Error(response.data.message || "설문 제출 실패");
+      }
+    } catch (error) {
+      console.error("설문 제출 중 오류 발생:", error);
+      Alert.alert(
+        "설문 제출 실패",
+        "설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
+        [{ text: "확인", style: "default" }],
+      );
+    }
 
     // 임시로 done 페이지로 이동
-    history.push("done", newContext);
+    // history.push("done", newContext);
   };
 
   return (
