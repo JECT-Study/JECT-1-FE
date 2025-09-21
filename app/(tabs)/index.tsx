@@ -694,14 +694,14 @@ export default function HomeScreen() {
 
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
-            <View className="relative px-[18px] py-2.5">
-              <Text className="text-xl font-semibold text-[#424242]">
+            <View className="relative py-2.5">
+              <Text className="px-[18px] text-xl font-semibold text-[#424242]">
                 {isLoggedIn && nickname
                   ? `${nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
               </Text>
 
-              <View className="mb-5 mt-3 flex-row gap-x-2.5">
+              <View className="mb-5 mt-3 flex-row gap-x-2.5 px-[18px]">
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedRecommendationsCategory === category.id;
@@ -739,6 +739,9 @@ export default function HomeScreen() {
                   data={chunkedRecommendationsData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => (
                     <View className="w-[287px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -803,8 +806,8 @@ export default function HomeScreen() {
             </View>
 
             {/* 이번달 핫한 축제 */}
-            <View className="px-[18px] py-2.5">
-              <Text className="mb-[18px] text-xl font-semibold text-[#424242]">
+            <View className="py-2.5">
+              <Text className="mb-[18px] px-[18px] text-xl font-semibold text-[#424242]">
                 이번달 핫한 축제 🔥
               </Text>
 
@@ -817,6 +820,9 @@ export default function HomeScreen() {
                   data={hotFestivalData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => <HotCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
@@ -825,8 +831,8 @@ export default function HomeScreen() {
             </View>
 
             {/* 금주 콘텐츠 */}
-            <View className="flex gap-y-[18px] px-[18px] py-2.5">
-              <Text className="text-xl font-semibold text-black">
+            <View className="flex gap-y-[18px] py-2.5">
+              <Text className="px-[18px] text-xl font-semibold text-black">
                 금주 콘텐츠를 한눈에👀
               </Text>
 
@@ -834,6 +840,9 @@ export default function HomeScreen() {
                 data={weekDays}
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingHorizontal: 18,
+                }}
                 renderItem={({ item }) => (
                   <Pressable
                     className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
@@ -872,6 +881,9 @@ export default function HomeScreen() {
                   data={chunkedFilteredContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => (
                     <View className="w-[285px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -887,22 +899,24 @@ export default function HomeScreen() {
                 />
               )}
 
-              <Pressable
-                className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
-                onPress={handleSchedulePress}
-              >
-                <View className="flex-row items-center gap-x-1.5">
-                  <Text className="text-[15px] font-normal text-[#6C4DFF]">
-                    더보기
-                  </Text>
-                  <ChevronRight />
-                </View>
-              </Pressable>
+              <View className="px-[18px]">
+                <Pressable
+                  className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
+                  onPress={handleSchedulePress}
+                >
+                  <View className="flex-row items-center gap-x-1.5">
+                    <Text className="text-[15px] font-normal text-[#6C4DFF]">
+                      더보기
+                    </Text>
+                    <ChevronRight />
+                  </View>
+                </Pressable>
+              </View>
             </View>
 
             {/* 이런 축제 어때요? */}
-            <View className="px-[18px] py-2.5 pb-6">
-              <View className="mb-[18px] flex-row items-center justify-between">
+            <View className="py-2.5 pb-6">
+              <View className="mb-[18px] flex-row items-center justify-between px-[18px]">
                 <Text className="text-xl font-semibold text-[#424242]">
                   이런 축제 어때요?
                 </Text>
@@ -926,6 +940,9 @@ export default function HomeScreen() {
                   data={categoryContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => <MoreCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
