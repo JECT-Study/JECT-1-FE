@@ -26,7 +26,6 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
-import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
@@ -409,8 +408,7 @@ export default function DetailScreen() {
             )}
 
             {/* 오른쪽 공유 버튼 */}
-            <Pressable
-              disabled
+            {/* <Pressable
               onPress={handleKakaoShare}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
@@ -419,7 +417,7 @@ export default function DetailScreen() {
                 size={28}
                 color={showHeaderBackground ? "#000" : "#fff"}
               />
-            </Pressable>
+            </Pressable> */}
           </View>
 
           {/* 전체 스크롤 영역 */}
