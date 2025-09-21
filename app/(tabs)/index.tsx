@@ -33,8 +33,16 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
-import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
+
+// address를 시/도 구/군까지만 표시하는 함수
+const formatAddress = (address: string): string => {
+  const parts = address.split(" ");
+  if (parts.length >= 2) {
+    return `${parts[0]} ${parts[1]}`;
+  }
+  return address;
+};
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
@@ -87,34 +95,35 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[10px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[10px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[10px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[10px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[10px]"
@@ -123,10 +132,15 @@ const Card = ({ item }: { item: CustomContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-lg font-semibold text-[#424242]">
+        <Text
+          className="mb-1 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
-        <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
+        <Text className="text-sm text-[#9E9E9E]">
+          {formatAddress(item.address)}
+        </Text>
         <Text className="text-sm text-[#707070]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
@@ -149,34 +163,35 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
     return categoryItem ? categoryItem.label : "기타";
   };
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[14px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[14px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[14px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[14px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[14px]"
@@ -190,11 +205,14 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
             {getContentTypeLabel(item.contentType)}
           </Text>
         </View>
-        <Text className="mb-1.5 text-lg font-semibold text-[#424242]">
+        <Text
+          className="mb-1.5 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
-          {item.address}
+          {formatAddress(item.address)}
         </Text>
       </View>
     </Pressable>
@@ -209,34 +227,35 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-lg"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-lg ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-lg"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-lg ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-lg"
@@ -245,11 +264,14 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-lg font-semibold text-[#424242]">
+        <Text
+          className="mb-1 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="text-sm font-normal text-[#9E9E9E]">
-          {item.address}
+          {formatAddress(item.address)}
         </Text>
         <Text className="text-sm font-normal text-[#707070]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
@@ -267,34 +289,35 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[14px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[14px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[14px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[14px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[14px]"
@@ -303,7 +326,10 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
         )}
       </View>
       <View className="mt-2">
-        <Text className="text-lg font-semibold text-[#424242]">
+        <Text
+          className="text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
@@ -496,9 +522,7 @@ export default function HomeScreen() {
     try {
       setIsLoadingCategoryContent(true);
 
-      const response = await publicApi.get(
-        `${BACKEND_URL}/home/category?category=PERFORMANCE`,
-      );
+      const response = await publicApi.get(`${BACKEND_URL}/home/category`);
 
       if (response.data.isSuccess && response.data.result) {
         setCategoryContentData(response.data.result);
@@ -575,7 +599,7 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
-  const handleSearchPress = () => router.push("/search-keywords");
+  const handleSearchPress = () => router.push("/search-results");
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
@@ -615,7 +639,6 @@ export default function HomeScreen() {
           className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
-          bounces={false}
           onScroll={handleScrollStateChange}
           scrollEventThrottle={16}
           refreshControl={
@@ -716,7 +739,6 @@ export default function HomeScreen() {
                   data={chunkedRecommendationsData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  bounces={false}
                   renderItem={({ item }) => (
                     <View className="w-[287px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -795,7 +817,6 @@ export default function HomeScreen() {
                   data={hotFestivalData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  bounces={false}
                   renderItem={({ item }) => <HotCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
@@ -813,7 +834,6 @@ export default function HomeScreen() {
                 data={weekDays}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                bounces={false}
                 renderItem={({ item }) => (
                   <Pressable
                     className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
@@ -852,7 +872,6 @@ export default function HomeScreen() {
                   data={chunkedFilteredContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  bounces={false}
                   renderItem={({ item }) => (
                     <View className="w-[285px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -907,7 +926,6 @@ export default function HomeScreen() {
                   data={categoryContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  bounces={false}
                   renderItem={({ item }) => <MoreCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
