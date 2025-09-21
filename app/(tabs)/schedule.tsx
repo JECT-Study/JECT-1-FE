@@ -61,7 +61,7 @@ export default function ScheduleScreen() {
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
-    async (date: string, page: number = 0, isLoadMore: boolean = false) => {
+    async (date: string, page: number = 1, isLoadMore: boolean = false) => {
       const startTime = dayjs().valueOf();
 
       try {

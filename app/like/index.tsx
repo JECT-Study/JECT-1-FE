@@ -177,7 +177,7 @@ export default function Like() {
         <FlatList
           className="w-full flex-1 px-6 py-2"
           data={favorites}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <PostBlock
               info={{
                 contentId: item.contentId,
@@ -190,6 +190,7 @@ export default function Like() {
                 // likes는 PostBlock 내부에서 API로 가져옴
               }}
               onLikeChange={handleLikeChange}
+              showSeparator={index < favorites.length - 1}
             />
           )}
           keyExtractor={(item) => item.contentId.toString()}

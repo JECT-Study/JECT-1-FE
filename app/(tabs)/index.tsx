@@ -33,16 +33,8 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
+import { formatAddress } from "@/utils/addressUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
-
-// address를 시/도 구/군까지만 표시하는 함수
-const formatAddress = (address: string): string => {
-  const parts = address.split(" ");
-  if (parts.length >= 2) {
-    return `${parts[0]} ${parts[1]}`;
-  }
-  return address;
-};
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");

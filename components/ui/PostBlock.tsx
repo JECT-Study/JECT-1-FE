@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 import * as SecureStore from "expo-secure-store";
-import { Image, Platform, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { formatAddress } from "@/utils/addressUtils";
 import { getImageSource } from "@/utils/imageUtils";
 
 interface infoInterface {
@@ -28,28 +29,24 @@ interface PostBlockProps {
     isLiked: boolean,
     likeCount: number,
   ) => void;
+  showSeparator?: boolean;
 }
 
-export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
+export default function PostBlock({
+  info,
+  onLikeChange,
+  showSeparator = true,
+}: PostBlockProps) {
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  // 플랫폼별 토큰 조회 함수
-  const getTokenAsync = async (key: string): Promise<string | null> => {
-    if (Platform.OS === "web") {
-      return localStorage.getItem(key);
-    } else {
-      return await SecureStore.getItemAsync(key);
-    }
-  };
 
   // 토큰 확인을 통한 로그인 상태 체크
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const accessToken = await getTokenAsync("accessToken");
-        const refreshToken = await getTokenAsync("refreshToken");
+        const accessToken = await SecureStore.getItemAsync("accessToken");
+        const refreshToken = await SecureStore.getItemAsync("refreshToken");
         setIsLoggedIn(!!(accessToken && refreshToken));
       } catch (error) {
         console.error("토큰 확인 실패:", error);
@@ -99,10 +96,6 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
         if (onLikeChange) {
           onLikeChange(info.contentId, !currentIsLiked, 0);
         }
-
-        console.log(
-          `좋아요 ${!currentIsLiked ? "추가" : "취소"} 완료: ${info.title}`,
-        );
       }
     } catch (error) {
       console.error("좋아요 오류:", error);
@@ -113,7 +106,7 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
 
   return (
     <>
-      <View className="my-[18px] flex flex-row items-center">
+      <View className="flex flex-row items-center">
         <Image
           source={
             info.img_url
@@ -123,12 +116,15 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
           className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
           resizeMode="cover"
         />
-        <View className="ml-[18px] flex-1 justify-center">
-          <Text className="text-[16px] font-semibold leading-normal text-[#111]">
+        <View className="ml-[18px] mr-2 flex-1 justify-center">
+          <Text
+            className="text-lg font-semibold leading-normal text-[#111]"
+            numberOfLines={2}
+          >
             {info.title}
           </Text>
           <Text className="text-[13px] leading-[1.4] text-[#9E9E9E]">
-            {info.address}
+            {formatAddress(info.address)}
           </Text>
           <Text className="text-[13px] leading-normal text-[#6D6D6D]">
             {info.start_date} - {info.end_date}
@@ -159,9 +155,11 @@ export default function PostBlock({ info, onLikeChange }: PostBlockProps) {
           </Pressable>
         </View>
       </View>
-      <View className="px-2">
-        <Separator />
-      </View>
+      {showSeparator && (
+        <View className="py-5">
+          <Separator />
+        </View>
+      )}
     </>
   );
 }
