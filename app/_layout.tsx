@@ -20,7 +20,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 SplashScreen.setOptions({
-  duration: 1000,
+  duration: 2000,
   fade: true,
 });
 
@@ -72,7 +72,6 @@ export default function RootLayout() {
 
     // 앱이 종료된 상태에서 딥링크로 실행될 때 처리
     Linking.getInitialURL().then((url) => {
-      console.log("뭐임:", url);
       if (url) {
         handleDeepLink(url);
       }
