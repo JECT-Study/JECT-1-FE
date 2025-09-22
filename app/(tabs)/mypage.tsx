@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
-import { Alert, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
@@ -21,6 +21,7 @@ export default function MyScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [nickname, setNickname] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusModalType, setStatusModalType] = useState<"success" | "error">(
@@ -87,6 +88,7 @@ export default function MyScreen() {
       setStatusBarStyle("dark");
 
       const checkLoginStatus = async () => {
+        setIsLoading(true);
         try {
           const accessToken = await SecureStore.getItemAsync("accessToken");
           const refreshToken = await SecureStore.getItemAsync("refreshToken");
@@ -111,6 +113,8 @@ export default function MyScreen() {
           setIsLoggedIn(false);
           setNickname("");
           setProfileImage("");
+        } finally {
+          setIsLoading(false);
         }
       };
       checkLoginStatus();
@@ -221,7 +225,11 @@ export default function MyScreen() {
     goSurvey();
   };
 
-  return (
+  return isLoading ? (
+    <View className="flex-1 items-center justify-center bg-white">
+      <ActivityIndicator size="large" color="#6C4DFF" />
+    </View>
+  ) : (
     <View className="w-full flex-1 bg-white pt-[65px]">
       <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
         <Text className="text-center text-xl font-medium text-[#212121]">
