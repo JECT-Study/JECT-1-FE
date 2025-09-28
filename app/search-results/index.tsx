@@ -30,7 +30,6 @@ import {
   SEARCH_LIMIT,
   SearchContentItem,
 } from "@/types/search";
-import { getImageSource } from "@/utils/imageUtils";
 import {
   getCategoryLabel,
   getRegionKeyword,
@@ -38,17 +37,46 @@ import {
 } from "@/utils/searchUtils";
 
 function EventCard({ item, onPress }: EventCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const hasImage = item.thumbnailUrl && item.thumbnailUrl.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.thumbnailUrl }
+    : require("../../assets/images/content_placeholder.png");
+
   return (
     <Pressable
       className="mb-6 flex w-[48%] items-center"
       onPress={() => onPress(item.id)}
     >
       <View className="h-[208px] w-full overflow-hidden rounded-[11px] bg-gray-200">
-        <Image
-          source={getImageSource(item.id)}
-          className="h-full w-full"
-          resizeMode="cover"
-        />
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
+          <Image
+            source={imageSource}
+            className="h-full w-full"
+            resizeMode="cover"
+          />
+        )}
       </View>
       <View className="mt-3 w-full">
         <Text
