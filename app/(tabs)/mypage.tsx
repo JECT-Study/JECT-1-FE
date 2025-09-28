@@ -5,15 +5,14 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
-import LogoutAlert from "@/components/user/LogoutAlert";
-import LogoutStatusModal from "@/components/user/LogoutStatusModal";
+import CommonModal from "@/components/ui/CommonModal";
 import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
 
@@ -24,10 +23,10 @@ export default function MyScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
-  const [statusModalType, setStatusModalType] = useState<"success" | "error">(
-    "success",
-  );
   const [statusModalMessage, setStatusModalMessage] = useState<string>("");
+  const [showLoginPromptModal, setShowLoginPromptModal] =
+    useState<boolean>(false);
+  const [loginPromptMessage, setLoginPromptMessage] = useState<string>("");
 
   const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
     usePageNavigation();
@@ -54,7 +53,6 @@ export default function MyScreen() {
       setShowLogoutAlert(false);
 
       // 성공 모달 표시
-      setStatusModalType("success");
       setStatusModalMessage("로그아웃이 완료되었습니다.");
       setShowStatusModal(true);
 
@@ -69,7 +67,6 @@ export default function MyScreen() {
       setShowLogoutAlert(false);
 
       // 에러 모달 표시
-      setStatusModalType("error");
       setStatusModalMessage(
         `로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`,
       );
@@ -124,20 +121,8 @@ export default function MyScreen() {
   // 프로필 수정 버튼 클릭 핸들러
   const handleEditProfile = () => {
     if (!isLoggedIn) {
-      Alert.alert(
-        "로그인이 필요합니다",
-        "프로필을 수정하려면 먼저 로그인해주세요.",
-        [
-          {
-            text: "취소",
-            style: "cancel",
-          },
-          {
-            text: "로그인하러 가기",
-            onPress: () => router.push("/"),
-          },
-        ],
-      );
+      setLoginPromptMessage("프로필을 수정하려면 먼저 로그인해주세요.");
+      setShowLoginPromptModal(true);
       return;
     }
     goEditProfile();
@@ -162,20 +147,8 @@ export default function MyScreen() {
   // 나의일정 버튼 클릭 핸들러
   const handlePlan = () => {
     if (!isLoggedIn) {
-      Alert.alert(
-        "로그인이 필요합니다",
-        "나의일정을 보려면 먼저 로그인해주세요.",
-        [
-          {
-            text: "취소",
-            style: "cancel",
-          },
-          {
-            text: "로그인하러 가기",
-            onPress: () => router.push("/"),
-          },
-        ],
-      );
+      setLoginPromptMessage("나의일정을 보려면 먼저 로그인해주세요.");
+      setShowLoginPromptModal(true);
       return;
     }
     goPlan();
@@ -184,20 +157,8 @@ export default function MyScreen() {
   // 관심목록 버튼 클릭 핸들러
   const handleLike = () => {
     if (!isLoggedIn) {
-      Alert.alert(
-        "로그인이 필요합니다",
-        "관심목록을 보려면 먼저 로그인해주세요.",
-        [
-          {
-            text: "취소",
-            style: "cancel",
-          },
-          {
-            text: "로그인하러 가기",
-            onPress: () => router.push("/"),
-          },
-        ],
-      );
+      setLoginPromptMessage("관심목록을 보려면 먼저 로그인해주세요.");
+      setShowLoginPromptModal(true);
       return;
     }
     goLike();
@@ -206,20 +167,8 @@ export default function MyScreen() {
   // 취향 분석하기 버튼 클릭 핸들러
   const handleSurvey = () => {
     if (!isLoggedIn) {
-      Alert.alert(
-        "로그인이 필요합니다",
-        "취향 분석을 하려면 먼저 로그인해주세요.",
-        [
-          {
-            text: "취소",
-            style: "cancel",
-          },
-          {
-            text: "로그인하러 가기",
-            onPress: () => router.push("/"),
-          },
-        ],
-      );
+      setLoginPromptMessage("취향 분석을 하려면 먼저 로그인해주세요.");
+      setShowLoginPromptModal(true);
       return;
     }
     goSurvey();
@@ -359,18 +308,41 @@ export default function MyScreen() {
       </View>
 
       {/* 로그아웃 확인 모달 */}
-      <LogoutAlert
-        isVisible={showLogoutAlert}
-        onConfirm={handleLogoutConfirm}
+      <CommonModal
+        visible={showLogoutAlert && !showStatusModal}
+        onClose={handleLogoutCancel}
+        mainTitle="로그아웃 하시겠어요?"
+        subTitle="언제든지 다시 로그인할 수 있어요."
+        cancelText="취소"
+        confirmText="로그아웃"
         onCancel={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
       />
 
       {/* 로그아웃 상태 모달 */}
-      <LogoutStatusModal
-        isVisible={showStatusModal}
-        type={statusModalType}
-        message={statusModalMessage}
+      <CommonModal
+        visible={showStatusModal}
         onClose={() => setShowStatusModal(false)}
+        mainTitle={statusModalMessage}
+        showSubTitle={false}
+        showCancelButton={false}
+        confirmText="확인"
+        onConfirm={() => setShowStatusModal(false)}
+      />
+
+      {/* 로그인 프롬프트 모달 */}
+      <CommonModal
+        visible={showLoginPromptModal}
+        onClose={() => setShowLoginPromptModal(false)}
+        mainTitle="로그인이 필요합니다"
+        subTitle={loginPromptMessage}
+        cancelText="취소"
+        confirmText="로그인하러 가기"
+        onCancel={() => setShowLoginPromptModal(false)}
+        onConfirm={() => {
+          setShowLoginPromptModal(false);
+          router.push("/");
+        }}
       />
     </View>
   );

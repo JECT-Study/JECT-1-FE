@@ -12,11 +12,11 @@ import {
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import DeleteScheduleAlert from "@/components/schedule/DeleteScheduleAlert";
 import DeleteScheduleBottomSheet from "@/components/schedule/DeleteScheduleBottomSheet";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
+import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
 import Toast from "@/components/ui/Toast";
@@ -354,11 +354,16 @@ export default function Plan() {
         onCancel={handleBottomSheetCancel}
       />
 
-      {/* 삭제 확인 Alert */}
-      <DeleteScheduleAlert
-        isVisible={showDeleteAlert}
-        onConfirm={handleDeleteConfirm}
+      {/* 삭제 확인 모달 */}
+      <CommonModal
+        visible={showDeleteAlert}
+        onClose={handleDeleteCancel}
+        mainTitle="일정을 삭제하시겠어요?"
+        subTitle="삭제된 일정은 복구할 수 없어요."
+        cancelText="취소"
+        confirmText="삭제"
         onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
       />
 
       {/* 토스트 */}

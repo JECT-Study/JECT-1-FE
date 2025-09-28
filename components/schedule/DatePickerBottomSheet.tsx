@@ -4,11 +4,12 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CalendarHeader from "@/components/ui/CalendarHeader";
+import CommonModal from "@/components/ui/CommonModal";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
@@ -77,6 +78,7 @@ export default function DatePickerBottomSheet({
   onScheduleAdded,
 }: DatePickerBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<string>(() => {
     try {
       return dayjs(startDate).isValid()
@@ -151,7 +153,7 @@ export default function DatePickerBottomSheet({
         }
       } catch (error) {
         console.error("API 요청 오류:", error);
-        Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
+        setShowErrorModal(true);
       }
     }
   }, [selectedDate, onClose, contentId, onScheduleAdded]);
@@ -291,6 +293,17 @@ export default function DatePickerBottomSheet({
             </Text>
           </Pressable>
         </View>
+
+        {/* 오류 모달 */}
+        <CommonModal
+          visible={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          mainTitle="오류"
+          subTitle="일정 생성에 실패했습니다. 다시 시도해주세요."
+          showCancelButton={false}
+          confirmText="확인"
+          onConfirm={() => setShowErrorModal(false)}
+        />
       </BottomSheetView>
     </BottomSheet>
   );

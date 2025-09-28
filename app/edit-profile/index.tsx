@@ -3,18 +3,12 @@ import { useEffect, useState } from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import {
-  Alert,
-  Pressable,
-  SafeAreaView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 
 import CameraIcon from "@/components/icons/CameraIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import XIcon from "@/components/icons/X";
+import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
@@ -35,6 +29,15 @@ export default function EditProfile() {
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
+
+  // 모달 상태
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalSubTitle, setModalSubTitle] = useState("");
+  const [modalConfirmText, setModalConfirmText] = useState("확인");
+  const [modalOnConfirm, setModalOnConfirm] = useState<(() => void) | null>(
+    null,
+  );
 
   // 프로필 이미지 관련
   const { onPress, isBottomSheetOpen, onCloseBottomSheet, onLibrary } =
@@ -74,7 +77,11 @@ export default function EditProfile() {
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
     if (!inputNickname.trim()) {
-      Alert.alert("알림", "닉네임을 입력해주세요.");
+      setModalTitle("알림");
+      setModalSubTitle("닉네임을 입력해주세요.");
+      setModalConfirmText("확인");
+      setModalOnConfirm(() => () => setShowModal(false));
+      setShowModal(true);
       return;
     }
 
@@ -155,23 +162,30 @@ export default function EditProfile() {
           await SecureStore.setItemAsync("profileImage", profileUri);
         }
 
-        Alert.alert("성공", "프로필이 성공적으로 업데이트되었습니다.", [
-          {
-            text: "확인",
-            onPress: () => {
-              router.back();
-            },
-          },
-        ]);
+        setModalTitle("성공");
+        setModalSubTitle("프로필이 성공적으로 업데이트되었습니다.");
+        setModalConfirmText("확인");
+        setModalOnConfirm(() => () => {
+          setShowModal(false);
+          router.back();
+        });
+        setShowModal(true);
       } else {
-        Alert.alert(
-          "오류",
+        setModalTitle("오류");
+        setModalSubTitle(
           response.data.message || "프로필 업데이트에 실패했습니다.",
         );
+        setModalConfirmText("확인");
+        setModalOnConfirm(() => () => setShowModal(false));
+        setShowModal(true);
       }
     } catch (error) {
       console.error("프로필 업데이트 오류:", error);
-      Alert.alert("오류", "프로필 업데이트 중 오류가 발생했습니다.");
+      setModalTitle("오류");
+      setModalSubTitle("프로필 업데이트 중 오류가 발생했습니다.");
+      setModalConfirmText("확인");
+      setModalOnConfirm(() => () => setShowModal(false));
+      setShowModal(true);
     } finally {
       setIsLoading(false);
     }
@@ -280,6 +294,17 @@ export default function EditProfile() {
         isOpen={isBottomSheetOpen}
         onClose={onCloseBottomSheet}
         onLibrary={onLibrary}
+      />
+
+      {/* 공통 모달 */}
+      <CommonModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        mainTitle={modalTitle}
+        subTitle={modalSubTitle}
+        showCancelButton={false}
+        confirmText={modalConfirmText}
+        onConfirm={modalOnConfirm || (() => setShowModal(false))}
       />
     </SafeAreaView>
   );

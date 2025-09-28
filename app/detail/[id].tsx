@@ -8,7 +8,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   Image,
   Platform,
@@ -31,6 +30,7 @@ import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
+import CommonModal from "@/components/ui/CommonModal";
 import Divider from "@/components/ui/Divider";
 import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
@@ -182,6 +182,7 @@ export default function DetailScreen() {
   const [showToast, setShowToast] = useState<boolean>(false);
   const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
+  const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -238,9 +239,7 @@ export default function DetailScreen() {
   const showHeaderBackground = scrollY > 300;
 
   const handleKakaoShare = () => {
-    Alert.alert("공유 기능은 준비중입니다", "", [
-      { text: "확인", style: "default" },
-    ]);
+    setShowShareModal(true);
   };
 
   // const handleKakaoShare = async () => {
@@ -826,6 +825,17 @@ export default function DetailScreen() {
       <LoginPromptModal
         visible={showLoginModal}
         onClose={() => setShowLoginModal(false)}
+      />
+
+      {/* 공유 모달 */}
+      <CommonModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        mainTitle="공유 기능은 준비중입니다"
+        showSubTitle={false}
+        showCancelButton={false}
+        confirmText="확인"
+        onConfirm={() => setShowShareModal(false)}
       />
     </>
   );

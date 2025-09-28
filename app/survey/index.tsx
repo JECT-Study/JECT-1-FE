@@ -2,12 +2,11 @@ import { useState } from "react";
 
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
-import SurveyExitAlert from "@/components/survey/SurveyExitAlert";
 import SurveyStep from "@/components/survey/SurveyStep";
+import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
 import { authApi } from "@/features/axios/axiosInstance";
 
@@ -24,6 +23,7 @@ const totalQuestions = 6;
 
 export default function SurveyScreen() {
   const [showExitAlert, setShowExitAlert] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const funnel = useFunnel<{
     intro: SurveyResult;
     step1: SurveyResult;
@@ -90,11 +90,7 @@ export default function SurveyScreen() {
       }
     } catch (error) {
       console.error("설문 제출 중 오류 발생:", error);
-      Alert.alert(
-        "설문 제출 실패",
-        "설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
-        [{ text: "확인", style: "default" }],
-      );
+      setShowErrorModal(true);
     }
 
     // 임시로 done 페이지로 이동
@@ -194,13 +190,29 @@ export default function SurveyScreen() {
       />
 
       {/* 설문 종료 확인 모달 */}
-      <SurveyExitAlert
-        isVisible={showExitAlert}
+      <CommonModal
+        visible={showExitAlert}
+        onClose={() => setShowExitAlert(false)}
+        mainTitle="취향 분석을 그만두시겠어요?"
+        subTitle="선택한 내용은 저장되지 않아요."
+        cancelText="취소"
+        confirmText="확인"
+        onCancel={() => setShowExitAlert(false)}
         onConfirm={() => {
           setShowExitAlert(false);
           router.back();
         }}
-        onCancel={() => setShowExitAlert(false)}
+      />
+
+      {/* 설문 제출 오류 모달 */}
+      <CommonModal
+        visible={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        mainTitle="설문 제출 실패"
+        subTitle="설문 제출 중 오류가 발생했습니다. 다시 시도해주세요."
+        showCancelButton={false}
+        confirmText="확인"
+        onConfirm={() => setShowErrorModal(false)}
       />
     </SafeAreaView>
   );
