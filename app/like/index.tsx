@@ -135,6 +135,7 @@ export default function Like() {
       <CustomHeader
         title="관심 목록"
         isCommit={false}
+        separator
         cancel={() => {
           router.back();
         }}
@@ -150,13 +151,13 @@ export default function Like() {
                 key={key}
                 className={`flex h-[33px] w-[49px] items-center justify-center rounded-[20px] text-[14px] ${
                   selectedCategory === key
-                    ? "bg-[#816BFF] text-white"
-                    : "border-[1px] border-[#816BFF] bg-white"
+                    ? "bg-[#6C4DFF] text-white"
+                    : "border-[1px] border-[#6C4DFF] bg-white"
                 } `}
               >
                 <Text
                   className={`${
-                    selectedCategory === key ? "text-white" : "text-[#816BFF]"
+                    selectedCategory === key ? "text-white" : "text-[#6C4DFF]"
                   }`}
                 >
                   {value}
@@ -176,7 +177,7 @@ export default function Like() {
         <FlatList
           className="w-full flex-1 px-6 py-2"
           data={favorites}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <PostBlock
               info={{
                 contentId: item.contentId,
@@ -189,6 +190,7 @@ export default function Like() {
                 // likes는 PostBlock 내부에서 API로 가져옴
               }}
               onLikeChange={handleLikeChange}
+              showSeparator={index < favorites.length - 1}
             />
           )}
           keyExtractor={(item) => item.contentId.toString()}

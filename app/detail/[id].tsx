@@ -8,6 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -16,6 +17,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
@@ -24,13 +26,16 @@ import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import LocationPinIcon from "@/components/icons/LocationPinIcon";
+import ShareOutlineIcon from "@/components/icons/ShareOutlineIcon";
 import AppleMap from "@/components/map/AppleMap";
 import NaverMap from "@/components/map/NaverMap";
 import DatePickerBottomSheet from "@/components/schedule/DatePickerBottomSheet";
+import CommonModal from "@/components/ui/CommonModal";
 import Divider from "@/components/ui/Divider";
+import LoginPromptModal from "@/components/ui/LoginPromptModal";
+import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -46,14 +51,123 @@ interface ContentDetail {
   startDate: string;
   endDate: string;
   likes: number;
-  isAlwaysOpen: boolean;
-  openingHour: string;
-  closedHour: string;
+  isAlwaysOpen: boolean | null;
+  openingHour: string | null;
+  closedHour: string | null;
   address: string;
   introduction: string;
   description: string;
   longitude: number;
   latitude: number;
+  telNumber: string | null;
+  homepage: string | null;
+}
+
+function DetailImageCarousel({
+  imageHeight,
+  images,
+  onImagePress,
+}: {
+  imageHeight: number;
+  images: string[];
+  onImagePress?: (index: number) => void;
+}) {
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [imageLoadStates, setImageLoadStates] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  // 이미지가 없으면 placeholder 사용
+  const carouselData =
+    images.length > 0
+      ? images.map((url) => ({ uri: url }))
+      : [require("@/assets/images/content_placeholder.png")];
+
+  const renderCarouselItem = ({
+    item,
+    index,
+  }: {
+    item: any;
+    index: number;
+  }) => {
+    const isRemoteImage = typeof item === "object" && "uri" in item;
+    const isLoaded = imageLoadStates[index];
+
+    return (
+      <Pressable
+        onPress={() => onImagePress?.(index)}
+        style={{ height: imageHeight, position: "relative" }}
+      >
+        {isRemoteImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("@/assets/images/content_placeholder.png")}
+              className="absolute inset-0 w-full"
+              style={{
+                height: imageHeight,
+                resizeMode: "cover",
+              }}
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={item}
+              className={`absolute inset-0 w-full ${isLoaded ? "opacity-100" : "opacity-0"}`}
+              style={{
+                height: imageHeight,
+                resizeMode: "cover",
+              }}
+              onLoad={() =>
+                setImageLoadStates((prev) => ({ ...prev, [index]: true }))
+              }
+              onError={() =>
+                setImageLoadStates((prev) => ({ ...prev, [index]: false }))
+              }
+            />
+          </>
+        ) : (
+          /* 로컬 placeholder 이미지 */
+          <Image
+            source={item}
+            className="w-full"
+            style={{
+              height: imageHeight,
+              resizeMode: "cover",
+            }}
+          />
+        )}
+      </Pressable>
+    );
+  };
+
+  return (
+    <View
+      style={{
+        height: imageHeight,
+      }}
+    >
+      <Carousel
+        width={Dimensions.get("window").width}
+        height={imageHeight}
+        data={carouselData}
+        renderItem={renderCarouselItem}
+        loop={true}
+        scrollAnimationDuration={1000}
+        onSnapToItem={(index) => setCurrentIndex(index)}
+      />
+
+      <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
+        {carouselData.map((_, index) => (
+          <View
+            key={index}
+            className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
+              index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
+            }`}
+          />
+        ))}
+      </View>
+    </View>
+  );
 }
 
 export default function DetailScreen() {
@@ -65,6 +179,10 @@ export default function DetailScreen() {
   const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
+  const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -100,6 +218,7 @@ export default function DetailScreen() {
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
+            console.log(contentDetail);
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
@@ -117,28 +236,54 @@ export default function DetailScreen() {
     fetchContentDetail();
   }, [id]);
 
-  const showHeaderBackground = scrollY > 150;
+  const showHeaderBackground = scrollY > 300;
+
+  const handleKakaoShare = () => {
+    setShowShareModal(true);
+  };
 
   // const handleKakaoShare = async () => {
   //   if (!contentData) return;
 
   //   try {
+  //     const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
+  //     const deepLinkUrl = `mycode://detail/${id}`;
+  //     console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
+
   //     await shareFeedTemplate({
   //       template: {
   //         content: {
   //           title: contentData.title,
   //           description: contentData.description,
   //           imageUrl:
-  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/detail-dummy.png",
+  //             getImageSource(contentData.contentId).uri ||
+  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
   //           link: {
-  //             webUrl: "https://github.com/",
-  //             mobileWebUrl: "https://github.com/",
+  //             // 앱이 설치된 경우 딥링크로 이동
+  //             mobileWebUrl: deepLinkUrl,
+  //             webUrl: appStoreUrl,
+  //             // 앱이 설치되지 않은 경우 앱스토어로 이동
+  //             androidExecutionParams: { target: "detail", id: String(id) },
+  //             iosExecutionParams: { target: "detail", id: String(id) },
   //           },
   //         },
+  //         buttons: [
+  //           {
+  //             title: "자세히 보기",
+  //             link: {
+  //               mobileWebUrl: deepLinkUrl,
+  //               webUrl: appStoreUrl,
+  //               androidExecutionParams: { target: "detail", id: String(id) },
+  //               iosExecutionParams: { target: "detail", id: String(id) },
+  //             },
+  //           },
+  //         ],
   //       },
   //     });
   //   } catch (error) {
   //     console.error("카카오톡 공유 오류:", error);
+  //     // 사용자에게 오류 메시지 표시
+  //     Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
   //   }
   // };
 
@@ -149,6 +294,7 @@ export default function DetailScreen() {
   const handleCopyAddress = async () => {
     try {
       await Clipboard.setStringAsync(contentData!.address);
+      setShowCopyToast(true);
       console.log("주소가 복사되었습니다.");
     } catch (error) {
       console.error("복사 오류:", error);
@@ -214,26 +360,45 @@ export default function DetailScreen() {
   };
 
   const handleImagePress = (index: number) => {
-    const imageUrls = [
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-      "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-    ];
+    if (!contentData?.images || contentData.images.length === 0) return;
 
     router.push({
       pathname: "/image-viewer",
       params: {
         initialIndex: index.toString(),
-        images: JSON.stringify(imageUrls),
+        images: JSON.stringify(contentData.images),
       },
     });
   };
 
   const handleAddToSchedule = () => {
-    setIsDatePickerOpen(true);
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+    } else if (contentData?.scheduleId === null) {
+      setIsDatePickerOpen(true);
+    }
   };
 
   const handleDatePickerClose = () => {
     setIsDatePickerOpen(false);
+  };
+
+  // 일정 추가 성공 시 호출되는 콜백
+  const handleScheduleAdded = (scheduleId: number) => {
+    // contentData의 scheduleId 업데이트
+    setContentData((prev) => (prev ? { ...prev, scheduleId } : null));
+    // 토스트 표시
+    setShowToast(true);
+  };
+
+  // 토스트 숨김 핸들러
+  const handleToastHide = () => {
+    setShowToast(false);
+  };
+
+  // 복사 토스트 숨김 핸들러
+  const handleCopyToastHide = () => {
+    setShowCopyToast(false);
   };
 
   const openAppleMaps = async () => {
@@ -266,9 +431,10 @@ export default function DetailScreen() {
         await Linking.openURL(naverMapScheme);
       } else {
         // 네이버 지도 앱이 설치되어 있지 않으면 스토어로 이동
-        const storeURL = Platform.OS === "ios" 
-          ? "https://itunes.apple.com/app/id311867728?mt=8"
-          : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
+        const storeURL =
+          Platform.OS === "ios"
+            ? "https://itunes.apple.com/app/id311867728?mt=8"
+            : "https://play.google.com/store/apps/details?id=com.nhn.android.nmap";
         await Linking.openURL(storeURL);
       }
     } catch (error) {
@@ -297,7 +463,7 @@ export default function DetailScreen() {
           } else if (buttonIndex === 1) {
             openNaverMap();
           }
-        }
+        },
       );
     } else {
       // Android: 네이버 지도만 사용
@@ -326,7 +492,7 @@ export default function DetailScreen() {
 
           {/* 상단 고정 헤더 */}
           <View
-            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center px-4 pb-3 pt-20 ${
+            className={`absolute left-0 right-0 top-0 z-50 flex-row items-center justify-between px-4 pb-3 pt-20 ${
               showHeaderBackground
                 ? "border-b-[0.5px] border-[#DCDEE3] bg-white"
                 : "bg-transparent"
@@ -337,29 +503,32 @@ export default function DetailScreen() {
               onPress={handleGoBack}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-              className="z-10"
             >
               <BackArrow color={showHeaderBackground ? "#000" : "#fff"} />
             </Pressable>
 
-            {/* 중앙 제목 텍스트 (절대 위치로 완전 중앙 정렬) */}
+            {/* 중앙 제목 텍스트 */}
             {showHeaderBackground && (
-              <View
-                className="absolute left-0 right-0 items-center justify-center"
-                style={{ top: 72 }}
+              <Text
+                className="text-lg font-semibold text-[#212121]"
+                numberOfLines={1}
+                style={{ maxWidth: "60%" }}
               >
-                <Text
-                  className="text-lg font-semibold text-[#212121]"
-                  numberOfLines={1}
-                  style={{ maxWidth: "60%" }}
-                >
-                  {contentData.title}
-                </Text>
-              </View>
+                {contentData.title}
+              </Text>
             )}
 
-            {/* 오른쪽 공간 (균형을 위한 투명 요소) */}
-            <View style={{ width: 24, height: 24 }} />
+            {/* 오른쪽 공유 버튼 */}
+            <Pressable
+              onPress={handleKakaoShare}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+            >
+              <ShareOutlineIcon
+                size={28}
+                color={showHeaderBackground ? "#000" : "#fff"}
+              />
+            </Pressable>
           </View>
 
           {/* 전체 스크롤 영역 */}
@@ -370,124 +539,149 @@ export default function DetailScreen() {
             onScroll={handleScroll}
             contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
           >
-            {/* <DetailImageCarousel
+            <DetailImageCarousel
               imageHeight={IMAGE_HEIGHT}
+              images={contentData.images}
               onImagePress={handleImagePress}
-            /> */}
-
-            {/* 임시 상단 이미지 영역 */}
-            <Image
-              source={getImageSource(contentData.contentId)}
-              className="w-full"
-              style={{
-                height: IMAGE_HEIGHT,
-                resizeMode: "cover",
-              }}
             />
 
-            {/* 정보 영역 */}
-            <View className="mt-[-20px] rounded-t-2xl bg-white pt-6">
-              {/* 제목 섹션 */}
-              <View className="mb-3 px-5">
-                <View className="mb-3.5 flex-row items-center justify-between">
-                  <View className="flex-1 gap-1 pr-4">
-                    <Text className="text-xl font-semibold text-[#212121]">
-                      {contentData.title}
+            {/* 대표 정보 영역 */}
+            <View className="mt-[-20px] rounded-t-2xl bg-white px-4 pt-6">
+              <View className="mb-3.5 flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-2xl font-semibold text-[#212121]">
+                    {contentData.title}
+                  </Text>
+                  <Text className="mt-1 text-lg font-medium text-[#424242]">
+                    {contentData.placeName}
+                  </Text>
+                  <Text className="mt-3.5 text-lg text-[#424242]">
+                    {contentData.description}
+                  </Text>
+                </View>
+              </View>
+
+              <Divider />
+
+              {/* 상세 정보 섹션 */}
+              <View>
+                <View className="my-6 flex-col gap-y-2">
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      기간
                     </Text>
-                    <Text className="text-[#424242]">
-                      {contentData.placeName}
-                    </Text>
-                    <Text className="text-[#424242]">
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
                       {contentData.startDate && contentData.endDate
                         ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
                         : ""}
                     </Text>
                   </View>
-                </View>
 
-                {/* <Pressable
-                  className="h-[43px] flex-1 justify-center rounded border-[0.5px] border-gray-300 p-2.5"
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-                >
-                  <Text className="text-center font-medium text-black">
-                    전시 홈페이지
-                  </Text>
-                </Pressable> */}
-              </View>
-
-              <Divider />
-
-              {/* 정보 섹션 */}
-              <View>
-                <View className="my-5 flex-col gap-y-2 px-5">
-                  <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
-                      관람시간
-                    </Text>
-                    <Text className="text-sm text-gray-700">
-                      {contentData.isAlwaysOpen
-                        ? "24시간 운영"
-                        : contentData.openingHour && contentData.closedHour
-                          ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
-                          : ""}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
-                      전화번호
-                    </Text>
-                    <Text className="text-sm text-gray-700">031-770-3232</Text>
-                  </View>
-
-                  <View className="flex-row items-center">
-                    <Text className="w-20 font-semibold text-gray-800">
+                  <View className="flex-row">
+                    <Text className="w-24 text-base font-medium text-gray-600">
                       주소
                     </Text>
-                    <View className="flex-row flex-wrap items-center gap-x-1">
-                      <Text className="text-sm text-gray-700">
+                    <View className="flex-1 flex-row items-start">
+                      <Text className="mr-2 flex-1 text-base text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
                         onPress={handleCopyAddress}
-                        className="flex-row items-center"
+                        className="flex-shrink-0 flex-row items-center"
                         style={({ pressed }) => [
                           { opacity: pressed ? 0.7 : 1 },
                         ]}
                       >
-                        <CopyIcon size={14} />
-                        <Text className="ml-1 text-xs text-blue-600">복사</Text>
+                        <CopyIcon />
+                        <Text className="ml-1 text-base text-[#186ADE]">
+                          복사
+                        </Text>
                       </Pressable>
                     </View>
                   </View>
 
-                  <View className="flex-row">
-                    <Text className="mt-0.5 w-20 font-semibold text-gray-800">
-                      행사소개
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      관람시간
                     </Text>
-                    <Text className="flex-1 text-sm text-gray-700">
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                      {contentData.isAlwaysOpen
+                        ? "24시간 운영"
+                        : contentData.openingHour && contentData.closedHour
+                          ? `${contentData.openingHour.substring(0, 5)}-${contentData.closedHour.substring(0, 5)}`
+                          : "-"}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      전화번호
+                    </Text>
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                      {contentData.telNumber || "-"}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      링크
+                    </Text>
+                    {contentData.homepage ? (
+                      <Pressable
+                        className="rounded border border-gray-300 bg-white px-2 py-1"
+                        style={({ pressed }) => [
+                          { opacity: pressed ? 0.7 : 1 },
+                        ]}
+                        onPress={() => {
+                          Linking.openURL(contentData.homepage!);
+                        }}
+                      >
+                        <Text className="text-sm text-gray-700">
+                          홈페이지 바로가기
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Text className="text-base text-gray-600">-</Text>
+                    )}
+                  </View>
+
+                  <View className="flex-row">
+                    <Text className="w-24 text-base font-medium text-gray-600">
+                      행사내용
+                    </Text>
+                    <Text className="flex-1 pr-4 text-base text-gray-600">
                       {contentData.introduction}
                     </Text>
                   </View>
                 </View>
 
-                <Divider />
+                <Divider className="mb-4" />
 
-                <View className="my-5 px-5">
-                  <Text className="mb-3 font-semibold text-gray-800">
-                    행사내용
+                <View className="my-6">
+                  <Text className="mb-4 text-xl font-semibold text-gray-800">
+                    컨텐츠 키워드
                   </Text>
-                  <View className="flex-row flex-wrap gap-y-1">
-                    <Text className="text-gray-700">
-                      {contentData.description}
-                    </Text>
+                  {/* 더미 데이터 임시 표시 */}
+                  <View className="flex-row flex-wrap gap-2">
+                    {[
+                      "혼자 휴식",
+                      "조용한 휴식",
+                      "오감체험",
+                      "가족이랑",
+                      "감성가득",
+                    ].map((tag, index) => (
+                      <View
+                        key={index}
+                        className="rounded-md border border-gray-300 bg-white px-2 py-1"
+                      >
+                        <Text className="text-sm text-gray-700">#{tag}</Text>
+                      </View>
+                    ))}
                   </View>
                 </View>
 
-                <Divider height="h-2" bg="bg-[#F5F5F5]" />
-
-                <View className="my-5 px-5">
-                  <Text className="mb-4 text-lg font-semibold text-gray-800">
+                <View className="my-5">
+                  <Text className="mb-4 text-xl font-semibold text-gray-800">
                     위치
                   </Text>
 
@@ -504,9 +698,9 @@ export default function DetailScreen() {
                     />
                   )}
 
-                  <View className="mb-3 flex-row items-center">
-                    <LocationIcon size={16} />
-                    <Text className="ml-1.5 flex-1 text-sm text-black">
+                  <View className="my-3 flex-row items-center">
+                    <LocationIcon size={18} />
+                    <Text className="ml-1.5 text-base text-black">
                       {contentData.address}
                     </Text>
                   </View>
@@ -516,7 +710,7 @@ export default function DetailScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     onPress={handleNaverMapPress}
                   >
-                    <LocationPinIcon size={14} />
+                    <LocationPinIcon size={16} />
                     <Text className="ml-1.5 text-center font-medium text-black">
                       길찾기
                     </Text>
@@ -528,10 +722,10 @@ export default function DetailScreen() {
 
           {/* 하단 고정 바 */}
           <View
-            className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3"
+            className="absolute bottom-0 left-0 right-0 border-t border-[#E5E5E5] bg-white px-5 pt-3"
             style={{ paddingBottom: 12 + insets.bottom }}
           >
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between gap-x-4">
               <View className="flex-col items-center">
                 <Pressable
                   className="items-center justify-center"
@@ -547,40 +741,57 @@ export default function DetailScreen() {
                   {isLiked ? (
                     <HeartFilledIcon
                       size={28}
-                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                      color={!isLoggedIn ? "#E0E0E0" : undefined}
                     />
                   ) : (
                     <HeartOutlineIcon
                       size={28}
-                      color={!isLoggedIn ? "#BDBDBD" : undefined}
+                      color={!isLoggedIn ? "#E0E0E0" : undefined}
                     />
                   )}
                 </Pressable>
                 <Text
-                  className="text-lg font-medium"
-                  style={{ color: !isLoggedIn ? "#BDBDBD" : "#6b7280" }}
+                  className="text-sm"
+                  style={{ color: !isLoggedIn ? "#E0E0E0" : "#111111" }}
                 >
                   {likeCount !== null ? likeCount : contentData?.likes || 0}
                 </Text>
               </View>
 
               <Pressable
-                className={`ml-4 h-[50px] flex-1 justify-center rounded-lg px-6 ${
-                  isLoggedIn ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
+                className={`h-[50px] flex-1 justify-center rounded-lg px-6 ${
+                  isLoggedIn && contentData.scheduleId === null
+                    ? "bg-[#6C4DFF]"
+                    : contentData.scheduleId !== null
+                      ? "bg-gray-300"
+                      : "bg-[#6C4DFF]"
                 }`}
                 style={({ pressed }) => [
-                  { opacity: !isLoggedIn ? 0.6 : pressed ? 0.9 : 1 },
+                  {
+                    opacity:
+                      contentData.scheduleId !== null ? 0.6 : pressed ? 0.9 : 1,
+                  },
                 ]}
                 onPress={handleAddToSchedule}
-                disabled={!isLoggedIn}
+                disabled={contentData.scheduleId !== null}
               >
                 <Text className="text-center text-lg font-semibold text-white">
-                  내 일정에 추가
+                  {contentData.scheduleId !== null
+                    ? "이미 추가됨"
+                    : "내 일정에 추가"}
                 </Text>
               </Pressable>
             </View>
           </View>
         </View>
+      )}
+
+      {/* 날짜 선택 바텀 시트 오버레이 */}
+      {isDatePickerOpen && (
+        <Pressable
+          className="absolute inset-0 z-0 flex-1 items-center justify-center bg-black/50"
+          onPress={handleDatePickerClose}
+        />
       )}
 
       {/* 날짜 선택 바텀 시트 */}
@@ -592,8 +803,40 @@ export default function DetailScreen() {
           endDate={contentData.endDate}
           eventTitle={contentData.title}
           contentId={id as string}
+          onScheduleAdded={handleScheduleAdded}
         />
       )}
+
+      {/* 일정 토스트 */}
+      <Toast
+        visible={showToast}
+        message="일정에 추가되었습니다."
+        onHide={handleToastHide}
+      />
+
+      {/* 복사 토스트 */}
+      <Toast
+        visible={showCopyToast}
+        message="주소가 복사되었습니다."
+        onHide={handleCopyToastHide}
+      />
+
+      {/* 로그인 안내 모달 */}
+      <LoginPromptModal
+        visible={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
+
+      {/* 공유 모달 */}
+      <CommonModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        mainTitle="공유 기능은 준비중입니다"
+        showSubTitle={false}
+        showCancelButton={false}
+        confirmText="확인"
+        onConfirm={() => setShowShareModal(false)}
+      />
     </>
   );
 }

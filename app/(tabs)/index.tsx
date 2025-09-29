@@ -26,14 +26,14 @@ import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
 import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
 import { FestivalIcon } from "@/components/icons/FestivalIcon";
-import LockIcon from "@/components/icons/LockIcon";
+import LockWithSparkles from "@/components/icons/LockWithSparkles";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
-import { getImageSource } from "@/utils/imageUtils";
+import { formatAddress } from "@/utils/addressUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -87,34 +87,35 @@ const Card = ({ item }: { item: CustomContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[10px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[10px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[10px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[10px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[10px]"
@@ -123,10 +124,15 @@ const Card = ({ item }: { item: CustomContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-base font-semibold text-[#424242]">
+        <Text
+          className="mb-1 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
-        <Text className="text-sm text-[#9E9E9E]">{item.address}</Text>
+        <Text className="text-sm text-[#9E9E9E]">
+          {formatAddress(item.address)}
+        </Text>
         <Text className="text-sm text-[#707070]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
@@ -149,34 +155,35 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
     return categoryItem ? categoryItem.label : "기타";
   };
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[14px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[14px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[14px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[14px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[14px]"
@@ -190,11 +197,14 @@ const HotCard = ({ item }: { item: CustomContentItem }) => {
             {getContentTypeLabel(item.contentType)}
           </Text>
         </View>
-        <Text className="mb-1.5 text-base font-semibold text-[#424242]">
+        <Text
+          className="mb-1.5 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
-          {item.address}
+          {formatAddress(item.address)}
         </Text>
       </View>
     </Pressable>
@@ -209,34 +219,35 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="flex-row" onPress={handlePress}>
       <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-lg"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-lg ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-lg"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-lg ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-lg"
@@ -245,11 +256,14 @@ const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
         )}
       </View>
       <View className="ml-3.5 flex-1">
-        <Text className="mb-1 text-base font-semibold text-[#424242]">
+        <Text
+          className="mb-1 text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="text-sm font-normal text-[#9E9E9E]">
-          {item.address}
+          {formatAddress(item.address)}
         </Text>
         <Text className="text-sm font-normal text-[#707070]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
@@ -267,34 +281,35 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
 
   const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
-  const imageSource = getImageSource(item.contentId);
-  const isRemoteImage = typeof imageSource === "object" && "uri" in imageSource;
+  const hasImage = item.image && item.image.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: item.image }
+    : require("../../assets/images/content_placeholder.png");
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
-        {/* Placeholder 이미지 - 항상 표시 */}
-        <Image
-          source={require("../../assets/images/content_placeholder.png")}
-          className="absolute inset-0 h-full w-full rounded-[14px]"
-          resizeMode="cover"
-        />
-
-        {/* 실제 이미지 - 로딩 완료 시 표시 */}
-        {isRemoteImage && (
-          <Image
-            source={imageSource}
-            className={`absolute inset-0 h-full w-full rounded-[14px] ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            resizeMode="cover"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
-          />
-        )}
-
-        {/* 로컬 이미지인 경우 바로 표시 */}
-        {!isRemoteImage && (
+        {hasImage ? (
+          <>
+            {/* Placeholder 이미지 - 항상 표시 */}
+            <Image
+              source={require("../../assets/images/content_placeholder.png")}
+              className="absolute inset-0 h-full w-full rounded-[14px]"
+              resizeMode="cover"
+            />
+            {/* API 이미지 - 로딩 완료 시 표시 */}
+            <Image
+              source={imageSource}
+              className={`absolute inset-0 h-full w-full rounded-[14px] ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              resizeMode="cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(false)}
+            />
+          </>
+        ) : (
+          /* 이미지가 없는 경우 placeholder만 표시 */
           <Image
             source={imageSource}
             className="absolute inset-0 h-full w-full rounded-[14px]"
@@ -303,7 +318,10 @@ const MoreCard = ({ item }: { item: CategoryContentItem }) => {
         )}
       </View>
       <View className="mt-2">
-        <Text className="text-base font-semibold text-[#424242]">
+        <Text
+          className="text-lg font-semibold text-[#424242]"
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
@@ -496,9 +514,7 @@ export default function HomeScreen() {
     try {
       setIsLoadingCategoryContent(true);
 
-      const response = await publicApi.get(
-        `${BACKEND_URL}/home/category?category=PERFORMANCE`,
-      );
+      const response = await publicApi.get(`${BACKEND_URL}/home/category`);
 
       if (response.data.isSuccess && response.data.result) {
         setCategoryContentData(response.data.result);
@@ -575,7 +591,7 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
-  const handleSearchPress = () => router.push("/(tabs)/search_tab");
+  const handleSearchPress = () => router.push("/search-results");
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
@@ -600,7 +616,7 @@ export default function HomeScreen() {
               onPress={handleSearchPress}
             >
               <Text className="text-[#6E6E6E]">
-                6월에 안가면 손해! 고창 수박 축제
+                이번 주말, 뭐 할지 검색해 볼까?
               </Text>
               <SearchIcon size={24} color="#6B51FB" />
             </Pressable>
@@ -627,42 +643,57 @@ export default function HomeScreen() {
           }
         >
           {/* 카테고리 버튼 */}
-          <View className="px-6 pb-[11px] pt-6">
+          <View className="mb-7 px-6 pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
-                <View className="gap-y-[7px]" key={item.id}>
-                  <View className="flex h-16 w-16 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
+                <Pressable
+                  className="gap-y-1"
+                  key={item.id}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/search-results",
+                      params: {
+                        keyword: "",
+                        category: item.id,
+                        region: "ALL",
+                      },
+                    });
+                  }}
+                >
+                  <View className="flex h-20 w-20 items-center justify-center rounded-[14px] bg-[#F5F5F5]">
                     {item.iconType === "performance" && (
-                      <PerformanceIcon width={32} height={32} />
+                      <PerformanceIcon width={55} height={55} />
                     )}
                     {item.iconType === "exhibition" && (
-                      <ExhibitionIcon width={32} height={29} />
+                      <ExhibitionIcon width={72} height={72} />
                     )}
                     {item.iconType === "festival" && (
-                      <FestivalIcon width={48} height={48} />
+                      <View className="mt-[-8px]">
+                        <FestivalIcon width={52} height={52} />
+                      </View>
                     )}
                     {item.iconType === "event" && (
-                      <EventIcon width={54} height={54} />
+                      <EventIcon width={70} height={70} />
                     )}
                   </View>
-                  <Text className="text-center text-sm text-black">
+                  <Text className="text-center text-base text-[#424242]">
                     {item.label}
                   </Text>
-                </View>
+                </Pressable>
               ))}
             </View>
           </View>
 
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
-            <View className="relative px-[18px] py-2.5">
-              <Text className="text-xl font-semibold text-black">
+            <View className="relative py-2.5">
+              <Text className="px-[18px] text-xl font-semibold text-[#424242]">
                 {isLoggedIn && nickname
                   ? `${nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
               </Text>
 
-              <View className="mb-5 mt-3 flex-row gap-x-2.5">
+              <View className="mb-5 mt-3 flex-row gap-x-2.5 px-[18px]">
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedRecommendationsCategory === category.id;
@@ -700,6 +731,9 @@ export default function HomeScreen() {
                   data={chunkedRecommendationsData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => (
                     <View className="w-[287px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -721,14 +755,14 @@ export default function HomeScreen() {
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   <View className="absolute inset-0 bg-white/95" />
-                  <View className="items-center gap-y-2.5">
-                    <LockIcon />
+                  <View className="items-center gap-y-3">
+                    <LockWithSparkles width={144} height={117} />
                     <View>
-                      <Text className="text-center text-lg font-medium text-[#212121]">
-                        로그인하고
+                      <Text className="text-center text-xl font-semibold text-gray-800">
+                        이 공간은 잠시 비공개예요!
                       </Text>
-                      <Text className="text-center text-lg font-medium text-[#212121]">
-                        맞춤 컨텐츠를 확인해보세요!
+                      <Text className="text-center text-lg text-gray-600">
+                        내게 꼭 맞는 전시, 로그인하면 바로 보여드려요.
                       </Text>
                     </View>
                     <Pressable
@@ -749,11 +783,11 @@ export default function HomeScreen() {
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: 4,
+                          gap: 6,
                         }}
                       >
-                        <Text className="font-base text-sm text-white">
-                          로그인하기
+                        <Text className="text-base text-white">
+                          로그인하러 가기
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
@@ -764,8 +798,8 @@ export default function HomeScreen() {
             </View>
 
             {/* 이번달 핫한 축제 */}
-            <View className="px-[18px] py-2.5">
-              <Text className="mb-[18px] text-xl font-semibold text-[#424242]">
+            <View className="py-2.5">
+              <Text className="mb-[18px] px-[18px] text-xl font-semibold text-[#424242]">
                 이번달 핫한 축제 🔥
               </Text>
 
@@ -778,6 +812,9 @@ export default function HomeScreen() {
                   data={hotFestivalData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => <HotCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}
@@ -786,8 +823,8 @@ export default function HomeScreen() {
             </View>
 
             {/* 금주 콘텐츠 */}
-            <View className="flex gap-y-[18px] px-[18px] py-2.5">
-              <Text className="text-xl font-semibold text-black">
+            <View className="flex gap-y-[18px] py-2.5">
+              <Text className="px-[18px] text-xl font-semibold text-black">
                 금주 콘텐츠를 한눈에👀
               </Text>
 
@@ -795,6 +832,9 @@ export default function HomeScreen() {
                 data={weekDays}
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingHorizontal: 18,
+                }}
                 renderItem={({ item }) => (
                   <Pressable
                     className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
@@ -833,6 +873,9 @@ export default function HomeScreen() {
                   data={chunkedFilteredContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => (
                     <View className="w-[285px] flex-1 gap-y-[15.5px]">
                       {item.map((cardItem) => (
@@ -848,22 +891,24 @@ export default function HomeScreen() {
                 />
               )}
 
-              <Pressable
-                className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
-                onPress={handleSchedulePress}
-              >
-                <View className="flex-row items-center gap-x-1.5">
-                  <Text className="text-[15px] font-normal text-[#6C4DFF]">
-                    더보기
-                  </Text>
-                  <ChevronRight />
-                </View>
-              </Pressable>
+              <View className="px-[18px]">
+                <Pressable
+                  className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
+                  onPress={handleSchedulePress}
+                >
+                  <View className="flex-row items-center gap-x-1.5">
+                    <Text className="text-[15px] font-normal text-[#6C4DFF]">
+                      더보기
+                    </Text>
+                    <ChevronRight />
+                  </View>
+                </Pressable>
+              </View>
             </View>
 
             {/* 이런 축제 어때요? */}
-            <View className="px-[18px] py-2.5 pb-6">
-              <View className="mb-[18px] flex-row items-center justify-between">
+            <View className="py-2.5 pb-6">
+              <View className="mb-[18px] flex-row items-center justify-between px-[18px]">
                 <Text className="text-xl font-semibold text-[#424242]">
                   이런 축제 어때요?
                 </Text>
@@ -887,6 +932,9 @@ export default function HomeScreen() {
                   data={categoryContentData}
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
                   renderItem={({ item }) => <MoreCard item={item} />}
                   keyExtractor={(item) => item.contentId.toString()}
                   ItemSeparatorComponent={() => <View className="w-3.5" />}

@@ -3,31 +3,23 @@ import { useEffect, useState } from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import {
-  Alert,
-  Pressable,
-  SafeAreaView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 
 import CameraIcon from "@/components/icons/CameraIcon";
+import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import XIcon from "@/components/icons/X";
+import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
+import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import useImagePicker from "@/features/user/imagePicker";
+import useCustomImagePicker from "@/features/user/useCustomImagePicker";
 import {
   useCancelEditProfile,
   useInitializeFromUserStore,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
 import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
-
-// 기본 프로필 이미지 (회색)
-const DEFAULT_PROFILE_IMAGE =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iOTQiIHZpZXdCb3g9IjAgMCA5NCA5NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDciIGN5PSI0NyIgcj0iNDciIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeD0iMjciIHk9IjI3Ij4KPHBhdGggZD0iTTIwIDIwQzI0LjQxODMgMjAgMjggMTYuNDE4MyAyOCAxMkMyOCA3LjU4MTcyIDI0LjQxODMgNCAyMCA0QzE1LjU4MTcgNCAxMiA3LjU4MTcyIDEyIDEyQzEyIDE2LjQxODMgMTUuNTgxNyAyMCAyMCAyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMCAyNEM5IDI0IDAgMzMgMCA0NEg0MEMzNiAzMyAzMSAyNCAyMCAyNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
@@ -38,8 +30,18 @@ export default function EditProfile() {
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
 
+  // 모달 상태
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalSubTitle, setModalSubTitle] = useState("");
+  const [modalConfirmText, setModalConfirmText] = useState("확인");
+  const [modalOnConfirm, setModalOnConfirm] = useState<(() => void) | null>(
+    null,
+  );
+
   // 프로필 이미지 관련
-  const { onPress } = useImagePicker();
+  const { onPress, isBottomSheetOpen, onCloseBottomSheet, onLibrary } =
+    useCustomImagePicker();
   const profileUri = useTempImageUri();
 
   // 닉네임 관련 - 직접 상태 관리
@@ -75,7 +77,11 @@ export default function EditProfile() {
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
     if (!inputNickname.trim()) {
-      Alert.alert("알림", "닉네임을 입력해주세요.");
+      setModalTitle("알림");
+      setModalSubTitle("닉네임을 입력해주세요.");
+      setModalConfirmText("확인");
+      setModalOnConfirm(() => () => setShowModal(false));
+      setShowModal(true);
       return;
     }
 
@@ -156,23 +162,30 @@ export default function EditProfile() {
           await SecureStore.setItemAsync("profileImage", profileUri);
         }
 
-        Alert.alert("성공", "프로필이 성공적으로 업데이트되었습니다.", [
-          {
-            text: "확인",
-            onPress: () => {
-              router.back();
-            },
-          },
-        ]);
+        setModalTitle("성공");
+        setModalSubTitle("프로필이 성공적으로 업데이트되었습니다.");
+        setModalConfirmText("확인");
+        setModalOnConfirm(() => () => {
+          setShowModal(false);
+          router.back();
+        });
+        setShowModal(true);
       } else {
-        Alert.alert(
-          "오류",
+        setModalTitle("오류");
+        setModalSubTitle(
           response.data.message || "프로필 업데이트에 실패했습니다.",
         );
+        setModalConfirmText("확인");
+        setModalOnConfirm(() => () => setShowModal(false));
+        setShowModal(true);
       }
     } catch (error) {
       console.error("프로필 업데이트 오류:", error);
-      Alert.alert("오류", "프로필 업데이트 중 오류가 발생했습니다.");
+      setModalTitle("오류");
+      setModalSubTitle("프로필 업데이트 중 오류가 발생했습니다.");
+      setModalConfirmText("확인");
+      setModalOnConfirm(() => () => setShowModal(false));
+      setShowModal(true);
     } finally {
       setIsLoading(false);
     }
@@ -196,9 +209,9 @@ export default function EditProfile() {
       return currentProfileImage;
     }
 
-    // 3. 둘 다 없으면 기본 이미지 사용
-    console.log("✅ 기본 이미지 사용");
-    return DEFAULT_PROFILE_IMAGE;
+    // 3. 둘 다 없으면 null 반환 (기본 아이콘 사용)
+    console.log("✅ 기본 아이콘 사용");
+    return null;
   };
 
   const imageSource = getImageSource();
@@ -208,6 +221,7 @@ export default function EditProfile() {
       <CustomHeader
         title="프로필 수정"
         isCommit={true}
+        separator
         commit={handleUpdateProfile}
         cancel={() => {
           cancelEdit();
@@ -221,10 +235,14 @@ export default function EditProfile() {
           aria-label="profile_image"
           className="relative size-[94px] rounded-full"
         >
-          <Image
-            source={imageSource}
-            style={{ width: 94, height: 94, borderRadius: "100%" }}
-          />
+          {imageSource ? (
+            <Image
+              source={imageSource}
+              style={{ width: 94, height: 94, borderRadius: "100%" }}
+            />
+          ) : (
+            <DefaultProfileIcon size={94} />
+          )}
           <Pressable
             onPress={onPress}
             disabled={isLoading}
@@ -270,6 +288,24 @@ export default function EditProfile() {
           </Text>
         )}
       </View>
+
+      {/* 이미지 피커 바텀시트 */}
+      <ImagePickerBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={onCloseBottomSheet}
+        onLibrary={onLibrary}
+      />
+
+      {/* 공통 모달 */}
+      <CommonModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        mainTitle={modalTitle}
+        subTitle={modalSubTitle}
+        showCancelButton={false}
+        confirmText={modalConfirmText}
+        onConfirm={modalOnConfirm || (() => setShowModal(false))}
+      />
     </SafeAreaView>
   );
 }

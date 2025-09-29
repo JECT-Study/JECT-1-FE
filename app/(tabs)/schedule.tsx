@@ -4,13 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
@@ -52,7 +46,6 @@ export default function ScheduleScreen() {
     dayjs().format("YYYY-MM-DD"),
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true); // 초기 로딩 상태
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
@@ -68,12 +61,7 @@ export default function ScheduleScreen() {
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
-    async (
-      date: string,
-      page: number = 0,
-      isLoadMore: boolean = false,
-      isInitial: boolean = false,
-    ) => {
+    async (date: string, page: number = 1, isLoadMore: boolean = false) => {
       const startTime = dayjs().valueOf();
 
       try {
@@ -133,9 +121,6 @@ export default function ScheduleScreen() {
         } else {
           setIsLoading(false);
         }
-        if (isInitial) {
-          setIsInitialLoading(false); // 초기 로딩 완료
-        }
       }
     },
     [],
@@ -143,7 +128,7 @@ export default function ScheduleScreen() {
 
   // 초기 데이터 로딩
   useEffect(() => {
-    fetchScheduleData(selectedDate, 0, false, true); // 초기 로딩 플래그 true
+    fetchScheduleData(selectedDate, 0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -152,7 +137,7 @@ export default function ScheduleScreen() {
     if (hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
       console.log(`다음 페이지 로딩: ${nextPage}`);
-      fetchScheduleData(selectedDate, nextPage, true, false); // 무한스크롤은 초기 로딩 아님
+      fetchScheduleData(selectedDate, nextPage, true);
     }
   }, [
     hasMoreData,
@@ -168,7 +153,7 @@ export default function ScheduleScreen() {
       setSelectedDate(date);
       setCurrentPage(1);
       setHasMoreData(true);
-      fetchScheduleData(date, 0, false, false); // 날짜 변경은 초기 로딩 아님
+      fetchScheduleData(date, 0, false);
     },
     [fetchScheduleData],
   );
@@ -183,29 +168,18 @@ export default function ScheduleScreen() {
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
-      <View
-        className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
-      >
+      <View className="flex-1 bg-white">
         <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-          <Text className="text-center text-lg font-medium text-[#212121]">
+          <Text className="text-center text-xl font-medium text-[#212121]">
             컨텐츠 일정
           </Text>
         </View>
 
         <CalendarProvider date={selectedDate}>
-          {isInitialLoading ? (
-            <View className="flex-1 items-center justify-center py-20">
-              <ActivityIndicator size="large" color="#6C4DFF" />
-              <Text className="mt-4 text-center text-gray-500">
-                캘린더를 불러오는 중...
-              </Text>
-            </View>
-          ) : (
-            <CommonCalendar
-              selectedDate={selectedDate}
-              onDateChange={handleDateChange}
-            />
-          )}
+          <CommonCalendar
+            selectedDate={selectedDate}
+            onDateChange={handleDateChange}
+          />
 
           <FlatList
             className="mx-4 mt-7 flex-1"
@@ -219,7 +193,7 @@ export default function ScheduleScreen() {
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                   <Text className="mt-4 text-center text-gray-500">
-                    스케줄을 불러오는 중...
+                    일정을 불러오는 중...
                   </Text>
                 </View>
               ) : (
@@ -236,14 +210,14 @@ export default function ScheduleScreen() {
               ) : null
             }
             ListFooterComponent={
-              isLoadingMore ? (
+              isLoadingMore && !isLoading ? (
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : !hasMoreData && schedules.length > 0 ? (
                 <View className="items-center justify-center py-4">
                   <Text className="text-sm text-gray-500">
-                    모든 스케줄을 불러왔습니다.
+                    모든 일정을 불러왔습니다.
                   </Text>
                 </View>
               ) : null

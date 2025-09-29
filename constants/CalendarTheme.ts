@@ -44,5 +44,19 @@ export const getCalendarTheme = () => {
         width: "100%",
       },
     },
+
+    // 캘린더 날짜 간격 조정
+    "stylesheet.calendar.main": {
+      container: {
+        paddingLeft: 10,
+        paddingRight: 10,
+      },
+      week: {
+        marginTop: 8,
+        marginBottom: 8,
+        flexDirection: "row" as const,
+        justifyContent: "space-around" as const,
+      },
+    },
   };
 };

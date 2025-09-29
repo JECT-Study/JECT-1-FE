@@ -14,6 +14,7 @@ export default function SurveyStep({
   total,
   currentStep,
   dividedOptions,
+  selectedValue,
 }: {
   question: string;
   options: string[];
@@ -22,8 +23,11 @@ export default function SurveyStep({
   onBack: () => void;
   total: number;
   currentStep: number;
+  selectedValue?: number;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(
+    selectedValue ?? null,
+  );
 
   const navigation = useNavigation();
 
@@ -35,6 +39,11 @@ export default function SurveyStep({
       swipeEnabled: false,
     });
   }, [navigation]);
+
+  // selectedValue가 변경되면 selected 상태도 업데이트
+  useEffect(() => {
+    setSelected(selectedValue ?? null);
+  }, [selectedValue]);
 
   return (
     <View className="w-full flex-1 justify-between bg-white">
@@ -53,7 +62,7 @@ export default function SurveyStep({
         <View className="w-7" />
       </View>
       <View className="flex items-center">
-        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray800">
+        <Text className="mb-6 mt-4 text-center text-2xl font-semibold text-gray-800">
           {question}
         </Text>
       </View>
@@ -71,15 +80,15 @@ export default function SurveyStep({
                         onPress={() => setSelected(globalIndex)}
                         className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
                           selected === globalIndex
-                            ? "border-[2px] border-main bg-sub"
-                            : "bg-gray100"
+                            ? "border-[1.5px] border-main bg-sub"
+                            : "bg-gray-100"
                         }`}
                       >
                         <Text
-                          className={`text-center text-[16px] ${
+                          className={`text-center text-lg ${
                             selected === globalIndex
                               ? "font-semibold text-main"
-                              : "text-gray600"
+                              : "text-gray-600"
                           }`}
                         >
                           {label}

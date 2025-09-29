@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   RefreshControl,
   Text,
   View,
@@ -13,11 +12,14 @@ import {
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import DeleteScheduleBottomSheet from "@/components/schedule/DeleteScheduleBottomSheet";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
+import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
+import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -58,20 +60,21 @@ export default function Plan() {
     dayjs().format("YYYY-MM-DD"),
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [showBottomSheet, setShowBottomSheet] = useState<boolean>(false);
+
+  const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
+  const [selectedContentId, setSelectedContentId] = useState<number | null>(
+    null,
+  );
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
-    async (
-      date: string,
-      page: number = 0,
-      isLoadMore: boolean = false,
-      isInitial: boolean = false,
-    ) => {
+    async (date: string, page: number = 0, isLoadMore: boolean = false) => {
       const startTime = dayjs().valueOf();
 
       try {
@@ -131,9 +134,6 @@ export default function Plan() {
         } else {
           setIsLoading(false);
         }
-        if (isInitial) {
-          setIsInitialLoading(false);
-        }
       }
     },
     [],
@@ -141,7 +141,7 @@ export default function Plan() {
 
   // 초기 데이터 로딩
   useEffect(() => {
-    fetchScheduleData(selectedDate, 0, false, true);
+    fetchScheduleData(selectedDate, 0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -150,7 +150,7 @@ export default function Plan() {
     if (hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
       console.log(`다음 페이지 로딩: ${nextPage}`);
-      fetchScheduleData(selectedDate, nextPage, true, false);
+      fetchScheduleData(selectedDate, nextPage, true);
     }
   }, [
     hasMoreData,
@@ -166,7 +166,7 @@ export default function Plan() {
       setSelectedDate(date);
       setCurrentPage(1);
       setHasMoreData(true);
-      fetchScheduleData(date, 0, false, false);
+      fetchScheduleData(date, 0, false);
     },
     [fetchScheduleData],
   );
@@ -181,44 +181,110 @@ export default function Plan() {
     setRefresh(true);
     setCurrentPage(1);
     setHasMoreData(true);
-    fetchScheduleData(selectedDate, 0, false, false).finally(() => {
+    fetchScheduleData(selectedDate, 0, false).finally(() => {
       setRefresh(false);
     });
   }, [selectedDate, fetchScheduleData]);
+
+  // 메뉴 버튼 클릭 핸들러
+  const handleMenuPress = useCallback((contentId: number) => {
+    console.log("메뉴 버튼 클릭됨. contentId:", contentId);
+    setSelectedContentId(contentId);
+    setShowBottomSheet(true);
+  }, []);
+
+  // 바텀시트 삭제 클릭 핸들러
+  const handleBottomSheetDelete = useCallback(() => {
+    console.log(
+      "바텀시트 삭제 버튼 클릭. selectedContentId:",
+      selectedContentId,
+    );
+    setShowBottomSheet(false);
+    setShowDeleteAlert(true);
+    // selectedContentId는 여기서 null로 설정하지 않음 (Alert에서 사용해야 하므로)
+  }, [selectedContentId]);
+
+  // 바텀시트 취소 핸들러
+  const handleBottomSheetCancel = useCallback(() => {
+    setShowBottomSheet(false);
+    setSelectedContentId(null);
+  }, []);
+
+  // 삭제 확인 핸들러
+  const handleDeleteConfirm = useCallback(async () => {
+    console.log("삭제 확인. selectedContentId:", selectedContentId);
+    if (!selectedContentId) {
+      console.log("selectedContentId가 null입니다");
+      return;
+    }
+
+    try {
+      console.log(
+        "삭제 API 호출:",
+        `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
+      );
+      const response = await authApi.delete(
+        `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
+      );
+
+      if (response.data.isSuccess) {
+        // 삭제 성공 시 목록에서 해당 아이템 제거
+        setSchedules((prev) =>
+          prev.filter((item) => item.contentId !== selectedContentId),
+        );
+        console.log("일정 삭제 성공:", selectedContentId);
+        // 토스트 표시
+        setShowToast(true);
+      } else {
+        console.error("일정 삭제 실패:", response.data.message);
+      }
+    } catch (error) {
+      console.error("일정 삭제 API 호출 실패:", error);
+    } finally {
+      setShowDeleteAlert(false);
+      setSelectedContentId(null);
+    }
+  }, [selectedContentId]);
+
+  // 삭제 취소 핸들러
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteAlert(false);
+    setSelectedContentId(null);
+  }, []);
+
+  // 토스트 숨김 핸들러
+  const handleToastHide = useCallback(() => {
+    setShowToast(false);
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <CustomHeader
         title="나의 일정"
         isCommit={false}
+        separator
         cancel={() => {
           router.back();
         }}
       />
 
-      <View
-        className={`flex-1 bg-white ${Platform.OS === "web" ? "pt-8" : ""}`}
-      >
+      <View className="flex-1 bg-white">
         <CalendarProvider date={selectedDate}>
-          {isInitialLoading ? (
-            <View className="flex-1 items-center justify-center py-20">
-              <ActivityIndicator size="large" color="#6C4DFF" />
-              <Text className="mt-4 text-center text-gray-500">
-                캘린더를 불러오는 중...
-              </Text>
-            </View>
-          ) : (
-            <CommonCalendar
-              selectedDate={selectedDate}
-              onDateChange={handleDateChange}
-            />
-          )}
+          <CommonCalendar
+            selectedDate={selectedDate}
+            onDateChange={handleDateChange}
+          />
 
           <FlatList
             className="mx-4 mt-7 flex-1"
             data={schedules}
             renderItem={({ item }) => (
-              <ScheduleItem item={item} onPress={handleScheduleItemPress} />
+              <ScheduleItem
+                item={item}
+                onPress={handleScheduleItemPress}
+                onMenuPress={handleMenuPress}
+                showMenuButton={true}
+              />
             )}
             keyExtractor={(item) => item.contentId.toString()}
             ListEmptyComponent={
@@ -226,7 +292,7 @@ export default function Plan() {
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                   <Text className="mt-4 text-center text-gray-500">
-                    스케줄을 불러오는 중...
+                    나의 일정을 불러오는 중...
                   </Text>
                 </View>
               ) : (
@@ -245,14 +311,14 @@ export default function Plan() {
                 : null
             }
             ListFooterComponent={
-              isLoadingMore ? (
+              isLoadingMore && !isLoading ? (
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : !hasMoreData && schedules.length > 0 ? (
                 <View className="items-center justify-center py-4">
                   <Text className="text-sm text-gray-500">
-                    모든 스케줄을 불러왔습니다.
+                    모든 일정을 불러왔습니다.
                   </Text>
                 </View>
               ) : null
@@ -275,6 +341,37 @@ export default function Plan() {
           />
         </CalendarProvider>
       </View>
+
+      {/* 삭제 바텀 시트 */}
+      <DeleteScheduleBottomSheet
+        isOpen={showBottomSheet}
+        onDelete={handleBottomSheetDelete}
+        onClose={() => {
+          console.log("바텀시트 onClose 호출됨 - selectedContentId 유지");
+          setShowBottomSheet(false);
+          // selectedContentId는 건드리지 않음
+        }}
+        onCancel={handleBottomSheetCancel}
+      />
+
+      {/* 삭제 확인 모달 */}
+      <CommonModal
+        visible={showDeleteAlert}
+        onClose={handleDeleteCancel}
+        mainTitle="일정을 삭제하시겠어요?"
+        subTitle="삭제된 일정은 복구할 수 없어요."
+        cancelText="취소"
+        confirmText="삭제"
+        onCancel={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      {/* 토스트 */}
+      <Toast
+        visible={showToast}
+        message="일정이 삭제되었습니다."
+        onHide={handleToastHide}
+      />
     </SafeAreaView>
   );
 }

@@ -15,10 +15,11 @@ interface DayProps {
   onPress?: (date: DateData) => void;
 }
 
-// 커스텀 Day 컴포넌트 (일요일을 빨간색으로 표시)
+// 커스텀 Day 컴포넌트 (일요일을 빨간색, 토요일을 파란색으로 표시)
 export const CustomDay = ({ date, state, marking, onPress }: DayProps) => {
   const dateObj = dayjs(date?.dateString);
   const isSunday = dateObj.day() === 0;
+  const isSaturday = dateObj.day() === 6;
 
   // state 또는 marking에서 선택 상태 확인
   const isSelected = state === "selected" || marking?.selected;
@@ -30,11 +31,19 @@ export const CustomDay = ({ date, state, marking, onPress }: DayProps) => {
 
   let textColor = "#424242"; // 기본 색상
   if (isDisabled) {
-    textColor = "#9E9E9E"; // 비활성화된 날짜
+    if (isSunday) {
+      textColor = "#FFB0B0"; // 비활성화된 일요일
+    } else if (isSaturday) {
+      textColor = "#A3C8FF"; // 비활성화된 토요일
+    } else {
+      textColor = "#9E9E9E"; // 비활성화된 일반 날짜
+    }
   } else if (isSelected) {
     textColor = selectedTextColor; // 선택된 날짜
   } else if (isSunday) {
     textColor = "#F43630"; // 일요일
+  } else if (isSaturday) {
+    textColor = "#2563EB"; // 토요일
   }
 
   return (

@@ -1,7 +1,9 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { Pressable, View } from "react-native";
 import {
   DateData,
@@ -14,8 +16,11 @@ import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 
-// dayjs 플러그인 확장
+// dayjs 플러그인 확장 및 타임존 설정
+dayjs.extend(utc);
+dayjs.extend(timezone);
 dayjs.extend(isSameOrBefore);
+dayjs.tz.setDefault("Asia/Seoul");
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {
@@ -61,6 +66,8 @@ export default function CommonCalendar({
   const [isCalendarExpanded, setIsCalendarExpanded] = useState<boolean>(true);
   // 캘린더 토글 중인지 여부 (손잡이 비활성화용)
   const [isToggling, setIsToggling] = useState<boolean | null>(null);
+  // 초기 렌더링 완료 상태
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // 캘린더 컴포넌트 참조 (확장/축소 제어용)
   const calendarRef = useRef<{ toggleCalendarPosition: () => boolean }>(null);
@@ -122,10 +129,17 @@ export default function CommonCalendar({
     );
   }, [selectedDate, onDateChange]);
 
+  // 초기 렌더링 시 캘린더 초기화
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialized(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View>
+    <View className="z-0">
       <ExpandableCalendar
         ref={calendarRef}
+        key={isInitialized ? "initialized" : "loading"}
         theme={getCalendarTheme()}
         firstDay={0} // 주의 첫 번째 요일 설정 (0: 일요일, 1: 월요일)
         renderHeader={renderHeader} // 커스텀 헤더 렌더링
@@ -141,19 +155,22 @@ export default function CommonCalendar({
         futureScrollRange={3} // 미래 방향으로 스크롤 가능한 개월 수 (12개월 후까지)
         markingType="dot" // 일정이 있는 날짜에 점(dot) 표시
         dayComponent={CustomDay} // 커스텀 Day 컴포넌트 사용 (일요일 빨간색 표시)
+        date={selectedDate} // 현재 선택된 날짜 명시적 전달
       />
 
-      <View
-        className={`items-center rounded-b-[32px] bg-white px-4 pb-2 pt-4 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
-      >
-        <Pressable
-          disabled={isToggling !== null}
-          className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
-          onPress={toggleCalendar}
+      {isInitialized && (
+        <View
+          className={`items-center rounded-b-[32px] bg-white px-4 pb-2 pt-4 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
         >
-          <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
-        </Pressable>
-      </View>
+          <Pressable
+            disabled={isToggling !== null}
+            className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
+            onPress={toggleCalendar}
+          >
+            <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }

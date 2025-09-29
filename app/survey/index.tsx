@@ -1,11 +1,14 @@
+import { useState } from "react";
+
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
 import SurveyStep from "@/components/survey/SurveyStep";
+import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
+import { authApi } from "@/features/axios/axiosInstance";
 
 interface SurveyResult {
   step1?: number;
@@ -19,6 +22,8 @@ interface SurveyResult {
 const totalQuestions = 6;
 
 export default function SurveyScreen() {
+  const [showExitAlert, setShowExitAlert] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const funnel = useFunnel<{
     intro: SurveyResult;
     step1: SurveyResult;
@@ -47,12 +52,23 @@ export default function SurveyScreen() {
     const region = options.Q1[context.step1 ?? 0];
 
     const answers = [
-      { questionId: 1, optionId: (context.step1 ?? 0) + 1 },
-      { questionId: 2, optionId: (context.step2 ?? 0) + 1 },
-      { questionId: 3, optionId: (context.step3 ?? 0) + 1 },
-      { questionId: 4, optionId: (context.step4 ?? 0) + 1 },
-      { questionId: 5, optionId: (context.step5 ?? 0) + 1 },
-      { questionId: 6, optionId: answerIndex + 1 },
+      {
+        questionId: 1,
+        optionId: (context.step2 ?? 0) + 1,
+      },
+      {
+        questionId: 2,
+        optionId: (context.step3 ?? 0) + 5,
+      },
+      {
+        questionId: 3,
+        optionId: (context.step4 ?? 0) + 9,
+      },
+      {
+        questionId: 4,
+        optionId: (context.step5 ?? 0) + 13,
+      },
+      { questionId: 5, optionId: answerIndex + 17 },
     ];
 
     const requestBody = {
@@ -63,26 +79,22 @@ export default function SurveyScreen() {
     console.log("API 전송 데이터:", requestBody);
 
     // // API 호출
-    // try {
-    //   const response = await authApi.post("/trait-test", requestBody);
+    try {
+      const response = await authApi.post("/trait-test", requestBody);
 
-    //   if (response.data.isSuccess) {
-    //     console.log("설문 제출 성공:", response.data);
-    //     history.push("done", newContext);
-    //   } else {
-    //     throw new Error(response.data.message || "설문 제출 실패");
-    //   }
-    // } catch (error) {
-    //   console.error("설문 제출 중 오류 발생:", error);
-    //   Alert.alert(
-    //     "설문 제출 실패",
-    //     "설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.",
-    //     [{ text: "확인", style: "default" }],
-    //   );
-    // }
+      if (response.data.isSuccess) {
+        console.log("설문 제출 성공:", response.data);
+        history.push("done", newContext);
+      } else {
+        throw new Error(response.data.message || "설문 제출 실패");
+      }
+    } catch (error) {
+      console.error("설문 제출 중 오류 발생:", error);
+      setShowErrorModal(true);
+    }
 
     // 임시로 done 페이지로 이동
-    history.push("done", newContext);
+    // history.push("done", newContext);
   };
 
   return (
@@ -99,25 +111,12 @@ export default function SurveyScreen() {
               history.push("step2", { ...context, step1: answerIndex })
             }
             onBack={() => {
-              Alert.alert(
-                "취향 분석을 그만 두시겠어요?",
-                "선택한 내용은 저장되지 않아요.",
-                [
-                  {
-                    text: "계속 진행",
-                    style: "cancel",
-                  },
-                  {
-                    text: "네, 그만둘게요.",
-                    style: "destructive",
-                    onPress: () => router.back(),
-                  },
-                ],
-              );
+              setShowExitAlert(true);
             }}
             total={totalQuestions}
             currentStep={1}
             dividedOptions={true}
+            selectedValue={context.step1}
           />
         )}
         step2={({ history, context }) => (
@@ -130,6 +129,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step1", context)}
             total={totalQuestions}
             currentStep={2}
+            selectedValue={context.step2}
           />
         )}
         step3={({ history, context }) => (
@@ -142,6 +142,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step2", context)}
             total={totalQuestions}
             currentStep={3}
+            selectedValue={context.step3}
           />
         )}
         step4={({ history, context }) => (
@@ -154,6 +155,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step3", context)}
             total={totalQuestions}
             currentStep={4}
+            selectedValue={context.step4}
           />
         )}
         step5={({ history, context }) => (
@@ -166,6 +168,7 @@ export default function SurveyScreen() {
             onBack={() => history.push("step4", context)}
             total={totalQuestions}
             currentStep={5}
+            selectedValue={context.step5}
           />
         )}
         step6={({ history, context }) => (
@@ -178,11 +181,38 @@ export default function SurveyScreen() {
             onBack={() => history.push("step5", context)}
             total={totalQuestions}
             currentStep={6}
+            selectedValue={context.step6}
           />
         )}
         done={({ context, history }) => (
           <SurveyBalloon type="END" onNext={() => router.push("/(tabs)")} />
         )}
+      />
+
+      {/* 설문 종료 확인 모달 */}
+      <CommonModal
+        visible={showExitAlert}
+        onClose={() => setShowExitAlert(false)}
+        mainTitle="취향 분석을 그만두시겠어요?"
+        subTitle="선택한 내용은 저장되지 않아요."
+        cancelText="취소"
+        confirmText="확인"
+        onCancel={() => setShowExitAlert(false)}
+        onConfirm={() => {
+          setShowExitAlert(false);
+          router.back();
+        }}
+      />
+
+      {/* 설문 제출 오류 모달 */}
+      <CommonModal
+        visible={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        mainTitle="설문 제출 실패"
+        subTitle="설문 제출 중 오류가 발생했습니다. 다시 시도해주세요."
+        showCancelButton={false}
+        confirmText="확인"
+        onConfirm={() => setShowErrorModal(false)}
       />
     </SafeAreaView>
   );

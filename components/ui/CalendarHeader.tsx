@@ -69,7 +69,7 @@ export default function CalendarHeader({
   }, [selectedDate, setSelectedDate, canGoNext]);
 
   return (
-    <View className="my-2 flex-row items-center justify-between px-4 py-2.5">
+    <View className="flex-row items-center justify-between px-4 py-2.5">
       <Pressable
         onPress={goToPreviousMonth}
         className="p-2"
@@ -81,7 +81,7 @@ export default function CalendarHeader({
         />
       </Pressable>
 
-      <Text className="mx-1 text-xl font-semibold text-[#424242]">
+      <Text className="mx-1 text-2xl font-semibold text-[#424242]">
         {year}. {month}
       </Text>
 

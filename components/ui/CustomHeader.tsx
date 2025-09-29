@@ -25,7 +25,7 @@ export default function CustomHeader({
   return (
     <View
       aria-label={`${title} header`}
-      className={`relative z-50 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b-2 border-gray-100" : ""} p-4`}
+      className={`relative z-0 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b border-[#DCDEE3]" : ""} p-4`}
     >
       {cancel ? (
         <Pressable onPress={cancel} className="w-[60px] items-start">
@@ -36,9 +36,7 @@ export default function CustomHeader({
       )}
 
       <View className="flex-1 items-center">
-        <Text className="text-[18px] font-semibold text-[#383535]">
-          {title}
-        </Text>
+        <Text className="text-xl font-semibold text-[#383535]">{title}</Text>
       </View>
 
       {isCommit ? (

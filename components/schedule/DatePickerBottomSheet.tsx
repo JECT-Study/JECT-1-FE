@@ -2,15 +2,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
-import { Alert, Platform, Pressable, Text, View } from "react-native";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import { Pressable, Text, View } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CalendarHeader from "@/components/ui/CalendarHeader";
+import CommonModal from "@/components/ui/CommonModal";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
 import { authApi } from "@/features/axios/axiosInstance";
+
+// dayjs 플러그인 확장 및 타임존 설정
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Seoul");
 
 // 한국어 로케일 설정
 LocaleConfig.locales["ko"] = {
@@ -56,6 +64,8 @@ interface DatePickerBottomSheetProps {
   eventTitle?: string;
   /** 콘텐츠 ID */
   contentId: string;
+  /** 일정 추가 성공 콜백 */
+  onScheduleAdded?: (scheduleId: number) => void;
 }
 
 export default function DatePickerBottomSheet({
@@ -65,8 +75,10 @@ export default function DatePickerBottomSheet({
   endDate,
   eventTitle,
   contentId,
+  onScheduleAdded,
 }: DatePickerBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<string>(() => {
     try {
       return dayjs(startDate).isValid()
@@ -130,17 +142,21 @@ export default function DatePickerBottomSheet({
         );
 
         if (response.data.isSuccess) {
+          const scheduleId = response.data.result.scheduleId;
+          // 성공 콜백 호출
+          if (onScheduleAdded) {
+            onScheduleAdded(scheduleId);
+          }
           onClose();
-          Alert.alert("일정에 추가되었습니다.", "내 일정에서 확인해주세요.");
         } else {
           throw new Error("일정 생성에 실패했습니다.");
         }
       } catch (error) {
         console.error("API 요청 오류:", error);
-        Alert.alert("오류", "일정 생성에 실패했습니다. 다시 시도해주세요.");
+        setShowErrorModal(true);
       }
     }
-  }, [selectedDate, onClose, contentId]);
+  }, [selectedDate, onClose, contentId, onScheduleAdded]);
 
   // 커스텀 헤더 렌더링
   const renderHeader = useCallback(() => {
@@ -159,9 +175,13 @@ export default function DatePickerBottomSheet({
     const marked: { [key: string]: any } = {};
 
     try {
-      // 선택 가능한 날짜 범위 설정
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
+      // 선택 가능한 날짜 범위 설정 - 한국 시간대로 명시적 처리
+      const start = dayjs
+        .tz(startDate, "YYYY-MM-DD", "Asia/Seoul")
+        .startOf("day");
+      const end = dayjs.tz(endDate, "YYYY-MM-DD", "Asia/Seoul").endOf("day");
+
+      console.log(start);
 
       if (!start.isValid() || !end.isValid()) {
         return marked;
@@ -170,7 +190,7 @@ export default function DatePickerBottomSheet({
       let current = start;
 
       // 시작일부터 종료일까지 모든 날짜를 활성화
-      while (current.isSameOrBefore(end)) {
+      while (current.isSameOrBefore(end, "day")) {
         const dateString = current.format("YYYY-MM-DD");
         marked[dateString] = {
           disabled: false,
@@ -221,14 +241,13 @@ export default function DatePickerBottomSheet({
         width: 40,
         height: 4,
         borderRadius: 2,
-        marginTop: 8,
+        marginTop: 4,
       }}
     >
       <BottomSheetView
-        className="px-4"
         style={{
           paddingBottom: 16 + insets.bottom,
-          paddingHorizontal: Platform.OS === "web" ? 10 : 0,
+          paddingHorizontal: 0,
         }}
       >
         <Calendar
@@ -251,13 +270,12 @@ export default function DatePickerBottomSheet({
           dayComponent={CustomDay}
         />
 
-        {selectedDate && (
-          <View className="px-4 py-2">
-            <Text className="text-base font-medium text-gray-700">
-              선택한 날: {dayjs(selectedDate).format("MM월 DD일 (ddd)")}
-            </Text>
-          </View>
-        )}
+        <View className="mt-2 px-4 py-2">
+          <Text className="text-center text-lg font-medium text-gray-700">
+            선택한 날:{" "}
+            {selectedDate && dayjs(selectedDate).format("MM월 DD일 (ddd)")}
+          </Text>
+        </View>
 
         <View className="p-4">
           <Pressable
@@ -270,11 +288,22 @@ export default function DatePickerBottomSheet({
               { opacity: pressed && selectedDate ? 0.8 : 1 },
             ]}
           >
-            <Text className="text-center text-base font-medium text-white">
+            <Text className="text-center text-lg font-semibold text-white">
               내 일정에 추가하기
             </Text>
           </Pressable>
         </View>
+
+        {/* 오류 모달 */}
+        <CommonModal
+          visible={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          mainTitle="오류"
+          subTitle="일정 생성에 실패했습니다. 다시 시도해주세요."
+          showCancelButton={false}
+          confirmText="확인"
+          onConfirm={() => setShowErrorModal(false)}
+        />
       </BottomSheetView>
     </BottomSheet>
   );

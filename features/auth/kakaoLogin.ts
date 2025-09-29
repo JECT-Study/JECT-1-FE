@@ -3,7 +3,7 @@ import { login, me } from "@react-native-kakao/user";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
@@ -13,12 +13,6 @@ const kakaoNativeAppKey = Constants.expoConfig?.extra?.kakaoNativeAppKey ?? "";
 
 // SDK 초기화 함수
 export const initializeKakao = () => {
-  // 웹 환경에서는 카카오 SDK 초기화를 건너뜀
-  if (Platform.OS === "web") {
-    console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
-    return;
-  }
-
   const appKey = kakaoNativeAppKey;
   if (!appKey) {
     console.error("카카오 앱 키가 설정되지 않았습니다.");
@@ -30,17 +24,22 @@ export const initializeKakao = () => {
 
 // 카카오 로그인 함수
 export const kakaoLogin = async () => {
-  // 웹 환경에서는 카카오 로그인을 지원하지 않음
-  if (Platform.OS === "web") {
-    console.log("웹 환경에서는 카카오 로그인이 지원되지 않습니다.");
-    alert(
-      "웹 환경에서는 카카오 로그인이 지원되지 않습니다. 테스터 로그인을 이용해주세요.",
-    );
-    return;
-  }
-
   try {
-    await login();
+    try {
+      // 먼저 카카오톡 로그인 시도
+      await login();
+    } catch (kakaoError: any) {
+      // 카카오톡이 설치되어 있지만 로그인이 안 되어 있는 경우 웹뷰로 재시도
+      if (kakaoError.message?.includes("not connected to Kakao account")) {
+        console.log("카카오톡 로그인 실패, 웹뷰로 재시도");
+        await login({
+          useKakaoAccountLogin: true, // 웹뷰로 로그인
+        });
+      } else {
+        throw kakaoError; // 다른 에러는 그대로 throw
+      }
+    }
+
     const profile = await me();
     const id = profile.id;
 
@@ -73,10 +72,7 @@ export const kakaoLogin = async () => {
   } catch (error: any) {
     // 카카오 로그인 취소 시에는 에러 메시지를 표시하지 않음
 
-    console.log(
-      "카카오 로그인 취소 또는 에러:",
-      error?.response?.data?.message,
-    );
+    console.log("카카오 로그인 취소 또는 에러:", error);
 
     // 2404 에러 코드인 경우 서버 메시지를 alert으로 표시
     if (error?.response?.data?.code === 2404) {

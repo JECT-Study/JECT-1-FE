@@ -13,7 +13,7 @@ export default function NaverMapNative({
   longitude = 126.9779692,
 }: NaverMapProps) {
   return (
-    <View className="mb-3 h-48 overflow-hidden rounded-lg">
+    <View className="h-48 overflow-hidden rounded-lg">
       <NaverMapView
         style={{ width: "100%", height: "100%" }}
         initialCamera={{

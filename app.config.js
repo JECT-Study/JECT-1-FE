@@ -1,21 +1,23 @@
 import "dotenv/config";
 
 export default {
-  name: "mycode",
+  name: "마이코드",
   slug: "mycode",
   owner: "donggukim",
-  version: "1.0.1",
+  version: "1.0.2",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
   scheme: "mycode",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  backgroundColor: "#6B51FB",
 
   ios: {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "18",
+    buildNumber: "22",
+    backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
     },
@@ -42,9 +44,11 @@ export default {
   android: {
     package: process.env.MYCODE_BUNDLE_IDENTIFIER,
     edgeToEdgeEnabled: true,
+    icon: "./assets/mycode_icon.png",
+    backgroundColor: "#111111",
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
-      backgroundColor: "#ffffff",
+      foregroundImage: "./assets/mycode_icon.png",
+      backgroundColor: "#6B51FB",
     },
     intentFilters: [
       {
@@ -69,9 +73,9 @@ export default {
       "expo-splash-screen",
       {
         image: "./assets/images/mycode_splash.png",
-        imageWidth: 200,
+        imageWidth: 270,
         resizeMode: "contain",
-        backgroundColor: "#111111",
+        backgroundColor: "#6C4DFF",
       },
     ],
     [
