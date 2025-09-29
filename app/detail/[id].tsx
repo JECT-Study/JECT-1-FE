@@ -38,7 +38,6 @@ import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -258,8 +257,9 @@ export default function DetailScreen() {
             title: contentData.title,
             description: contentData.description,
             imageUrl:
-              getImageSource(contentData.contentId).uri ||
-              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+              contentData.images && contentData.images.length > 0
+                ? contentData.images[0]
+                : require("../../assets/images/content_placeholder.png"),
             link: {
               // 앱이 설치된 경우 딥링크로 이동
               mobileWebUrl: deepLinkUrl,

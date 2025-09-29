@@ -109,7 +109,7 @@ export default function RootLayout() {
               // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
               setTimeout(() => {
                 router.push(`/detail/${id}`);
-              }, 1500);
+              }, 2000);
             }
           }
         }
