@@ -12,7 +12,7 @@ import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { AppState, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "react-native-reanimated";
@@ -53,6 +53,7 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  // 앱이 이미 실행 중일 때만 딥링크 처리
   useEffect(() => {
     const handleDeepLink = async (url: string) => {
       const parsed = Linking.parse(url);
@@ -63,10 +64,20 @@ export default function RootLayout() {
 
         if (target === "detail" && id) {
           console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
-          // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
-          setTimeout(() => {
-            router.push(`/detail/${id}`);
-          }, 500);
+
+          // 앱이 백그라운드에서 실행 중일 때는 활성화될 때까지 대기
+          const handleAppStateChange = (nextAppState: string) => {
+            console.log("앱 상태 변경:", nextAppState);
+            if (nextAppState === "active") {
+              console.log("앱 활성화됨 - detail 페이지로 이동");
+              router.push(`/detail/${id}`);
+              subscription.remove();
+            }
+          };
+          const subscription = AppState.addEventListener(
+            "change",
+            handleAppStateChange,
+          );
         }
       }
     };
@@ -79,7 +90,7 @@ export default function RootLayout() {
     return () => subscription?.remove();
   }, [router]);
 
-  // 앱이 종료된 상태에서 딥링크로 실행될 때만 처리 (완전히 분리)
+  // 앱이 종료된 상태에서 딥링크로 실행될 때만 처리
   useEffect(() => {
     if (!initialURLProcessed) {
       initialURLProcessed = true;
