@@ -1,5 +1,5 @@
 import "@/global.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
@@ -35,23 +35,23 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  // const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   // 최소 1초 타이머 설정
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setMinTimeElapsed(true);
-  //   }, 1000);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 1000);
 
-  //   return () => clearTimeout(timer);
-  // }, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
   useEffect(() => {
-    if (loaded) {
+    if (loaded && minTimeElapsed) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, minTimeElapsed]);
 
   // 앱이 이미 실행 중일 때만 딥링크 처리
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function RootLayout() {
               // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
               setTimeout(() => {
                 router.push(`/detail/${id}`);
-              }, 500);
+              }, 1500);
             }
           }
         }
@@ -119,7 +119,7 @@ export default function RootLayout() {
     }
   }, [router]);
 
-  if (!loaded) {
+  if (!loaded || !minTimeElapsed) {
     // 폰트 로딩이 완료되지 않았거나 최소 시간이 경과하지 않은 경우
     return null;
   }
