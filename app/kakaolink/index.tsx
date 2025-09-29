@@ -8,8 +8,8 @@ export default function KakaoLink() {
 
   useEffect(() => {
     // 스택을 모두 제거하고 이동
-    router.dismissAll();
-    router.replace("/(tabs)");
+    // router.dismissAll();
+    router.replace("/");
   }, [router]);
 
   return <View />;

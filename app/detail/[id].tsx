@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { shareFeedTemplate } from "@react-native-kakao/share";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -8,6 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Platform,
@@ -36,6 +38,7 @@ import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { getImageSource } from "@/utils/imageUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -218,7 +221,6 @@ export default function DetailScreen() {
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
-            console.log(contentDetail);
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
@@ -238,54 +240,54 @@ export default function DetailScreen() {
 
   const showHeaderBackground = scrollY > 300;
 
-  const handleKakaoShare = () => {
-    setShowShareModal(true);
-  };
-
-  // const handleKakaoShare = async () => {
-  //   if (!contentData) return;
-
-  //   try {
-  //     const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
-  //     const deepLinkUrl = `mycode://detail/${id}`;
-  //     console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
-
-  //     await shareFeedTemplate({
-  //       template: {
-  //         content: {
-  //           title: contentData.title,
-  //           description: contentData.description,
-  //           imageUrl:
-  //             getImageSource(contentData.contentId).uri ||
-  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-  //           link: {
-  //             // 앱이 설치된 경우 딥링크로 이동
-  //             mobileWebUrl: deepLinkUrl,
-  //             webUrl: appStoreUrl,
-  //             // 앱이 설치되지 않은 경우 앱스토어로 이동
-  //             androidExecutionParams: { target: "detail", id: String(id) },
-  //             iosExecutionParams: { target: "detail", id: String(id) },
-  //           },
-  //         },
-  //         buttons: [
-  //           {
-  //             title: "자세히 보기",
-  //             link: {
-  //               mobileWebUrl: deepLinkUrl,
-  //               webUrl: appStoreUrl,
-  //               androidExecutionParams: { target: "detail", id: String(id) },
-  //               iosExecutionParams: { target: "detail", id: String(id) },
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("카카오톡 공유 오류:", error);
-  //     // 사용자에게 오류 메시지 표시
-  //     Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
-  //   }
+  // const handleKakaoShare = () => {
+  //   setShowShareModal(true);
   // };
+
+  const handleKakaoShare = async () => {
+    if (!contentData) return;
+
+    try {
+      const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
+      const deepLinkUrl = `mycode://detail/${id}`;
+      console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
+
+      await shareFeedTemplate({
+        template: {
+          content: {
+            title: contentData.title,
+            description: contentData.description,
+            imageUrl:
+              getImageSource(contentData.contentId).uri ||
+              "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
+            link: {
+              // 앱이 설치된 경우 딥링크로 이동
+              mobileWebUrl: deepLinkUrl,
+              webUrl: appStoreUrl,
+              // 앱이 설치되지 않은 경우 앱스토어로 이동
+              androidExecutionParams: { target: "detail", id: String(id) },
+              iosExecutionParams: { target: "detail", id: String(id) },
+            },
+          },
+          buttons: [
+            {
+              title: "자세히 보기",
+              link: {
+                mobileWebUrl: deepLinkUrl,
+                webUrl: appStoreUrl,
+                androidExecutionParams: { target: "detail", id: String(id) },
+                iosExecutionParams: { target: "detail", id: String(id) },
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("카카오톡 공유 오류:", error);
+      // 사용자에게 오류 메시지 표시
+      Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleGoBack = () => {
     router.back();

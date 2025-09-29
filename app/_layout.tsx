@@ -1,5 +1,5 @@
 import "@/global.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import {
@@ -19,6 +19,9 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
+// 전역 플래그로 초기 URL 처리 중복 방지
+let initialURLProcessed = false;
+
 SplashScreen.setOptions({
   // duration: 1000,
   fade: true,
@@ -32,66 +35,80 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  // const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   // 최소 1초 타이머 설정
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 1000);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setMinTimeElapsed(true);
+  //   }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
   useEffect(() => {
-    if (loaded && minTimeElapsed) {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, minTimeElapsed]);
+  }, [loaded]);
 
   useEffect(() => {
     const handleDeepLink = async (url: string) => {
-      console.log("🔗 딥링크 수신:", url);
       const parsed = Linking.parse(url);
-      console.log("🔍 파싱된 URL:", parsed);
 
       // 카카오 딥링크 처리: kakao[앱키]://kakaolink?target=detail&id=123
       if (parsed.hostname === "kakaolink" && parsed.queryParams) {
         const { target, id } = parsed.queryParams;
-        console.log("🎯 카카오 딥링크 - target:", target, "id:", id);
 
         if (target === "detail" && id) {
           console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
-          router.push(`/detail/${id}`);
-        }
-      }
-      // mycode://detail/123 형태의 일반 딥링크 처리
-      else if (parsed.hostname === "detail" && parsed.path) {
-        const contentId = parsed.path.replace("/", "");
-        console.log("📍 추출된 contentId:", contentId);
-        if (contentId) {
-          router.push(`/detail/${contentId}`);
+          // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
+          setTimeout(() => {
+            router.push(`/detail/${id}`);
+          }, 500);
         }
       }
     };
 
     // 앱이 이미 실행 중일 때 딥링크 처리
-    const subscription = Linking.addEventListener("url", (event) => {
-      handleDeepLink(event.url);
-    });
-
-    // 앱이 종료된 상태에서 딥링크로 실행될 때 처리
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
-      }
+    const subscription = Linking.addEventListener("url", (e) => {
+      handleDeepLink(e.url);
     });
 
     return () => subscription?.remove();
   }, [router]);
 
-  if (!loaded || !minTimeElapsed) {
+  // 앱이 종료된 상태에서 딥링크로 실행될 때만 처리 (완전히 분리)
+  useEffect(() => {
+    if (!initialURLProcessed) {
+      initialURLProcessed = true;
+
+      const handleInitialURL = async () => {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          const parsed = Linking.parse(url);
+
+          // 카카오 딥링크 처리: kakao[앱키]://kakaolink?target=detail&id=123
+          if (parsed.hostname === "kakaolink" && parsed.queryParams) {
+            const { target, id } = parsed.queryParams;
+
+            if (target === "detail" && id) {
+              console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
+              // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
+              setTimeout(() => {
+                router.push(`/detail/${id}`);
+              }, 500);
+            }
+          }
+        }
+      };
+
+      handleInitialURL();
+    }
+  }, [router]);
+
+  if (!loaded) {
     // 폰트 로딩이 완료되지 않았거나 최소 시간이 경과하지 않은 경우
     return null;
   }
