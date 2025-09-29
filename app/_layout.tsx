@@ -37,13 +37,26 @@ export default function RootLayout() {
   });
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  // 최소 1초 타이머 설정
+  // 최소 1초 타이머 설정 (딥링크가 아닐 때만)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 1000);
+    const checkInitialUrlAndSetTimer = async () => {
+      const url = await Linking.getInitialURL();
+      const isDeepLink = url && url.includes("kakaolink");
 
-    return () => clearTimeout(timer);
+      if (isDeepLink) {
+        // 딥링크로 실행된 경우 즉시 설정
+        setMinTimeElapsed(true);
+      } else {
+        // 일반 실행인 경우 1초 지연
+        const timer = setTimeout(() => {
+          setMinTimeElapsed(true);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkInitialUrlAndSetTimer();
   }, []);
 
   // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
@@ -109,7 +122,7 @@ export default function RootLayout() {
               // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
               setTimeout(() => {
                 router.push(`/detail/${id}`);
-              }, 2000);
+              }, 500);
             }
           }
         }
