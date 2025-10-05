@@ -55,10 +55,16 @@ export default function SurveyScreen() {
       return region.replace(/,\s*/g, "·").replace(/\s+/g, "");
     };
 
-    // 첫 번째 질문의 답변을 regions 배열로 변환하고 포맷 적용
+    // 첫 번째 질문의 답변을 regions 배열로 변환하고 포맷 적용 (API 전송용)
     const regions = (context.step1 ?? []).map((index) =>
       formatRegionName(options.Q1[index]),
     );
+
+    // userRegions 저장용: id와 name을 포함한 객체 배열
+    const userRegionsWithId = (context.step1 ?? []).map((index) => ({
+      id: index + 1, // id는 1부터 시작
+      name: formatRegionName(options.Q1[index]),
+    }));
 
     const answers = [
       {
@@ -93,10 +99,13 @@ export default function SurveyScreen() {
       if (response.data.isSuccess) {
         console.log("설문 제출 성공:", response.data);
 
-        // 설문 제출 성공 시 userRegions 업데이트
-        await SecureStore.setItemAsync("userRegions", JSON.stringify(regions));
+        // 설문 제출 성공 시 userRegions 업데이트 (id와 name 포함)
+        await SecureStore.setItemAsync(
+          "userRegions",
+          JSON.stringify(userRegionsWithId),
+        );
         const { setUserRegions } = useUserStore.getState().action;
-        setUserRegions(regions);
+        setUserRegions(userRegionsWithId);
 
         history.push("done", newContext);
       } else {

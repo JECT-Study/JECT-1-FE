@@ -1,19 +1,24 @@
 import { create } from "zustand/react";
 
+export interface UserRegion {
+  id: number;
+  name: string;
+}
+
 interface UserStore {
   nickname: string;
   profileImage: string;
-  userRegions: string[];
+  userRegions: UserRegion[];
   isLoggedIn: boolean;
   action: {
     setUserInfo: (
       nickname: string,
       profileImage: string,
-      userRegions?: string[],
+      userRegions?: UserRegion[],
     ) => void;
     setNickname: (nickname: string) => void;
     setProfileImage: (profileImage: string) => void;
-    setUserRegions: (userRegions: string[]) => void;
+    setUserRegions: (userRegions: UserRegion[]) => void;
     setLoggedIn: (isLoggedIn: boolean) => void;
     clearUserInfo: () => void;
   };
@@ -28,7 +33,7 @@ const useUserStore = create<UserStore>((set) => ({
     setUserInfo: (
       nickname: string,
       profileImage: string,
-      userRegions: string[] = [],
+      userRegions: UserRegion[] = [],
     ) =>
       set(() => ({
         nickname,
@@ -38,7 +43,7 @@ const useUserStore = create<UserStore>((set) => ({
       })),
     setNickname: (nickname: string) => set(() => ({ nickname })),
     setProfileImage: (profileImage: string) => set(() => ({ profileImage })),
-    setUserRegions: (userRegions: string[]) => set(() => ({ userRegions })),
+    setUserRegions: (userRegions: UserRegion[]) => set(() => ({ userRegions })),
     setLoggedIn: (isLoggedIn: boolean) => set(() => ({ isLoggedIn })),
     clearUserInfo: () =>
       set(() => ({
