@@ -37,6 +37,7 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
+import { mapUserRegionNameToKey } from "@/utils/searchUtils";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
@@ -344,7 +345,22 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
-  const handleSearchPress = () => router.push("/search-results");
+  const handleSearchPress = () => {
+    // userRegions가 있으면 첫 번째 지역을 region 파라미터로 전달
+    if (userRegions && userRegions.length > 0) {
+      const firstRegionKey = mapUserRegionNameToKey(userRegions[0].name);
+      router.push({
+        pathname: "/search-results",
+        params: {
+          keyword: "",
+          category: "ALL",
+          region: firstRegionKey,
+        },
+      });
+    } else {
+      router.push("/search-results");
+    }
+  };
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
