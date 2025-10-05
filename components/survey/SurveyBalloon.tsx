@@ -1,5 +1,9 @@
+import { useCallback } from "react";
+
+import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import { Pressable, Text, View } from "react-native";
 
 import Confetti from "@/components/survey/Confetti";
@@ -11,6 +15,13 @@ interface Props {
 }
 
 export default function SurveyBalloon({ type, onNext }: Props) {
+  useFocusEffect(
+    useCallback(() => {
+      // StatusBar 스타일을 dark로 설정
+      setStatusBarStyle("dark");
+    }, []),
+  );
+
   return (
     <View className="flex-1 justify-between bg-white">
       <CustomHeader

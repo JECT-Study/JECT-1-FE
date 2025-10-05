@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
@@ -9,6 +10,7 @@ import SurveyStep from "@/components/survey/SurveyStep";
 import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
 import { authApi } from "@/features/axios/axiosInstance";
+import useUserStore from "@/stores/useUserStore";
 
 interface SurveyResult {
   step1?: number[];
@@ -48,8 +50,15 @@ export default function SurveyScreen() {
   ) => {
     const newContext = { ...context, step6: answerIndex };
 
-    // 첫 번째 질문의 답변을 regions 배열로 변환
-    const regions = (context.step1 ?? []).map((index) => options.Q1[index]);
+    // 지역명 변환 함수: "경기, 인천" → "경기·인천", 띄어쓰기 제거
+    const formatRegionName = (region: string) => {
+      return region.replace(/,\s*/g, "·").replace(/\s+/g, "");
+    };
+
+    // 첫 번째 질문의 답변을 regions 배열로 변환하고 포맷 적용
+    const regions = (context.step1 ?? []).map((index) =>
+      formatRegionName(options.Q1[index]),
+    );
 
     const answers = [
       {
@@ -83,12 +92,19 @@ export default function SurveyScreen() {
 
       if (response.data.isSuccess) {
         console.log("설문 제출 성공:", response.data);
+
+        // 설문 제출 성공 시 userRegions 업데이트
+        await SecureStore.setItemAsync("userRegions", JSON.stringify(regions));
+        const { setUserRegions } = useUserStore.getState().action;
+        setUserRegions(regions);
+
         history.push("done", newContext);
       } else {
         throw new Error(response.data.message || "설문 제출 실패");
       }
     } catch (error) {
       console.error("설문 제출 중 오류 발생:", error);
+
       setShowErrorModal(true);
     }
   };

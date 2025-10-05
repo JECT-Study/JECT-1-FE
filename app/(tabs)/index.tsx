@@ -155,6 +155,7 @@ export default function HomeScreen() {
             // userRegions도 SecureStore에서 불러와서 Store에 설정
             const storedUserRegions =
               await SecureStore.getItemAsync("userRegions");
+            console.log("와와", storedUserRegions);
             if (storedUserRegions) {
               const { setUserRegions } = useUserStore.getState().action;
               setUserRegions(JSON.parse(storedUserRegions));
