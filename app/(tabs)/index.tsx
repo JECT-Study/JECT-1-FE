@@ -11,7 +11,6 @@ import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -22,6 +21,10 @@ import {
   View,
 } from "react-native";
 
+import Card from "@/components/home/Card";
+import HotCard from "@/components/home/HotCard";
+import MoreCard from "@/components/home/MoreCard";
+import WeeklyCard from "@/components/home/WeeklyCard";
 import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
 import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
@@ -33,7 +36,6 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
-import { formatAddress } from "@/utils/addressUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // dayjs 한국어 로케일 설정
@@ -78,264 +80,6 @@ const categoryConfig = [
   { id: "FESTIVAL", iconType: "festival", label: "축제" },
   { id: "EVENT", iconType: "event", label: "행사" },
 ] as const;
-
-const Card = ({ item }: { item: CustomContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="flex-row" onPress={handlePress}>
-      <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[10px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[10px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[10px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="ml-3.5 flex-1">
-        <Text
-          className="mb-1 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm text-[#9E9E9E]">
-          {formatAddress(item.address)}
-        </Text>
-        <Text className="text-sm text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const HotCard = ({ item }: { item: CustomContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  // contentType에 따른 라벨 매핑
-  const getContentTypeLabel = (contentType: string) => {
-    const categoryItem = categoryConfig.find(
-      (config) => config.id === contentType,
-    );
-    return categoryItem ? categoryItem.label : "기타";
-  };
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="w-[154px]" onPress={handlePress}>
-      <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[14px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[14px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[14px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="mt-2">
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
-          <Text className="text-sm font-medium text-[#707070]">
-            {getContentTypeLabel(item.contentType)}
-          </Text>
-        </View>
-        <Text
-          className="mb-1.5 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
-          {formatAddress(item.address)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="flex-row" onPress={handlePress}>
-      <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-lg"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-lg ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-lg"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="ml-3.5 flex-1">
-        <Text
-          className="mb-1 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm font-normal text-[#9E9E9E]">
-          {formatAddress(item.address)}
-        </Text>
-        <Text className="text-sm font-normal text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const MoreCard = ({ item }: { item: CategoryContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="w-[154px]" onPress={handlePress}>
-      <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[14px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[14px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[14px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="mt-2">
-        <Text
-          className="text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
-          <Text className="text-sm font-medium text-[#707070]">
-            경기 남양주시
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-};
 
 const SCROLL_THRESHOLD = 20;
 
@@ -391,7 +135,7 @@ export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const { nickname } = useUserStore();
+  const { nickname, userRegions } = useUserStore();
 
   const router = useRouter();
 
@@ -407,6 +151,14 @@ export default function HomeScreen() {
 
           if (accessToken && refreshToken) {
             setIsLoggedIn(true);
+
+            // userRegions도 SecureStore에서 불러와서 Store에 설정
+            const storedUserRegions =
+              await SecureStore.getItemAsync("userRegions");
+            if (storedUserRegions) {
+              const { setUserRegions } = useUserStore.getState().action;
+              setUserRegions(JSON.parse(storedUserRegions));
+            }
           } else {
             setIsLoggedIn(false);
           }
@@ -749,7 +501,7 @@ export default function HomeScreen() {
                 />
               )}
 
-              {!isLoggedIn && (
+              {(!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
                 <BlurView
                   intensity={8}
                   className="absolute inset-0 flex items-center justify-center"
@@ -762,13 +514,17 @@ export default function HomeScreen() {
                         이 공간은 잠시 비공개예요!
                       </Text>
                       <Text className="text-center text-lg text-gray-600">
-                        내게 꼭 맞는 전시, 로그인하면 바로 보여드려요.
+                        내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요.
                       </Text>
                     </View>
                     <Pressable
                       onPress={() => {
-                        router.dismissAll();
-                        router.push("/");
+                        if (!isLoggedIn) {
+                          router.dismissAll();
+                          router.push("/");
+                        } else {
+                          router.push("/survey");
+                        }
                       }}
                     >
                       <LinearGradient
@@ -787,7 +543,7 @@ export default function HomeScreen() {
                         }}
                       >
                         <Text className="text-base text-white">
-                          로그인하러 가기
+                          취향 분석하러 가기
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
