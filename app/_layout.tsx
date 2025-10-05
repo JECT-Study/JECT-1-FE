@@ -168,7 +168,10 @@ export default function RootLayout() {
                   name="(tabs)"
                   options={{ headerShown: false, gestureEnabled: false }}
                 />
-                <Stack.Screen name="+not-found" />
+                <Stack.Screen
+                  name="+not-found"
+                  options={{ headerShown: false }}
+                />
                 <Stack.Screen
                   name="my/withdrawal"
                   options={{ headerShown: false }}

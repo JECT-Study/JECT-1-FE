@@ -4,7 +4,14 @@ import { useNavigation } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import Chevron from "@/components/icons/Chevron";
-import { chunk } from "@/features/survey/chunkOption";
+
+const chunk = <T,>(array: T[], size: number): T[][] => {
+  const result: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+};
 
 export default function SurveyStep({
   question,

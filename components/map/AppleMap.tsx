@@ -6,27 +6,26 @@ export interface AppleMapProps {
   longitude?: number;
 }
 
-export default function AppleMap({ latitude, longitude }: AppleMapProps) {
-  // 기본값 설정 (서울 시청)
-  const lat = latitude || 37.5666805;
-  const lng = longitude || 126.9784147;
-
+export default function AppleMap({
+  latitude = 37.566535,
+  longitude = 126.9779692,
+}: AppleMapProps) {
   return (
     <View className="h-48 w-full overflow-hidden rounded-lg">
       <AppleMaps.View
         style={{ flex: 1 }}
         cameraPosition={{
           coordinates: {
-            latitude: lat,
-            longitude: lng,
+            latitude,
+            longitude,
           },
           zoom: 17,
         }}
         markers={[
           {
             coordinates: {
-              latitude: lat,
-              longitude: lng,
+              latitude,
+              longitude,
             },
           },
         ]}

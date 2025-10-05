@@ -11,14 +11,14 @@ import {
   View,
 } from "react-native";
 
+import FavoriteContentItem from "@/components/like/FavoriteContentItem";
 import CustomHeader from "@/components/ui/CustomHeader";
-import PostBlock from "@/components/ui/PostBlock";
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { categoryUnion, filterData } from "@/constants/Filter";
 import { authApi } from "@/features/axios/axiosInstance";
 
 // 좋아요 아이템 타입 정의
-type FavoriteItem = {
+interface FavoriteItem {
   contentId: number;
   likeId: number;
   title: string;
@@ -26,7 +26,7 @@ type FavoriteItem = {
   address: string;
   startDate: string;
   endDate: string;
-};
+}
 
 // 카테고리 매핑 함수 (contentType 파라미터용)
 const getCategoryParam = (category: categoryUnion) => {
@@ -42,10 +42,10 @@ const getCategoryParam = (category: categoryUnion) => {
 
 export default function Like() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [refresh, setRefresh] = useState(false);
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] =
     useState<categoryUnion>("all");
 
@@ -178,7 +178,7 @@ export default function Like() {
           className="w-full flex-1 px-6 py-2"
           data={favorites}
           renderItem={({ item, index }) => (
-            <PostBlock
+            <FavoriteContentItem
               info={{
                 contentId: item.contentId,
                 title: item.title,
@@ -187,7 +187,6 @@ export default function Like() {
                 end_date: item.endDate,
                 img_url: item.image || undefined,
                 likeId: item.likeId,
-                // likes는 PostBlock 내부에서 API로 가져옴
               }}
               onLikeChange={handleLikeChange}
               showSeparator={index < favorites.length - 1}

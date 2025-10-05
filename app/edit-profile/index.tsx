@@ -13,7 +13,7 @@ import CustomHeader from "@/components/ui/CustomHeader";
 import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import useCustomImagePicker from "@/features/user/useCustomImagePicker";
+import useCustomImagePicker from "@/hooks/useCustomImagePicker";
 import {
   useCancelEditProfile,
   useInitializeFromUserStore,

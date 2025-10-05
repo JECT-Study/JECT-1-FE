@@ -1,4 +1,4 @@
-import Svg, { Path, Rect, Defs, LinearGradient, Stop } from "react-native-svg";
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 
 export default function CalendarEditIcon() {
   return (

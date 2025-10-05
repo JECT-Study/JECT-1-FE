@@ -14,7 +14,7 @@ import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
-import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
+import { ScheduleApiResponse } from "@/types/schedule";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // 페이지네이션 상수

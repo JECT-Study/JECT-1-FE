@@ -23,7 +23,7 @@ import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
-import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
+import { ScheduleApiResponse } from "@/types/schedule";
 
 const SCHEDULE_LIMIT = 10;
 

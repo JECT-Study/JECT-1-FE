@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-import { View, GestureResponderEvent, Dimensions } from "react-native";
-import { PIConfetti, ConfettiMethods } from "react-native-fast-confetti";
+import { Dimensions, GestureResponderEvent, View } from "react-native";
+import { ConfettiMethods, PIConfetti } from "react-native-fast-confetti";
 
 const confettiColors = ["#A864FD", "#29CDFF", "#78FF44", "#FF718D"];
 

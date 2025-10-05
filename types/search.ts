@@ -1,4 +1,4 @@
-// 검색 관련 공통 타입 정의
+// 검색 관련 타입 정의
 
 // 검색 결과 인터페이스 (Search API)
 export interface SearchContentItem {
@@ -51,3 +51,26 @@ export interface EventCardProps {
 
 // 검색 상수
 export const SEARCH_LIMIT = 10; // 페이지당 검색 결과 개수
+
+// 검색 관련 추가 인터페이스
+export interface SearchIndexResponse {
+  id: number;
+  title: string;
+  thumbnailUrl: string;
+  category: string;
+  address: string;
+  date: string;
+  view: number;
+}
+
+export interface SearchResultIndexResponse {
+  id: number;
+  title: string;
+  category: string;
+  address: string;
+  thumbnailUrl: string;
+}
+
+export interface SearchRecentIndexResponse {
+  result: string[];
+}

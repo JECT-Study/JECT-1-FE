@@ -13,7 +13,6 @@ import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
 import CommonModal from "@/components/ui/CommonModal";
-import usePageNavigation from "@/hooks/usePageNavigation";
 import useUserStore from "@/stores/useUserStore";
 
 export default function MyScreen() {
@@ -27,9 +26,6 @@ export default function MyScreen() {
   const [showLoginPromptModal, setShowLoginPromptModal] =
     useState<boolean>(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState<string>("");
-
-  const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
-    usePageNavigation();
 
   const handleAuthAction = async () => {
     // 항상 로그아웃 확인 모달 표시
@@ -125,7 +121,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goEditProfile();
+    router.push("/edit-profile");
   };
 
   // 프로필 이미지 결정 로직
@@ -151,7 +147,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goPlan();
+    router.push("/plan");
   };
 
   // 관심목록 버튼 클릭 핸들러
@@ -161,7 +157,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goLike();
+    router.push("/like");
   };
 
   // 취향 분석하기 버튼 클릭 핸들러
@@ -171,7 +167,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goSurvey();
+    router.push("/survey");
   };
 
   return isLoading ? (
@@ -281,7 +277,7 @@ export default function MyScreen() {
 
       <View className="w-full px-4">
         <Pressable
-          onPress={() => goTerms()}
+          onPress={() => router.push("/terms")}
           className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
         >
           <Text className="text-base">이용약관</Text>
@@ -298,7 +294,7 @@ export default function MyScreen() {
         )}
         {isLoggedIn && (
           <Pressable
-            onPress={() => goWithdrawal()}
+            onPress={() => router.push("/my/withdrawal")}
             className="flex h-16 w-full flex-row items-center justify-between"
           >
             <Text className="text-base">회원탈퇴</Text>
