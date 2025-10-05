@@ -11,7 +11,6 @@ import {
   LocaleConfig,
 } from "react-native-calendars";
 
-import ChevronIndicator from "@/components/icons/ChevronIndicator";
 import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
@@ -160,14 +159,21 @@ export default function CommonCalendar({
 
       {isInitialized && (
         <View
-          className={`items-center rounded-b-[32px] bg-white px-4 pb-2 pt-4 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
+          className={`items-center rounded-b-[32px] bg-white px-4 pb-4 pt-2 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
         >
           <Pressable
             disabled={isToggling !== null}
             className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
             onPress={toggleCalendar}
           >
-            <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
+            <View
+              style={{
+                width: 45,
+                height: 4,
+                borderRadius: 11,
+                backgroundColor: "#CDCDCD",
+              }}
+            />
           </Pressable>
         </View>
       )}
