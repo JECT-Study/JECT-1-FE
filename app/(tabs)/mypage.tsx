@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
@@ -13,13 +13,18 @@ import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
 import CommonModal from "@/components/ui/CommonModal";
-import useUserStore from "@/stores/useUserStore";
+import useUserStore, {
+  useIsLoggedIn,
+  useNickname,
+  useProfileImage,
+} from "@/stores/useUserStore";
 
 export default function MyScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [nickname, setNickname] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Zustand store에서 직접 가져오기
+  const isLoggedIn = useIsLoggedIn();
+  const nickname = useNickname();
+  const profileImage = useProfileImage();
+
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusModalMessage, setStatusModalMessage] = useState<string>("");
@@ -74,7 +79,7 @@ export default function MyScreen() {
     setShowLogoutAlert(false);
   };
 
-  // 화면 포커스 시 실행 (마운트 시도 포함)
+  // 화면 포커스 시 실행
   useFocusEffect(
     useCallback(() => {
       // StatusBar 스타일을 dark로 설정
@@ -84,38 +89,6 @@ export default function MyScreen() {
       setShowStatusModal(false);
       setShowLogoutAlert(false);
       setShowLoginPromptModal(false);
-
-      const checkLoginStatus = async () => {
-        setIsLoading(true);
-        try {
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
-
-            // 로그인 상태일 때 사용자 정보도 SecureStore에서 로드
-            const savedNickname = await SecureStore.getItemAsync("nickname");
-            const savedProfileImage =
-              await SecureStore.getItemAsync("profileImage");
-
-            setNickname(savedNickname || "");
-            setProfileImage(savedProfileImage || "");
-          } else {
-            setIsLoggedIn(false);
-            setNickname("");
-            setProfileImage("");
-          }
-        } catch (error) {
-          console.log("❌ MyScreen 토큰 확인 중 에러:", error);
-          setIsLoggedIn(false);
-          setNickname("");
-          setProfileImage("");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      checkLoginStatus();
     }, []),
   );
 
@@ -175,11 +148,7 @@ export default function MyScreen() {
     router.push("/survey");
   };
 
-  return isLoading ? (
-    <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator size="large" color="#6C4DFF" />
-    </View>
-  ) : (
+  return (
     <View className="w-full flex-1 bg-white pt-[65px]">
       <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
         <Text className="text-center text-xl font-medium text-[#212121]">
