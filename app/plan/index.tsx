@@ -2,13 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
 import { router } from "expo-router";
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -63,7 +57,6 @@ export default function Plan() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const [refresh, setRefresh] = useState<boolean>(false);
   const [showBottomSheet, setShowBottomSheet] = useState<boolean>(false);
 
   const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
@@ -176,16 +169,6 @@ export default function Plan() {
     router.push(`/detail/${contentId}`);
   }, []);
 
-  // 새로고침 핸들러
-  const onRefresh = useCallback(() => {
-    setRefresh(true);
-    setCurrentPage(1);
-    setHasMoreData(true);
-    fetchScheduleData(selectedDate, 0, false).finally(() => {
-      setRefresh(false);
-    });
-  }, [selectedDate, fetchScheduleData]);
-
   // 메뉴 버튼 클릭 핸들러
   const handleMenuPress = useCallback((contentId: number) => {
     console.log("메뉴 버튼 클릭됨. contentId:", contentId);
@@ -276,7 +259,7 @@ export default function Plan() {
           />
 
           <FlatList
-            className="mx-4 mt-7 flex-1"
+            className="mx-4 flex-1"
             data={schedules}
             renderItem={({ item }) => (
               <ScheduleItem
@@ -297,15 +280,13 @@ export default function Plan() {
               )
             }
             ListHeaderComponent={
-              schedules.length > 0
-                ? () => (
-                    <View className="mb-4">
-                      <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                        {formatSelectedDateHeader(selectedDate)}
-                      </Text>
-                    </View>
-                  )
-                : null
+              schedules.length > 0 ? (
+                <View className="mb-4">
+                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                    {formatSelectedDateHeader(selectedDate)}
+                  </Text>
+                </View>
+              ) : null
             }
             ListFooterComponent={
               isLoadingMore && !isLoading ? (
@@ -320,15 +301,13 @@ export default function Plan() {
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: schedules.length === 0 ? "center" : "flex-start",
+              paddingVertical: 20,
             }}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}
             removeClippedSubviews={true}
             initialNumToRender={10}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
-            }
           />
         </CalendarProvider>
       </View>

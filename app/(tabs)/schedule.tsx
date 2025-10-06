@@ -182,7 +182,7 @@ export default function ScheduleScreen() {
           />
 
           <FlatList
-            className="mx-4 mt-7 flex-1"
+            className="mx-4 flex-1"
             data={schedules}
             renderItem={({ item }) => (
               <ScheduleItem item={item} onPress={handleScheduleItemPress} />
@@ -219,6 +219,7 @@ export default function ScheduleScreen() {
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: schedules.length === 0 ? "center" : "flex-start",
+              paddingVertical: 20,
             }}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}

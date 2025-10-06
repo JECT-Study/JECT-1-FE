@@ -220,7 +220,9 @@ export default function MyScreen() {
               )}
             </View>
             <View className="ml-2 h-full justify-center p-2">
-              <Text className="mr-1 text-[16px]">{getDisplayName()}</Text>
+              <Text className="mr-1 text-xl font-medium">
+                {getDisplayName()}
+              </Text>
             </View>
           </View>
 
