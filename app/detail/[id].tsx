@@ -8,7 +8,6 @@ import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
-  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -22,6 +21,7 @@ import {
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import DetailSkeleton from "@/components/detail/DetailSkeleton";
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
@@ -476,14 +476,7 @@ export default function DetailScreen() {
   return (
     <>
       {loading || !contentData ? (
-        <View className="flex-1 items-center justify-center bg-white">
-          <StatusBar
-            barStyle="dark-content"
-            backgroundColor="transparent"
-            translucent
-          />
-          <ActivityIndicator size="large" color="#6C4DFF" />
-        </View>
+        <DetailSkeleton imageHeight={IMAGE_HEIGHT} />
       ) : (
         <View className="flex-1 bg-white">
           <StatusBar
