@@ -89,6 +89,41 @@ export default function MyScreen() {
       setShowStatusModal(false);
       setShowLogoutAlert(false);
       setShowLoginPromptModal(false);
+
+      // SecureStore의 토큰을 확인하고 로그인 상태 동기화
+      const checkLoginStatus = async () => {
+        try {
+          const accessToken = await SecureStore.getItemAsync("accessToken");
+          const refreshToken = await SecureStore.getItemAsync("refreshToken");
+
+          const { setLoggedIn } = useUserStore.getState().action;
+
+          if (accessToken && refreshToken) {
+            setLoggedIn(true);
+
+            // nickname과 profileImage도 SecureStore에서 불러와서 Store에 설정
+            const storedNickname = await SecureStore.getItemAsync("nickname");
+            const storedProfileImage =
+              await SecureStore.getItemAsync("profileImage");
+
+            const { setNickname, setProfileImage } =
+              useUserStore.getState().action;
+
+            if (storedNickname) {
+              setNickname(storedNickname);
+            }
+            if (storedProfileImage) {
+              setProfileImage(storedProfileImage);
+            }
+          } else {
+            setLoggedIn(false);
+          }
+        } catch (error) {
+          console.log("❌ 토큰 확인 중 에러:", error);
+        }
+      };
+
+      checkLoginStatus();
     }, []),
   );
 
