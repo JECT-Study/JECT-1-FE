@@ -167,7 +167,10 @@ export default function EditProfile() {
         setModalConfirmText("확인");
         setModalOnConfirm(() => () => {
           setShowModal(false);
-          router.back();
+          // 모달이 완전히 닫힌 후 화면 이동
+          setTimeout(() => {
+            router.back();
+          }, 100);
         });
         setShowModal(true);
       } else {

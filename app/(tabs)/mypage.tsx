@@ -80,6 +80,11 @@ export default function MyScreen() {
       // StatusBar 스타일을 dark로 설정
       setStatusBarStyle("dark");
 
+      // 모달 상태 초기화
+      setShowStatusModal(false);
+      setShowLogoutAlert(false);
+      setShowLoginPromptModal(false);
+
       const checkLoginStatus = async () => {
         setIsLoading(true);
         try {
