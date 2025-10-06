@@ -107,9 +107,9 @@ export default function RegionBottomSheet({
           width: 0,
           height: -4,
         },
-        shadowOpacity: isOpen ? 0.1 : 0,
-        shadowRadius: isOpen ? 8 : 0,
-        elevation: isOpen ? 10 : 0,
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 10,
       }}
       handleIndicatorStyle={{
         display: "none",

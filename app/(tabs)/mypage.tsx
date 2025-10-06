@@ -203,11 +203,7 @@ export default function MyScreen() {
         </Text>
       </View>
 
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6C4DFF" />
-        </View>
-      ) : isLoggedIn ? (
+      {isLoggedIn ? (
         <View>
           <View
             aria-label="user-info"
@@ -327,6 +323,13 @@ export default function MyScreen() {
           </Pressable>
         )}
       </View>
+
+      {/* 로딩 스피너 */}
+      {isLoading && (
+        <View className="absolute bottom-0 left-0 right-0 top-[113px] items-center justify-center bg-white">
+          <ActivityIndicator size="large" color="#6C4DFF" />
+        </View>
+      )}
 
       {/* 로그아웃 확인 모달 */}
       <CommonModal

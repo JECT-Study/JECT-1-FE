@@ -7,7 +7,7 @@ import dayjs from "dayjs";
  */
 export const ensureMinLoadingTime = async (
   startTime: number,
-  minDuration: number = 300,
+  minDuration: number = 200,
 ): Promise<void> => {
   const elapsedTime = dayjs().valueOf() - startTime; // 경과 시간 계산
   const remainingTime = Math.max(0, minDuration - elapsedTime); // 남은 시간 계산
