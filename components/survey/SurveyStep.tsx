@@ -166,7 +166,7 @@ export default function SurveyStep({
           onPress={() => selected !== null && onNext(selected)}
         >
           <Text
-            className={`text-center text-lg font-semibold ${
+            className={`text-center text-xl font-semibold ${
               isNextDisabled ? "text-gray500" : "text-white"
             }`}
           >

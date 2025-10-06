@@ -291,9 +291,6 @@ export default function Plan() {
               isLoading ? (
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
-                  <Text className="mt-4 text-center text-gray-500">
-                    나의 일정을 불러오는 중...
-                  </Text>
                 </View>
               ) : (
                 <ScheduleEmptyState />

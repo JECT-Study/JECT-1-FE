@@ -372,8 +372,13 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
+  // 검색 바 클릭 시 (region 선택 없이 이동)
   const handleSearchPress = () => {
-    // userRegions가 있으면 첫 번째 지역을 region 파라미터로 전달
+    router.push("/search-results");
+  };
+
+  // 더보기 버튼 클릭 시 (region 선택된 채로 이동)
+  const handleMoreButtonPress = () => {
     if (userRegions && userRegions.length > 0) {
       const firstRegionKey = mapUserRegionNameToKey(userRegions[0].name);
       router.push({
@@ -714,7 +719,7 @@ export default function HomeScreen() {
                 </Text>
                 <Pressable
                   className="flex-row items-center gap-x-1.5"
-                  onPress={handleSearchPress}
+                  onPress={handleMoreButtonPress}
                 >
                   <Text className="text-[13px] font-normal text-[#9E9E9E]">
                     더보기
