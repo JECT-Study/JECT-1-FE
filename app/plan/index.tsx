@@ -315,12 +315,6 @@ export default function Plan() {
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
-              ) : !hasMoreData && schedules.length > 0 ? (
-                <View className="items-center justify-center py-4">
-                  <Text className="text-sm text-gray-500">
-                    모든 일정을 불러왔습니다.
-                  </Text>
-                </View>
               ) : null
             }
             ItemSeparatorComponent={() => (

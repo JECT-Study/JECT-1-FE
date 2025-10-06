@@ -14,6 +14,7 @@ import {
 
 import FavoriteContentItem from "@/components/like/FavoriteContentItem";
 import CustomHeader from "@/components/ui/CustomHeader";
+import Toast from "@/components/ui/Toast";
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { categoryUnion, filterData } from "@/constants/Filter";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -49,6 +50,7 @@ export default function Like() {
   const [refresh, setRefresh] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] =
     useState<categoryUnion>("all");
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   // 좋아요 데이터 가져오기 함수
   const fetchLikes = useCallback(
@@ -126,10 +128,17 @@ export default function Like() {
       if (!isLiked) {
         // 찜 목록에서 좋아요를 취소하면 해당 항목이 사라져야 하므로 새로고침
         fetchLikes(0, false);
+        // 토스트 표시
+        setShowToast(true);
       }
     },
     [fetchLikes],
   );
+
+  // 토스트 숨김 핸들러
+  const handleToastHide = () => {
+    setShowToast(false);
+  };
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
@@ -221,6 +230,13 @@ export default function Like() {
             </View>
           ) : null
         }
+      />
+
+      {/* 토스트 */}
+      <Toast
+        visible={showToast}
+        message="관심 목록에서 삭제되었습니다."
+        onHide={handleToastHide}
       />
     </SafeAreaView>
   );
