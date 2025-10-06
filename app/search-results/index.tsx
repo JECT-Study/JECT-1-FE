@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
+  RefreshControl,
   Text,
   TextInput,
   View,
@@ -111,6 +112,7 @@ export default function SearchResults() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(
     category as string,
@@ -315,6 +317,13 @@ export default function SearchResults() {
     [handleCardPress],
   );
 
+  // 새로고침 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await executeSearch(searchText, 1, false);
+    setRefreshing(false);
+  }, [searchText, executeSearch]);
+
   return (
     <View className="flex-1 bg-white pt-[65px]">
       <View className="px-4 pb-4 pt-2">
@@ -466,6 +475,14 @@ export default function SearchResults() {
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
         ListEmptyComponent={
           isLoading ? (
             <View className="flex-1 items-center justify-center py-20">
