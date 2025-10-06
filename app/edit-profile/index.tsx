@@ -16,14 +16,12 @@ import { authApi } from "@/features/axios/axiosInstance";
 import useCustomImagePicker from "@/hooks/useCustomImagePicker";
 import {
   useCancelEditProfile,
-  useInitializeFromUserStore,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
 import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
-  const initializeFromUserStore = useInitializeFromUserStore();
   const setGlobalNickname = useSetNickname();
   const setGlobalProfileImage = useSetProfileImage();
 
@@ -61,18 +59,21 @@ export default function EditProfile() {
         }
 
         if (savedProfileImage) {
+          console.log(
+            "📸 SecureStore에서 불러온 프로필 이미지:",
+            savedProfileImage,
+          );
           setCurrentProfileImage(savedProfileImage);
+        } else {
+          console.log("📸 SecureStore에 저장된 프로필 이미지 없음");
         }
-
-        // Zustand store도 초기화 (다른 컴포넌트와의 일관성을 위해)
-        initializeFromUserStore();
       } catch (error) {
         console.error("사용자 정보 로드 실패:", error);
       }
     };
 
     loadUserInfo();
-  }, [initializeFromUserStore]);
+  }, []);
 
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
@@ -196,12 +197,20 @@ export default function EditProfile() {
 
   // 이미지 소스 결정 로직
   const getImageSource = () => {
-    // 1. 새로 선택한 이미지가 있고, 기본 SVG 이미지가 아닌 경우에만 사용
-    if (
+    console.log("🔍 getImageSource 호출됨");
+    console.log("  - profileUri:", profileUri);
+    console.log("  - currentProfileImage:", currentProfileImage);
+
+    // profileUri가 실제 이미지 URI인지 확인 (기본 SVG가 아닌 경우)
+    const hasNewImage =
       profileUri &&
       profileUri.trim() !== "" &&
-      !profileUri.startsWith("data:image/svg+xml")
-    ) {
+      !profileUri.startsWith("data:image/svg+xml");
+
+    console.log("  - hasNewImage:", hasNewImage);
+
+    // 1. 새로 선택한 이미지가 있으면 사용
+    if (hasNewImage) {
       console.log("✅ 새로 선택한 이미지 사용:", profileUri);
       return profileUri;
     }
