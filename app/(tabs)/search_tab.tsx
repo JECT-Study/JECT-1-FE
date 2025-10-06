@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -93,6 +94,7 @@ function EventCard({ item, onPress }: EventCardProps) {
 export default function SearchScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false); // 무한스크롤로 추가 데이터를 불러오는 중인지 여부 (하단 로딩 인디케이터 표시용)
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL"); // 선택된 카테고리 필터
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
@@ -380,13 +382,22 @@ export default function SearchScreen() {
     [handleCardPress],
   );
 
-  // ListFooterComponent 조건 변수들
-  const isFilterSearchComplete =
-    isFilterSearchMode && !filterHasMoreData && filterSearchResults.length > 0;
-  const isDefaultSearchComplete =
-    !isFilterSearchMode &&
-    !defaultHasMoreData &&
-    defaultSearchResults.length > 0;
+  // 새로고침 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    if (isFilterSearchMode) {
+      await searchByFilters(selectedCategory, selectedRegion, 1, false);
+    } else {
+      await searchDefault(1, false);
+    }
+    setRefreshing(false);
+  }, [
+    isFilterSearchMode,
+    selectedCategory,
+    selectedRegion,
+    searchByFilters,
+    searchDefault,
+  ]);
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
@@ -517,13 +528,18 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
         ListEmptyComponent={
           isLoading ? (
             <View className="flex-1 items-center justify-center py-20">
               <ActivityIndicator size="large" color="#6C4DFF" />
-              <Text className="mt-4 text-center text-gray-500">
-                {isFilterSearchMode ? "필터 검색 중..." : "검색 중..."}
-              </Text>
             </View>
           ) : (
             <View className="flex-1 items-center justify-center py-20">
@@ -543,12 +559,6 @@ export default function SearchScreen() {
           isLoadingMore && !isLoading ? (
             <View className="flex-row items-center justify-center py-4">
               <ActivityIndicator size="large" color="#6C4DFF" />
-            </View>
-          ) : isFilterSearchComplete || isDefaultSearchComplete ? (
-            <View className="items-center justify-center py-4">
-              <Text className="text-sm text-gray-500">
-                모든 검색 결과를 불러왔습니다.
-              </Text>
             </View>
           ) : null
         }
