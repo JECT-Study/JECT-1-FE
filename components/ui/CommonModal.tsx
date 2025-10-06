@@ -52,7 +52,7 @@ export default function CommonModal({
           className="mx-5 w-[90%] max-w-[320px] rounded-3xl bg-white p-6"
           onPress={(e) => e.stopPropagation()}
         >
-          <Text className="text-center text-lg font-semibold text-[#212121]">
+          <Text className="text-center text-xl font-semibold text-[#212121]">
             {mainTitle}
           </Text>
 
@@ -69,7 +69,7 @@ export default function CommonModal({
                 onPress={handleCancel}
                 style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text className="text-center text-base font-medium text-[#616161]">
+                <Text className="text-center text-lg font-medium text-[#616161]">
                   {cancelText}
                 </Text>
               </Pressable>
@@ -80,7 +80,7 @@ export default function CommonModal({
               onPress={handleConfirm}
               style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
             >
-              <Text className="text-center text-base font-semibold text-white">
+              <Text className="text-center text-lg font-semibold text-white">
                 {confirmText}
               </Text>
             </Pressable>

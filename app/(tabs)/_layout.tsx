@@ -72,9 +72,10 @@ export default function TabLayout() {
                     : TabColors.inactive;
                   const iconSize = 28; // 아이콘 크기를 28로 고정
 
-                  // 홈, 일정, 마이페이지 아이콘의 경우 isActive prop 추가
+                  // 홈, 검색, 일정, 마이페이지 아이콘의 경우 isActive prop 추가
                   if (
                     screen.name === "index" ||
+                    screen.name === "search_tab" ||
                     screen.name === "schedule" ||
                     screen.name === "mypage"
                   ) {

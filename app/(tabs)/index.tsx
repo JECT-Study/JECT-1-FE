@@ -468,7 +468,7 @@ export default function HomeScreen() {
                   : "맞춤 콘텐츠"}
               </Text>
 
-              <View className="mb-5 mt-3 flex-row gap-x-2.5 px-[18px]">
+              <View className="mb-5 mt-2 flex-row gap-x-2.5 px-[18px]">
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedRecommendationsCategory === category.id;
@@ -478,7 +478,7 @@ export default function HomeScreen() {
                     <Pressable
                       key={category.id}
                       disabled={isDisabled}
-                      className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
+                      className={`flex h-9 w-14 items-center justify-center rounded-full border border-[#6C4DFF] ${
                         isSelected ? "bg-[#6C4DFF]" : "bg-white"
                       }`}
                       onPress={() => {
@@ -486,7 +486,7 @@ export default function HomeScreen() {
                       }}
                     >
                       <Text
-                        className={`text-sm ${
+                        className={`text-base ${
                           isSelected ? "text-white" : "text-[#6C4DFF]"
                         }`}
                       >
@@ -604,7 +604,7 @@ export default function HomeScreen() {
             {/* 금주 콘텐츠 */}
             <View className="flex gap-y-[18px] py-2.5">
               <Text className="px-[18px] text-xl font-semibold text-black">
-                금주 콘텐츠를 한눈에👀
+                금주 콘텐츠를 한눈에 👀
               </Text>
 
               <FlatList

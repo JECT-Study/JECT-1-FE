@@ -34,7 +34,7 @@ export default function LoginPromptModal({
           className="mx-5 w-[90%] max-w-[320px] rounded-3xl bg-white p-6"
           onPress={(e) => e.stopPropagation()}
         >
-          <Text className="text-center text-lg font-semibold text-[#212121]">
+          <Text className="text-center text-xl font-semibold text-[#212121]">
             로그인 후 이용할 수 있어요
           </Text>
 
@@ -50,7 +50,7 @@ export default function LoginPromptModal({
             onPress={handleStartMaicord}
             style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
           >
-            <Text className="text-center text-base font-semibold text-white">
+            <Text className="text-center text-lg font-semibold text-white">
               마이코드 시작하기
             </Text>
           </Pressable>
@@ -60,7 +60,7 @@ export default function LoginPromptModal({
             onPress={onClose}
             style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
           >
-            <Text className="text-center text-sm text-[#9E9E9E]">다음에</Text>
+            <Text className="text-center text-base text-[#9E9E9E]">다음에</Text>
           </Pressable>
         </Pressable>
       </Pressable>

@@ -229,10 +229,10 @@ export default function MyScreen() {
           </View>
 
           <Pressable
-            className="mx-4 mt-4 flex h-10 items-center justify-center rounded-[4px] bg-gray-100"
+            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-[4px] bg-gray-100"
             onPress={handleEditProfile}
           >
-            <Text className="text-sm font-medium text-[#424242]">
+            <Text className="text-base font-medium text-[#424242]">
               프로필 수정
             </Text>
           </Pressable>
