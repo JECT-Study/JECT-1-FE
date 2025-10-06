@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
@@ -138,6 +138,31 @@ export default function HomeScreen() {
   const { nickname, userRegions } = useUserStore();
 
   const router = useRouter();
+  const navigation = useNavigation();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -424,6 +449,7 @@ export default function HomeScreen() {
         className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
       >
         <ScrollView
+          ref={scrollViewRef}
           className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
