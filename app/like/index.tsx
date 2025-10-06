@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -67,17 +68,16 @@ export default function Like() {
           params,
         });
 
-        const { content, last, totalElements } = response.data.result;
+        const { content, last } = response.data.result;
 
         if (isLoadMore) {
           setFavorites((prev) => [...prev, ...content]);
-          setPage(pageNumber);
         } else {
           setFavorites(content);
-          setPage(0);
         }
+        setPage(pageNumber);
 
-        setHasMore(!last && (isLoadMore ? true : totalElements > 0));
+        setHasMore(!last);
       } catch (error) {
         const axiosError = error as AxiosError;
         console.error("좋아요 데이터 로딩 실패:", axiosError);
@@ -109,7 +109,8 @@ export default function Like() {
   // 카테고리 변경 시 데이터 새로고침
   useEffect(() => {
     fetchLikes(0, false);
-  }, [selectedCategory, fetchLikes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory]);
 
   // 카테고리 변경 핸들러
   const handleCategoryChange = useCallback((category: categoryUnion) => {
@@ -167,10 +168,14 @@ export default function Like() {
           })}
         </View>
       </View>
-      {favorites.length === 0 && !loading ? (
+      {loading && favorites.length === 0 ? (
+        <View className="flex-1 items-center justify-center py-20">
+          <ActivityIndicator size="large" color="#6C4DFF" />
+        </View>
+      ) : favorites.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-base text-gray-500">
-            일치하는 내용이 없습니다.
+            아직 찜한 콘텐츠가 없어요.
           </Text>
         </View>
       ) : (
@@ -196,7 +201,19 @@ export default function Like() {
           onEndReached={loadMore}
           onEndReachedThreshold={0.8}
           refreshControl={
-            <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refresh}
+              onRefresh={onRefresh}
+              tintColor="#6C4DFF"
+              colors={["#6C4DFF"]}
+            />
+          }
+          ListFooterComponent={
+            loading && favorites.length > 0 ? (
+              <View className="flex-row items-center justify-center py-4">
+                <ActivityIndicator size="large" color="#6C4DFF" />
+              </View>
+            ) : null
           }
         />
       )}
