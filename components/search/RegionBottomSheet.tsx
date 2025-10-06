@@ -14,16 +14,15 @@ interface RegionBottomSheetProps {
   isOpen: boolean;
   /** 바텀시트 닫기 함수 */
   onClose: () => void;
-  /** 현재 선택된 지역 */
-  selectedRegion: string;
+  /** 현재 선택된 지역들 */
+  selectedRegion: string[];
   /** 지역 선택 함수 */
-  onRegionSelect: (region: string) => void;
+  onRegionSelect: (regions: string[]) => void;
   /** 검색 버튼 클릭 함수 */
-  onSearch: (region: string) => void;
+  onSearch: (regions: string[]) => void;
 }
 
 const regions = [
-  { key: "ALL", label: "전체" },
   { key: "SEOUL", label: "서울" },
   { key: "GYEONGGI_INCHEON", label: "경기/인천" },
   { key: "GANGWON", label: "강원" },
@@ -45,7 +44,7 @@ export default function RegionBottomSheet({
   onSearch,
 }: RegionBottomSheetProps) {
   const [tempSelectedRegion, setTempSelectedRegion] =
-    useState<string>(selectedRegion);
+    useState<string[]>(selectedRegion);
   const bottomSheetRef = useRef<BottomSheet | null>(null);
   const insets = useSafeAreaInsets();
 
@@ -61,13 +60,21 @@ export default function RegionBottomSheet({
 
   // 지역 선택 처리
   const handleRegionPress = useCallback((regionKey: string) => {
-    setTempSelectedRegion(regionKey);
+    setTempSelectedRegion((prev) => {
+      if (prev.includes(regionKey)) {
+        // 이미 선택된 경우 제거
+        return prev.filter((key) => key !== regionKey);
+      } else {
+        // 선택되지 않은 경우 추가
+        return [...prev, regionKey];
+      }
+    });
   }, []);
 
   // 초기화 버튼 처리
   const handleReset = useCallback(() => {
-    setTempSelectedRegion("ALL");
-    onRegionSelect("ALL");
+    setTempSelectedRegion([]);
+    onRegionSelect([]);
     onClose();
   }, [onRegionSelect, onClose]);
 
@@ -139,14 +146,14 @@ export default function RegionBottomSheet({
                 key={region.key}
                 onPress={() => handleRegionPress(region.key)}
                 className={`rounded-full px-3.5 py-1.5 ${
-                  tempSelectedRegion === region.key
+                  tempSelectedRegion.includes(region.key)
                     ? "border border-[#6C4DFF] bg-[#DFD8FD]"
                     : "border border-[#E0E0E0] bg-white"
                 }`}
               >
                 <Text
                   className={`font-base text-base ${
-                    tempSelectedRegion === region.key
+                    tempSelectedRegion.includes(region.key)
                       ? "text-[#6C4DFF]"
                       : "text-[#707070]"
                   }`}

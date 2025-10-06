@@ -98,7 +98,7 @@ export default function SearchResults() {
   const {
     keyword = "",
     category = "ALL",
-    region = "ALL",
+    region = "",
   } = useLocalSearchParams();
 
   console.log("받은 검색어:", keyword);
@@ -117,8 +117,8 @@ export default function SearchResults() {
   );
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
     useState<boolean>(false);
-  const [selectedRegion, setSelectedRegion] = useState<string>(
-    region as string,
+  const [selectedRegion, setSelectedRegion] = useState<string[]>(
+    region ? (region as string).split(",").filter((r) => r) : [],
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false);
 
@@ -135,6 +135,7 @@ export default function SearchResults() {
       searchKeyword: string,
       page: number = 1,
       isLoadMore: boolean = false,
+      regions: string[] = selectedRegion,
     ) => {
       try {
         if (isLoadMore) {
@@ -143,20 +144,23 @@ export default function SearchResults() {
           setIsLoading(true);
         }
 
-        const regionKeyword = getRegionKeyword(selectedRegion);
+        // 여러 지역의 키워드를 배열로 변환
+        const regionKeywords = regions.map((region) =>
+          getRegionKeyword(region),
+        );
 
         const params: any = {
           keyword: searchKeyword || "", // 빈 문자열도 허용
           page: page,
-          limit: SEARCH_LIMIT,
+          size: SEARCH_LIMIT,
         };
 
         if (selectedCategory !== "ALL") {
           params.category = selectedCategory;
         }
 
-        if (selectedRegion !== "ALL") {
-          params.region = regionKeyword;
+        if (regions.length > 0) {
+          params.regions = regionKeywords;
         }
 
         const response = await authApi.get<CategorySearchResponse>(
@@ -221,7 +225,7 @@ export default function SearchResults() {
     if (
       (keyword && (keyword as string).trim()) ||
       selectedCategory !== "ALL" ||
-      selectedRegion !== "ALL"
+      selectedRegion.length > 0
     ) {
       executeSearch((keyword as string) || "", 1, false);
     }
@@ -258,15 +262,15 @@ export default function SearchResults() {
   }, []);
 
   // 지역 선택 처리
-  const handleRegionSelect = useCallback((region: string) => {
-    setSelectedRegion(region);
+  const handleRegionSelect = useCallback((regions: string[]) => {
+    setSelectedRegion(regions);
   }, []);
 
   // 지역 바텀시트에서 검색 버튼 클릭 시
   const handleRegionSearchPress = useCallback(
-    (region: string) => {
-      setSelectedRegion(region);
-      executeSearch(searchText, 1, false);
+    (regions: string[]) => {
+      setSelectedRegion(regions);
+      executeSearch(searchText, 1, false, regions);
     },
     [searchText, executeSearch],
   );
@@ -398,7 +402,7 @@ export default function SearchResults() {
 
         <Pressable
           className={`flex-row items-center rounded-full px-3 py-2 ${
-            isRegionFilterOpen || selectedRegion !== "ALL"
+            isRegionFilterOpen || selectedRegion.length > 0
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isCategoryFilterOpen
                 ? "border border-[#E0E0E0] bg-gray-100"
@@ -409,20 +413,24 @@ export default function SearchResults() {
         >
           <Text
             className={`mr-1 text-[14px] ${
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "text-[#6C4DFF]"
                 : isCategoryFilterOpen
                   ? "text-[#9CA3AF]"
                   : "text-[#424242]"
             }`}
           >
-            {getRegionLabel(selectedRegion)}
+            {selectedRegion.length === 0
+              ? "지역"
+              : selectedRegion.length === 1
+                ? getRegionLabel(selectedRegion[0])
+                : `${getRegionLabel(selectedRegion[0])} 외 ${selectedRegion.length - 1}`}
           </Text>
           <Chevron
             direction="down"
             size={12}
             color={
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "#6C4DFF"
                 : isCategoryFilterOpen
                   ? "#9CA3AF"

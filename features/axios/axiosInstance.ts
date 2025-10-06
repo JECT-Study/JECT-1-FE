@@ -19,6 +19,9 @@ export const authApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: {
+    indexes: null, // regions[]=값 대신 regions=값 형식으로 변환
+  },
 });
 
 authApi.interceptors.request.use(

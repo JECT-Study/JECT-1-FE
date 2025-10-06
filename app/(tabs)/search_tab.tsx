@@ -98,7 +98,7 @@ export default function SearchScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL"); // 선택된 카테고리 필터
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
     useState<boolean>(false); // 카테고리 바텀시트 열림/닫힘 상태
-  const [selectedRegion, setSelectedRegion] = useState<string>("ALL"); // 선택된 지역 필터
+  const [selectedRegion, setSelectedRegion] = useState<string[]>([]); // 선택된 지역 필터
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false); // 지역 바텀시트 열림/닫힘 상태
 
   const [filterSearchResults, setFilterSearchResults] = useState<
@@ -221,7 +221,7 @@ export default function SearchScreen() {
 
   // 컴포넌트 마운트 시 기본 검색 실행
   useEffect(() => {
-    if (selectedCategory === "ALL" && selectedRegion === "ALL") {
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
       searchDefault(1, false);
       setIsFilterSearchMode(false);
     }
@@ -232,7 +232,7 @@ export default function SearchScreen() {
   const searchByFilters = useCallback(
     async (
       category: string,
-      region: string,
+      regions: string[],
       page: number = 1,
       isLoadMore: boolean = false,
     ) => {
@@ -244,7 +244,10 @@ export default function SearchScreen() {
           setIsFilterSearchMode(true);
         }
 
-        const regionKeyword = getRegionKeyword(region);
+        // 여러 지역의 키워드를 배열로 변환
+        const regionKeywords = regions.map((region) =>
+          getRegionKeyword(region),
+        );
 
         // API 파라미터 구성
         const params: any = {
@@ -253,19 +256,22 @@ export default function SearchScreen() {
           size: SEARCH_LIMIT,
         };
 
-        // 카테고리와 지역 필터 조건 추가
+        // 카테고리 필터 조건 추가
         if (category !== "ALL") {
           params.category = category;
         }
 
-        if (region !== "ALL") {
-          params.region = regionKeyword;
+        // 지역 필터 조건 추가 (배열로 전달)
+        if (regions.length > 0) {
+          params.regions = regionKeywords;
         }
 
         const response = await authApi.get<CategorySearchResponse>(
           `${BACKEND_URL}/search/results`,
           { params },
         );
+
+        console.log("와와", response);
 
         if (response.data.isSuccess && response.data.result) {
           const { contentList, pageInfo } = response.data.result;
@@ -345,15 +351,15 @@ export default function SearchScreen() {
   }, []);
 
   // 지역 선택 처리
-  const handleRegionSelect = useCallback((region: string) => {
-    setSelectedRegion(region);
+  const handleRegionSelect = useCallback((regions: string[]) => {
+    setSelectedRegion(regions);
   }, []);
 
   // 지역 바텀시트에서 검색 버튼 클릭 시
   const handleRegionSearchPress = useCallback(
-    (region: string) => {
-      setSelectedRegion(region);
-      searchByFilters(selectedCategory, region, 1, false);
+    (regions: string[]) => {
+      setSelectedRegion(regions);
+      searchByFilters(selectedCategory, regions, 1, false);
     },
     [selectedCategory, searchByFilters],
   );
@@ -436,7 +442,7 @@ export default function SearchScreen() {
                 pathname: "/search-keywords",
                 params: {
                   category: selectedCategory,
-                  region: selectedRegion,
+                  region: selectedRegion.join(","),
                 },
               })
             }
@@ -501,7 +507,7 @@ export default function SearchScreen() {
 
         <Pressable
           className={`flex-row items-center rounded-full px-3 py-2 ${
-            isRegionFilterOpen || selectedRegion !== "ALL"
+            isRegionFilterOpen || selectedRegion.length > 0
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isCategoryFilterOpen
                 ? "border border-[#E0E0E0] bg-gray-100"
@@ -512,20 +518,24 @@ export default function SearchScreen() {
         >
           <Text
             className={`mr-1 text-[14px] ${
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "text-[#6C4DFF]"
                 : isCategoryFilterOpen
                   ? "text-[#9CA3AF]"
                   : "text-[#424242]"
             }`}
           >
-            {getRegionLabel(selectedRegion)}
+            {selectedRegion.length === 0
+              ? "지역"
+              : selectedRegion.length === 1
+                ? getRegionLabel(selectedRegion[0])
+                : `${getRegionLabel(selectedRegion[0])} 외 ${selectedRegion.length - 1}`}
           </Text>
           <Chevron
             direction="down"
             size={12}
             color={
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "#6C4DFF"
                 : isCategoryFilterOpen
                   ? "#9CA3AF"
