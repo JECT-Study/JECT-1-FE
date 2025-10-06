@@ -1,11 +1,11 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
@@ -20,17 +20,19 @@ import useUserStore, {
 } from "@/stores/useUserStore";
 
 export default function MyScreen() {
-  // Zustand store에서 직접 가져오기
-  const isLoggedIn = useIsLoggedIn();
-  const nickname = useNickname();
-  const profileImage = useProfileImage();
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusModalMessage, setStatusModalMessage] = useState<string>("");
   const [showLoginPromptModal, setShowLoginPromptModal] =
     useState<boolean>(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState<string>("");
+
+  const isFirstLoad = useRef<boolean>(true);
+
+  const isLoggedIn = useIsLoggedIn();
+  const nickname = useNickname();
+  const profileImage = useProfileImage();
 
   const handleAuthAction = async () => {
     // 항상 로그아웃 확인 모달 표시
@@ -93,6 +95,11 @@ export default function MyScreen() {
       // SecureStore의 토큰을 확인하고 로그인 상태 동기화
       const checkLoginStatus = async () => {
         try {
+          // 첫 로드일 때만 로딩 스피너 표시
+          if (isFirstLoad.current) {
+            setIsLoading(true);
+          }
+
           const accessToken = await SecureStore.getItemAsync("accessToken");
           const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
@@ -120,6 +127,11 @@ export default function MyScreen() {
           }
         } catch (error) {
           console.log("❌ 토큰 확인 중 에러:", error);
+        } finally {
+          if (isFirstLoad.current) {
+            setIsLoading(false);
+            isFirstLoad.current = false;
+          }
         }
       };
 
@@ -191,7 +203,11 @@ export default function MyScreen() {
         </Text>
       </View>
 
-      {isLoggedIn ? (
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#6C4DFF" />
+        </View>
+      ) : isLoggedIn ? (
         <View>
           <View
             aria-label="user-info"
