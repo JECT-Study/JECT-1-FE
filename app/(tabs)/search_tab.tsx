@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
 import {
@@ -114,6 +114,32 @@ export default function SearchScreen() {
   >([]);
   const [defaultSearchPage, setDefaultSearchPage] = useState<number>(1); // 기본 검색 페이지
   const [defaultHasMoreData, setDefaultHasMoreData] = useState<boolean>(true); // 기본 검색 더 불러올 데이터 있는지
+
+  const navigation = useNavigation();
+  const flatListRef = useRef<FlatList>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -512,6 +538,7 @@ export default function SearchScreen() {
       <Divider />
 
       <FlatList
+        ref={flatListRef}
         className="pt-8"
         data={isFilterSearchMode ? filterSearchResults : defaultSearchResults}
         keyExtractor={(item) => item.id.toString()}
