@@ -398,7 +398,7 @@ export default function HomeScreen() {
 
   // 검색 바 클릭 시 (region 선택 없이 이동)
   const handleSearchPress = () => {
-    router.push("/search-results");
+    router.push("/search-keywords");
   };
 
   // 더보기 버튼 클릭 시 (region 선택된 채로 이동)

@@ -26,7 +26,7 @@ export default function SearchKeywords() {
   const inputRef = useRef<TextInput>(null);
 
   // URL 파라미터에서 카테고리와 지역 값 받기
-  const { category = "ALL", region = "ALL" } = useLocalSearchParams();
+  const { category = "ALL", region = "" } = useLocalSearchParams();
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
