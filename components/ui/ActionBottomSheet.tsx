@@ -7,21 +7,30 @@ import BottomSheet, {
 import { Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface DeleteScheduleBottomSheetProps {
-  isOpen: boolean;
-  onDelete: () => void;
-  onClose: () => void;
-  onCancel?: () => void; // 실제 취소 버튼용
+interface ActionButton {
+  label: string;
+  onPress: () => void;
+  color?: string; // 텍스트 색상
 }
 
-export default function DeleteScheduleBottomSheet({
+interface ActionBottomSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  actions: ActionButton[]; // 액션 버튼들의 배열
+  snapPoint?: number; // 바텀시트 높이 (기본값: 자동 계산)
+}
+
+export default function ActionBottomSheet({
   isOpen,
-  onDelete,
   onClose,
-  onCancel,
-}: DeleteScheduleBottomSheetProps) {
+  actions,
+  snapPoint,
+}: ActionBottomSheetProps) {
   const bottomSheetRef = useRef<BottomSheet | null>(null);
   const insets = useSafeAreaInsets();
+
+  // 액션 개수에 따라 동적으로 높이 계산 (각 버튼 60px + 간격 8px + 상하 패딩)
+  const calculatedSnapPoint = snapPoint || actions.length * 68 + 32;
 
   // 바텀시트 열기/닫기 처리
   useEffect(() => {
@@ -49,7 +58,7 @@ export default function DeleteScheduleBottomSheet({
     <BottomSheet
       ref={bottomSheetRef}
       index={isOpen ? 0 : -1}
-      snapPoints={[180]} // 고정 높이
+      snapPoints={[calculatedSnapPoint]}
       onClose={onClose}
       enablePanDownToClose
       style={{ zIndex: 200 }}
@@ -62,9 +71,9 @@ export default function DeleteScheduleBottomSheet({
           width: 0,
           height: -4,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 10,
+        shadowOpacity: isOpen ? 0.1 : 0,
+        shadowRadius: isOpen ? 8 : 0,
+        elevation: isOpen ? 10 : 0,
       }}
       handleIndicatorStyle={{
         display: "none",
@@ -75,25 +84,20 @@ export default function DeleteScheduleBottomSheet({
         className="flex-col gap-y-2 px-4"
         style={{ paddingBottom: insets.bottom }}
       >
-        <Pressable
-          onPress={onDelete}
-          className="flex-row items-center justify-center rounded-xl bg-[#F1F1F1] px-6 py-4"
-        >
-          <Text className="text-lg text-red-500">삭제하기</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            console.log("바텀시트 취소 버튼 클릭됨");
-            if (onCancel) {
-              onCancel();
-            } else {
-              onClose();
-            }
-          }}
-          className="flex-row items-center justify-center rounded-xl bg-[#F1F1F1] px-6 py-4"
-        >
-          <Text className="text-lg text-blue-500">취소</Text>
-        </Pressable>
+        {actions.map((action, index) => (
+          <Pressable
+            key={index}
+            onPress={action.onPress}
+            className="flex-row items-center justify-center rounded-xl bg-[#F1F1F1] px-6 py-4"
+          >
+            <Text
+              className="text-xl font-medium"
+              style={{ color: action.color || "#007AFF" }}
+            >
+              {action.label}
+            </Text>
+          </Pressable>
+        ))}
       </BottomSheetView>
     </BottomSheet>
   );

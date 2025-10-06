@@ -12,9 +12,9 @@ import {
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import DeleteScheduleBottomSheet from "@/components/schedule/DeleteScheduleBottomSheet";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
+import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -343,15 +343,26 @@ export default function Plan() {
       </View>
 
       {/* 삭제 바텀 시트 */}
-      <DeleteScheduleBottomSheet
+      <ActionBottomSheet
         isOpen={showBottomSheet}
-        onDelete={handleBottomSheetDelete}
         onClose={() => {
           console.log("바텀시트 onClose 호출됨 - selectedContentId 유지");
           setShowBottomSheet(false);
           // selectedContentId는 건드리지 않음
         }}
-        onCancel={handleBottomSheetCancel}
+        actions={[
+          {
+            label: "삭제하기",
+            onPress: handleBottomSheetDelete,
+            color: "#EF4444", // red-500
+          },
+          {
+            label: "취소",
+            onPress: handleBottomSheetCancel,
+            color: "#3B82F6", // blue-500
+          },
+        ]}
+        snapPoint={200}
       />
 
       {/* 삭제 확인 모달 */}

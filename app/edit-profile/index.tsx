@@ -8,9 +8,9 @@ import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 import CameraIcon from "@/components/icons/CameraIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import XIcon from "@/components/icons/X";
+import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
-import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import useCustomImagePicker from "@/hooks/useCustomImagePicker";
@@ -302,10 +302,25 @@ export default function EditProfile() {
       </View>
 
       {/* 이미지 피커 바텀시트 */}
-      <ImagePickerBottomSheet
+      <ActionBottomSheet
         isOpen={isBottomSheetOpen}
         onClose={onCloseBottomSheet}
-        onLibrary={onLibrary}
+        actions={[
+          {
+            label: "앨범에서 선택",
+            onPress: () => {
+              onLibrary();
+              onCloseBottomSheet();
+            },
+            color: "#007AFF",
+          },
+          {
+            label: "닫기",
+            onPress: onCloseBottomSheet,
+            color: "#007AFF",
+          },
+        ]}
+        snapPoint={200}
       />
 
       {/* 공통 모달 */}
