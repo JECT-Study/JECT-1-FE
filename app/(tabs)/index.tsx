@@ -13,7 +13,6 @@ import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -405,12 +404,8 @@ export default function HomeScreen() {
         end={{ x: 1, y: 0.86 }}
         locations={[0.0682, 0.9458]}
       >
-        <View
-          className={`flex-row items-end justify-center px-[18px] pb-20 ${
-            Platform.OS === "web" ? "pt-10" : "h-52"
-          }`}
-        >
-          <View className="w-full flex-row items-center gap-x-2">
+        <View className="h-52 flex-row items-end justify-center px-[18px] pb-20">
+          <View className="w-full flex-row items-center gap-x-3">
             <LogoIcon width={35} height={32} />
             <Pressable
               className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"

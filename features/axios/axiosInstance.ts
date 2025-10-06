@@ -2,36 +2,8 @@ import axios from "axios";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
 
 const baseURL = Constants.expoConfig?.extra?.BACKEND_URL ?? "";
-
-// 플랫폼별 토큰 저장 함수
-async function setTokenAsync(key: string, value: string) {
-  if (Platform.OS === "web") {
-    localStorage.setItem(key, value);
-  } else {
-    await SecureStore.setItemAsync(key, value);
-  }
-}
-
-// 플랫폼별 토큰 조회 함수
-async function getTokenAsync(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return localStorage.getItem(key);
-  } else {
-    return await SecureStore.getItemAsync(key);
-  }
-}
-
-// 플랫폼별 토큰 삭제 함수
-async function deleteTokenAsync(key: string) {
-  if (Platform.OS === "web") {
-    localStorage.removeItem(key);
-  } else {
-    await SecureStore.deleteItemAsync(key);
-  }
-}
 
 export const publicApi = axios.create({
   baseURL,
@@ -52,8 +24,7 @@ export const authApi = axios.create({
 authApi.interceptors.request.use(
   async (config) => {
     try {
-      // const accessToken = token;
-      const accessToken = await getTokenAsync("accessToken");
+      const accessToken = await SecureStore.getItemAsync("accessToken");
 
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
@@ -87,7 +58,7 @@ authApi.interceptors.response.use(
           "토큰이 만료되었습니다. 리프레시 토큰으로 갱신을 시도합니다.",
         );
 
-        const refreshToken = await getTokenAsync("refreshToken");
+        const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
         if (!refreshToken) {
           throw new Error("리프레시 토큰이 없습니다.");
@@ -103,13 +74,13 @@ authApi.interceptors.response.use(
 
         // 새 토큰 저장
         if (newAccessToken) {
-          await setTokenAsync("accessToken", newAccessToken);
+          await SecureStore.setItemAsync("accessToken", newAccessToken);
         } else {
           throw new Error("새로운 액세스 토큰을 받지 못했습니다.");
         }
 
         if (newRefreshToken) {
-          await setTokenAsync("refreshToken", newRefreshToken);
+          await SecureStore.setItemAsync("refreshToken", newRefreshToken);
         }
 
         // 원래 요청에 새 토큰 적용하여 재시도
@@ -121,8 +92,8 @@ authApi.interceptors.response.use(
         console.error("토큰 갱신 실패:", refreshError);
 
         // 리프레시 실패 시 저장된 토큰 삭제 및 로그인 페이지로 이동
-        await deleteTokenAsync("accessToken");
-        await deleteTokenAsync("refreshToken");
+        await SecureStore.deleteItemAsync("accessToken");
+        await SecureStore.deleteItemAsync("refreshToken");
 
         console.log("로그인 페이지로 이동합니다.");
         router.replace("/");

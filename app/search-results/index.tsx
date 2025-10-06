@@ -311,7 +311,7 @@ export default function SearchResults() {
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
-      <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
+      <View className="px-4 pb-4 pt-2">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
             <BackArrow />
