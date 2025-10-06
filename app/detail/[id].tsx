@@ -18,6 +18,12 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -189,11 +195,18 @@ export default function DetailScreen() {
   const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const scale = useSharedValue(1);
 
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { showActionSheetWithOptions } = useActionSheet();
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
 
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
@@ -344,6 +357,14 @@ export default function DetailScreen() {
         const likeCount = isAddAction ? result.likeCount : result;
         const likeId = isAddAction ? result.likeId : null;
 
+        // 애니메이션 실행 (찜하기 추가할 때만)
+        if (isAddAction) {
+          scale.value = withSequence(
+            withSpring(1.3, { damping: 10, stiffness: 100 }),
+            withSpring(1, { damping: 10, stiffness: 100 }),
+          );
+        }
+
         // UI 상태 업데이트
         setIsLiked(!currentIsLiked);
         setLikeCount(likeCount); // API 응답의 likeCount 사용
@@ -356,13 +377,11 @@ export default function DetailScreen() {
             : null,
         );
 
-        // 토스트 표시
-        setLikeToastMessage(
-          isAddAction
-            ? "관심 목록에 추가되었습니다."
-            : "관심 목록에서 삭제되었습니다.",
-        );
-        setShowLikeToast(true);
+        // 토스트 표시 (추가할 때만)
+        if (isAddAction) {
+          setLikeToastMessage("관심 목록에 추가되었습니다.");
+          setShowLikeToast(true);
+        }
       }
     } catch (error) {
       console.error("좋아요 오류:", error);
@@ -748,17 +767,19 @@ export default function DetailScreen() {
                   onPress={handleLikeToggle}
                   disabled={!isLoggedIn || isLikeLoading}
                 >
-                  {isLiked ? (
-                    <HeartFilledIcon
-                      size={28}
-                      color={!isLoggedIn ? "#E0E0E0" : undefined}
-                    />
-                  ) : (
-                    <HeartOutlineIcon
-                      size={28}
-                      color={!isLoggedIn ? "#E0E0E0" : undefined}
-                    />
-                  )}
+                  <Animated.View style={animatedStyle}>
+                    {isLiked ? (
+                      <HeartFilledIcon
+                        size={28}
+                        color={!isLoggedIn ? "#E0E0E0" : undefined}
+                      />
+                    ) : (
+                      <HeartOutlineIcon
+                        size={28}
+                        color={!isLoggedIn ? "#E0E0E0" : undefined}
+                      />
+                    )}
+                  </Animated.View>
                 </Pressable>
                 <Text
                   className="text-sm"
