@@ -83,7 +83,7 @@ export default function Toast({
           <View className="mr-3 h-6 w-6 items-center justify-center rounded-full bg-[##007AFF]">
             <Text className="text-base text-[#FAFAFA]">✓</Text>
           </View>
-          <Text className="flex-1 text-base text-white">{message}</Text>
+          <Text className="flex-1 text-lg text-white">{message}</Text>
         </View>
       </Pressable>
     </Animated.View>
