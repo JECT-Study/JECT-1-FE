@@ -186,11 +186,13 @@ export default function HomeScreen() {
   const chunkedFilteredContentData = chunkArray(weekDayData, 3);
 
   const fetchRecommendationsByCategory = useCallback(
-    async (category: CategoryType) => {
+    async (category: CategoryType, skipLoading = false) => {
       const startTime = dayjs().valueOf();
 
       try {
-        setIsLoadingRecommendations(true);
+        if (!skipLoading) {
+          setIsLoadingRecommendations(true);
+        }
 
         const response = await authApi.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
@@ -205,19 +207,23 @@ export default function HomeScreen() {
         // 에러 시 빈 배열로 설정
         setRecommendationsData([]);
       } finally {
-        // 최소 0.2초 보장
-        await ensureMinLoadingTime(startTime);
-        setIsLoadingRecommendations(false);
+        if (!skipLoading) {
+          // 최소 0.2초 보장
+          await ensureMinLoadingTime(startTime);
+          setIsLoadingRecommendations(false);
+        }
       }
     },
     [],
   );
 
-  const fetchHotFestivalData = useCallback(async () => {
+  const fetchHotFestivalData = useCallback(async (skipLoading = false) => {
     const startTime = dayjs().valueOf();
 
     try {
-      setIsLoadingHotFestival(true);
+      if (!skipLoading) {
+        setIsLoadingHotFestival(true);
+      }
 
       const response = await publicApi.get(`${BACKEND_URL}/home/festival/hot`);
 
@@ -228,51 +234,64 @@ export default function HomeScreen() {
       console.error(error);
       setHotFestivalData([]);
     } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingHotFestival(false);
-    }
-  }, []);
-
-  const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
-    const startTime = dayjs().valueOf();
-
-    try {
-      setIsLoadingWeekDay(true);
-
-      const weekDays = getWeekDays();
-      const selectedDayData = weekDays.find(
-        (day) => day.dayOfIndex === dateIndex,
-      );
-      if (!selectedDayData) {
-        // early return시에도 최소 0.2초 보장
+      if (!skipLoading) {
+        // 최소 0.2초 보장
         await ensureMinLoadingTime(startTime);
-        setIsLoadingWeekDay(false);
-        return;
+        setIsLoadingHotFestival(false);
       }
-
-      const response = await publicApi.get(
-        `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
-      );
-
-      if (response.data.isSuccess && response.data.result) {
-        setWeekDayData(response.data.result);
-      }
-    } catch (error) {
-      console.error(error);
-      setWeekDayData([]);
-    } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingWeekDay(false);
     }
   }, []);
 
-  const fetchCategoryContentData = useCallback(async () => {
+  const fetchWeeklyContentData = useCallback(
+    async (dateIndex: number, skipLoading = false) => {
+      const startTime = dayjs().valueOf();
+
+      try {
+        if (!skipLoading) {
+          setIsLoadingWeekDay(true);
+        }
+
+        const weekDays = getWeekDays();
+        const selectedDayData = weekDays.find(
+          (day) => day.dayOfIndex === dateIndex,
+        );
+        if (!selectedDayData) {
+          // early return시에도 최소 0.2초 보장
+          if (!skipLoading) {
+            await ensureMinLoadingTime(startTime);
+            setIsLoadingWeekDay(false);
+          }
+          return;
+        }
+
+        const response = await publicApi.get(
+          `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
+        );
+
+        if (response.data.isSuccess && response.data.result) {
+          setWeekDayData(response.data.result);
+        }
+      } catch (error) {
+        console.error(error);
+        setWeekDayData([]);
+      } finally {
+        if (!skipLoading) {
+          // 최소 0.2초 보장
+          await ensureMinLoadingTime(startTime);
+          setIsLoadingWeekDay(false);
+        }
+      }
+    },
+    [],
+  );
+
+  const fetchCategoryContentData = useCallback(async (skipLoading = false) => {
     const startTime = dayjs().valueOf();
 
     try {
-      setIsLoadingCategoryContent(true);
+      if (!skipLoading) {
+        setIsLoadingCategoryContent(true);
+      }
 
       const response = await publicApi.get(`${BACKEND_URL}/home/category`);
 
@@ -283,9 +302,11 @@ export default function HomeScreen() {
       console.error(error);
       setCategoryContentData([]);
     } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingCategoryContent(false);
+      if (!skipLoading) {
+        // 최소 0.2초 보장
+        await ensureMinLoadingTime(startTime);
+        setIsLoadingCategoryContent(false);
+      }
     }
   }, []);
 
@@ -307,10 +328,10 @@ export default function HomeScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
-      fetchRecommendationsByCategory(selectedRecommendationsCategory),
-      fetchHotFestivalData(),
-      fetchWeeklyContentData(selectedWeekDayIndex),
-      fetchCategoryContentData(),
+      fetchRecommendationsByCategory(selectedRecommendationsCategory, true),
+      fetchHotFestivalData(true),
+      fetchWeeklyContentData(selectedWeekDayIndex, true),
+      fetchCategoryContentData(true),
     ]);
     setRefreshing(false);
   }, [
