@@ -152,13 +152,13 @@ export default function RootLayout() {
             style={{
               flex: 1,
               alignItems: "center",
-              backgroundColor: "#010101",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <View
               style={{
                 width: "100%",
-                maxWidth: "100%",
+                maxWidth: 500,
                 flex: 1,
               }}
             >
