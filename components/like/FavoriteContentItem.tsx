@@ -110,13 +110,13 @@ export default function FavoriteContentItem({
 
   return (
     <>
-      <View className="flex flex-row items-center">
+      <View className="flex-row">
         <Image
           source={imageSource}
           className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
           resizeMode="cover"
         />
-        <View className="ml-[18px] mr-2 flex-1 justify-center">
+        <View className="ml-3.5 mr-2 flex-1">
           <Text
             className="text-lg font-semibold leading-normal text-[#111]"
             numberOfLines={2}

@@ -168,55 +168,60 @@ export default function Like() {
           })}
         </View>
       </View>
-      {loading && favorites.length === 0 ? (
-        <View className="flex-1 items-center justify-center py-20">
-          <ActivityIndicator size="large" color="#6C4DFF" />
-        </View>
-      ) : favorites.length === 0 ? (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-base text-gray-500">
-            아직 찜한 콘텐츠가 없어요.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          className="w-full flex-1 px-6 py-2"
-          data={favorites}
-          renderItem={({ item, index }) => (
-            <FavoriteContentItem
-              info={{
-                contentId: item.contentId,
-                title: item.title,
-                address: item.address,
-                start_date: item.startDate,
-                end_date: item.endDate,
-                img_url: item.image || undefined,
-                likeId: item.likeId,
-              }}
-              onLikeChange={handleLikeChange}
-              showSeparator={index < favorites.length - 1}
-            />
-          )}
-          keyExtractor={(item) => item.contentId.toString()}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.8}
-          refreshControl={
-            <RefreshControl
-              refreshing={refresh}
-              onRefresh={onRefresh}
-              tintColor="#6C4DFF"
-              colors={["#6C4DFF"]}
-            />
-          }
-          ListFooterComponent={
-            loading && favorites.length > 0 ? (
-              <View className="flex-row items-center justify-center py-4">
-                <ActivityIndicator size="large" color="#6C4DFF" />
-              </View>
-            ) : null
-          }
-        />
-      )}
+      <FlatList
+        className="w-full flex-1 px-6 py-2"
+        data={favorites}
+        renderItem={({ item, index }) => (
+          <FavoriteContentItem
+            info={{
+              contentId: item.contentId,
+              title: item.title,
+              address: item.address,
+              start_date: item.startDate,
+              end_date: item.endDate,
+              img_url: item.image || undefined,
+              likeId: item.likeId,
+            }}
+            onLikeChange={handleLikeChange}
+            showSeparator={index < favorites.length - 1}
+          />
+        )}
+        keyExtractor={(item) => item.contentId.toString()}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.8}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: favorites.length === 0 ? "center" : "flex-start",
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refresh}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
+        ListEmptyComponent={
+          loading ? (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color="#6C4DFF" />
+            </View>
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-base text-gray-500">
+                아직 찜한 콘텐츠가 없어요.
+              </Text>
+            </View>
+          )
+        }
+        ListFooterComponent={
+          loading && favorites.length > 0 ? (
+            <View className="flex-row items-center justify-center py-4">
+              <ActivityIndicator size="large" color="#6C4DFF" />
+            </View>
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
