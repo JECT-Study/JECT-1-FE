@@ -19,6 +19,13 @@ module.exports = {
         gray800: "#212121",
         black: "#111111",
       },
+      fontFamily: {
+        pretendard: ["Pretendard"],
+        "pretendard-bold": ["Pretendard-Bold"],
+        "pretendard-semibold": ["Pretendard-SemiBold"],
+        "pretendard-medium": ["Pretendard-Medium"],
+        "pretendard-light": ["Pretendard-Light"],
+      },
     },
   },
   plugins: [],

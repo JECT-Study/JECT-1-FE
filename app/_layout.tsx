@@ -33,7 +33,11 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Pretendard: require("pretendard/dist/public/static/Pretendard-Regular.otf"),
+    "Pretendard-Bold": require("pretendard/dist/public/static/Pretendard-Bold.otf"),
+    "Pretendard-SemiBold": require("pretendard/dist/public/static/Pretendard-SemiBold.otf"),
+    "Pretendard-Medium": require("pretendard/dist/public/static/Pretendard-Medium.otf"),
+    "Pretendard-Light": require("pretendard/dist/public/static/Pretendard-Light.otf"),
   });
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
