@@ -60,7 +60,7 @@ export default function MoreCard({ item }: { item: CategoryContentItem }) {
       </View>
       <View className="mt-2">
         <Text
-          className="text-lg font-semibold text-[#424242]"
+          className="text-lg font-semibold leading-6 text-[#424242]"
           numberOfLines={2}
         >
           {item.title}

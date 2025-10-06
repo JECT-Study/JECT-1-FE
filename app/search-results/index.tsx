@@ -80,7 +80,7 @@ function EventCard({ item, onPress }: EventCardProps) {
       </View>
       <View className="mt-3 w-full">
         <Text
-          className="text-lg font-semibold leading-5 text-gray-800"
+          className="text-lg font-semibold leading-6 text-gray-800"
           numberOfLines={2}
         >
           {item.title}

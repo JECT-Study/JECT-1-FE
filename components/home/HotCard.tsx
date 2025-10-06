@@ -81,7 +81,7 @@ export default function HotCard({ item }: { item: CustomContentItem }) {
           </Text>
         </View>
         <Text
-          className="mb-1.5 text-lg font-semibold text-[#424242]"
+          className="mb-1.5 text-lg font-semibold leading-6 text-[#424242]"
           numberOfLines={2}
         >
           {item.title}

@@ -64,7 +64,7 @@ export default function Card({ item }: { item: CustomContentItem }) {
       </View>
       <View className="ml-3.5 flex-1">
         <Text
-          className="mb-1 text-lg font-semibold text-[#424242]"
+          className="mb-1 text-lg font-semibold leading-6 text-[#424242]"
           numberOfLines={2}
         >
           {item.title}

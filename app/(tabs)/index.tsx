@@ -157,7 +157,6 @@ export default function HomeScreen() {
             const storedNickname = await SecureStore.getItemAsync("nickname");
             const storedUserRegions =
               await SecureStore.getItemAsync("userRegions");
-            console.log("와와", storedUserRegions);
 
             const { setNickname, setUserRegions } =
               useUserStore.getState().action;
@@ -370,8 +369,6 @@ export default function HomeScreen() {
   };
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
-
-  console.log(isLoggedIn);
 
   return (
     <View className="flex-1 bg-white">
