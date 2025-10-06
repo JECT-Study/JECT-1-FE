@@ -520,6 +520,12 @@ export default function SearchScreen() {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 100,
+          flexGrow: 1,
+          justifyContent:
+            (isFilterSearchMode ? filterSearchResults : defaultSearchResults)
+              .length === 0
+              ? "center"
+              : "flex-start",
         }}
         columnWrapperStyle={{
           justifyContent: "space-between",
