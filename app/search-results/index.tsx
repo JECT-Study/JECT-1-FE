@@ -21,6 +21,7 @@ import FilterIcon from "@/components/icons/FilterIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import FilterBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
+import CommonModal from "@/components/ui/CommonModal";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -102,6 +103,9 @@ export default function SearchResults() {
   } = useLocalSearchParams();
 
   const [searchText, setSearchText] = useState<string>(keyword as string);
+  const [lastValidSearchText, setLastValidSearchText] = useState<string>(
+    keyword as string,
+  );
   const [searchResults, setSearchResults] = useState<SearchContentItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -117,6 +121,8 @@ export default function SearchResults() {
     region ? (region as string).split(",").filter((r) => r) : [],
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false);
+  const [showEmptyKeywordModal, setShowEmptyKeywordModal] =
+    useState<boolean>(false);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -327,6 +333,11 @@ export default function SearchResults() {
               value={searchText}
               onChangeText={setSearchText}
               onSubmitEditing={() => {
+                if (!searchText.trim()) {
+                  setShowEmptyKeywordModal(true);
+                  return;
+                }
+                setLastValidSearchText(searchText);
                 executeSearch(searchText, 1, false);
               }}
               returnKeyType="search"
@@ -477,12 +488,6 @@ export default function SearchResults() {
             <View className="flex-row items-center justify-center py-4">
               <ActivityIndicator size="large" color="#6C4DFF" />
             </View>
-          ) : searchResults.length > 0 && !hasMoreData ? (
-            <View className="items-center justify-center py-4">
-              <Text className="text-sm text-gray-500">
-                모든 검색 결과를 불러왔습니다.
-              </Text>
-            </View>
           ) : null
         }
       />
@@ -501,6 +506,21 @@ export default function SearchResults() {
         selectedRegion={selectedRegion}
         onRegionSelect={handleRegionSelect}
         onSearch={handleRegionSearchPress}
+      />
+
+      <CommonModal
+        visible={showEmptyKeywordModal}
+        onClose={() => {
+          setSearchText(lastValidSearchText);
+          setShowEmptyKeywordModal(false);
+        }}
+        mainTitle="검색어를 입력해주세요."
+        confirmText="확인"
+        showCancelButton={false}
+        onConfirm={() => {
+          setSearchText(lastValidSearchText);
+          setShowEmptyKeywordModal(false);
+        }}
       />
     </View>
   );
