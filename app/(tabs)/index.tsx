@@ -404,13 +404,16 @@ export default function HomeScreen() {
   // 더보기 버튼 클릭 시 (region 선택된 채로 이동)
   const handleMoreButtonPress = () => {
     if (userRegions && userRegions.length > 0) {
-      const firstRegionKey = mapUserRegionNameToKey(userRegions[0].name);
+      // 모든 userRegions를 지역 키로 변환하여 쉼표로 연결
+      const regionKeys = userRegions
+        .map((region) => mapUserRegionNameToKey(region.name))
+        .join(",");
       router.push({
         pathname: "/search-results",
         params: {
           keyword: "",
           category: "ALL",
-          region: firstRegionKey,
+          region: regionKeys,
         },
       });
     } else {

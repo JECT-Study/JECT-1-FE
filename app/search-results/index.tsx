@@ -101,10 +101,6 @@ export default function SearchResults() {
     region = "",
   } = useLocalSearchParams();
 
-  console.log("받은 검색어:", keyword);
-  console.log("받은 카테고리:", category);
-  console.log("받은 지역:", region);
-
   const [searchText, setSearchText] = useState<string>(keyword as string);
   const [searchResults, setSearchResults] = useState<SearchContentItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
