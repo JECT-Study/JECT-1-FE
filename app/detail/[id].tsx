@@ -183,6 +183,8 @@ export default function DetailScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
   const [showToast, setShowToast] = useState<boolean>(false);
   const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
+  const [showLikeToast, setShowLikeToast] = useState<boolean>(false);
+  const [likeToastMessage, setLikeToastMessage] = useState<string>("");
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
   const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
@@ -353,6 +355,14 @@ export default function DetailScreen() {
               }
             : null,
         );
+
+        // 토스트 표시
+        setLikeToastMessage(
+          isAddAction
+            ? "관심 목록에 추가되었습니다."
+            : "관심 목록에서 삭제되었습니다.",
+        );
+        setShowLikeToast(true);
       }
     } catch (error) {
       console.error("좋아요 오류:", error);
@@ -401,6 +411,11 @@ export default function DetailScreen() {
   // 복사 토스트 숨김 핸들러
   const handleCopyToastHide = () => {
     setShowCopyToast(false);
+  };
+
+  // 찜 토스트 숨김 핸들러
+  const handleLikeToastHide = () => {
+    setShowLikeToast(false);
   };
 
   const openAppleMaps = async () => {
@@ -814,6 +829,13 @@ export default function DetailScreen() {
         visible={showCopyToast}
         message="주소가 복사되었습니다."
         onHide={handleCopyToastHide}
+      />
+
+      {/* 찜 토스트 */}
+      <Toast
+        visible={showLikeToast}
+        message={likeToastMessage}
+        onHide={handleLikeToastHide}
       />
 
       {/* 로그인 안내 모달 */}
