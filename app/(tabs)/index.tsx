@@ -153,12 +153,19 @@ export default function HomeScreen() {
           if (accessToken && refreshToken) {
             setIsLoggedIn(true);
 
-            // userRegions도 SecureStore에서 불러와서 Store에 설정
+            // nickname과 userRegions를 SecureStore에서 불러와서 Store에 설정
+            const storedNickname = await SecureStore.getItemAsync("nickname");
             const storedUserRegions =
               await SecureStore.getItemAsync("userRegions");
             console.log("와와", storedUserRegions);
+
+            const { setNickname, setUserRegions } =
+              useUserStore.getState().action;
+
+            if (storedNickname) {
+              setNickname(storedNickname);
+            }
             if (storedUserRegions) {
-              const { setUserRegions } = useUserStore.getState().action;
               setUserRegions(JSON.parse(storedUserRegions));
             }
           } else {
@@ -363,6 +370,8 @@ export default function HomeScreen() {
   };
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
+
+  console.log(isLoggedIn);
 
   return (
     <View className="flex-1 bg-white">
