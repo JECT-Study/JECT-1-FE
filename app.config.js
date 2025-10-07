@@ -16,12 +16,14 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "25",
+    buildNumber: "26",
     backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
     },
     infoPlist: {
+      CFBundleDevelopmentRegion: "ko",
+      CFBundleLocalizations: ["ko"],
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
         "kakaolink",
