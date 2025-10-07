@@ -66,18 +66,15 @@ export default function Withdrawal() {
 
   const handleWithdraw = async () => {
     if (checkSubmit()) {
-      console.log("이유", selected);
-      console.log("상세 이유", otherReason);
       try {
         await authApi.delete(WithdrawUrl);
-
-        console.log("회원탈퇴 성공");
 
         // 토큰 및 사용자 정보 삭제
         await SecureStore.deleteItemAsync("accessToken");
         await SecureStore.deleteItemAsync("refreshToken");
         await SecureStore.deleteItemAsync("nickname");
         await SecureStore.deleteItemAsync("profileImage");
+        await SecureStore.deleteItemAsync("userRegions");
 
         // Store 초기화
         const { clearUserInfo } = useUserStore.getState().action;
