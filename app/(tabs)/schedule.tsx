@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
@@ -51,6 +51,31 @@ export default function ScheduleScreen() {
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
   const router = useRouter();
+  const navigation = useNavigation();
+  const flatListRef = useRef<FlatList>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -182,6 +207,7 @@ export default function ScheduleScreen() {
           />
 
           <FlatList
+            ref={flatListRef}
             className="mx-4 flex-1"
             data={schedules}
             renderItem={({ item }) => (
