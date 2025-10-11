@@ -197,7 +197,7 @@ export default function MyScreen() {
 
   return (
     <View className="w-full flex-1 bg-white">
-      <View className="h-14 items-center justify-center border-b border-[#EEE] bg-white px-4">
+      <View className="h-14 items-center justify-center border-b border-[#DCDEE3] bg-white px-4">
         <Text className="text-center text-[19px] font-semibold text-[#212121]">
           마이페이지
         </Text>
@@ -328,7 +328,7 @@ export default function MyScreen() {
 
       {/* 로딩 스피너 */}
       {isLoading && (
-        <View className="absolute bottom-0 left-0 right-0 top-[113px] items-center justify-center bg-white">
+        <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center bg-white">
           <ActivityIndicator size="large" color="#6C4DFF" />
         </View>
       )}
