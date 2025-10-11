@@ -192,10 +192,10 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
+    <View className="flex-1 bg-white pt-[60px]">
       <View className="flex-1 bg-white">
-        <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-          <Text className="text-center text-xl font-medium text-[#212121]">
+        <View className="h-14 items-center justify-center border-b border-[#EEE] bg-white px-4">
+          <Text className="text-center text-[19px] font-bold text-[#212121]">
             컨텐츠 일정
           </Text>
         </View>

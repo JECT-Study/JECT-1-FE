@@ -596,10 +596,10 @@ export default function DetailScreen() {
               <View>
                 <View className="my-6 flex-col gap-y-2">
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       기간
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.startDate && contentData.endDate
                         ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
                         : ""}
@@ -607,11 +607,11 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       주소
                     </Text>
                     <View className="flex-1 flex-row items-start">
-                      <Text className="mr-2 flex-1 text-base text-gray-600">
+                      <Text className="mr-2 flex-1 text-lg text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
@@ -630,10 +630,10 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       관람시간
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.isAlwaysOpen
                         ? "24시간 운영"
                         : contentData.openingHour && contentData.closedHour
@@ -643,16 +643,16 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       전화번호
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.telNumber || "-"}
                     </Text>
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       링크
                     </Text>
                     {contentData.homepage ? (
@@ -670,15 +670,15 @@ export default function DetailScreen() {
                         </Text>
                       </Pressable>
                     ) : (
-                      <Text className="text-base text-gray-600">-</Text>
+                      <Text className="text-lg text-gray-600">-</Text>
                     )}
                   </View>
 
                   <View className="flex-row">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       행사내용
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.introduction}
                     </Text>
                   </View>
@@ -701,7 +701,7 @@ export default function DetailScreen() {
                     ].map((tag, index) => (
                       <View
                         key={index}
-                        className="rounded-md border border-gray-300 bg-white px-2 py-1"
+                        className="rounded-lg border border-gray-300 bg-white px-2 py-1"
                       >
                         <Text className="text-sm text-gray-700">#{tag}</Text>
                       </View>
@@ -727,8 +727,8 @@ export default function DetailScreen() {
                     />
                   )}
 
-                  <View className="my-3 flex-row items-center">
-                    <LocationIcon size={18} />
+                  <View className="my-3 flex-row items-center pr-3">
+                    <LocationIcon size={20} />
                     <Text className="ml-1.5 text-base text-black">
                       {contentData.address}
                     </Text>
@@ -739,8 +739,8 @@ export default function DetailScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     onPress={handleNaverMapPress}
                   >
-                    <LocationPinIcon size={16} />
-                    <Text className="ml-1.5 text-center font-medium text-black">
+                    <LocationPinIcon size={18} />
+                    <Text className="ml-1 text-center text-base font-medium text-black">
                       길찾기
                     </Text>
                   </Pressable>
@@ -790,23 +790,17 @@ export default function DetailScreen() {
               </View>
 
               <Pressable
-                className={`h-[50px] flex-1 justify-center rounded-lg px-6 ${
+                className={`h-16 flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn && contentData.scheduleId === null
-                    ? "bg-[#6C4DFF]"
+                    ? "bg-[#6C4DFF] active:bg-[#5638E6]"
                     : contentData.scheduleId !== null
                       ? "bg-gray-300"
-                      : "bg-[#6C4DFF]"
+                      : "bg-[#6C4DFF] active:bg-[#5638E6]"
                 }`}
-                style={({ pressed }) => [
-                  {
-                    opacity:
-                      contentData.scheduleId !== null ? 0.6 : pressed ? 0.9 : 1,
-                  },
-                ]}
                 onPress={handleAddToSchedule}
                 disabled={contentData.scheduleId !== null}
               >
-                <Text className="text-center text-lg font-semibold text-white">
+                <Text className="text-center text-xl font-semibold text-white">
                   {contentData.scheduleId !== null
                     ? "이미 추가됨"
                     : "내 일정에 추가"}

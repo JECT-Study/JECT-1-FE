@@ -196,9 +196,9 @@ export default function MyScreen() {
   };
 
   return (
-    <View className="w-full flex-1 bg-white pt-[65px]">
-      <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-        <Text className="text-center text-xl font-medium text-[#212121]">
+    <View className="w-full flex-1 bg-white pt-[60px]">
+      <View className="h-14 items-center justify-center border-b border-[#EEE] bg-white px-4">
+        <Text className="text-center text-[19px] font-bold text-[#212121]">
           마이페이지
         </Text>
       </View>
@@ -227,15 +227,15 @@ export default function MyScreen() {
           </View>
 
           <Pressable
-            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-[4px] bg-gray-100"
+            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-lg bg-gray-100"
             onPress={handleEditProfile}
           >
-            <Text className="text-base font-medium text-[#424242]">
+            <Text className="text-base font-semibold text-[#424242]">
               프로필 수정
             </Text>
           </Pressable>
 
-          <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-md bg-[#F2F3F6]">
+          <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-lg bg-[#F2F3F6]">
             <Pressable
               onPress={handlePlan}
               className="m-2 flex h-[70px] w-[105px] items-center justify-center"
@@ -279,7 +279,7 @@ export default function MyScreen() {
               마이코드와 함께하세요!
             </Text>
             <Pressable
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-[#6C4DFF] px-6"
+              className="flex h-16 w-full items-center justify-center rounded-xl bg-[#6C4DFF] px-6 active:bg-[#5638E6]"
               onPress={() => {
                 router.dismissAll();
                 router.push("/");
@@ -303,7 +303,7 @@ export default function MyScreen() {
           onPress={() => router.push("/terms")}
           className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
         >
-          <Text className="text-base">이용약관</Text>
+          <Text className="px-2 text-lg">이용약관</Text>
           <NewChevronRight />
         </Pressable>
         {isLoggedIn && (
@@ -311,7 +311,7 @@ export default function MyScreen() {
             onPress={handleAuthAction}
             className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
           >
-            <Text className="text-base">로그아웃</Text>
+            <Text className="px-2 text-lg">로그아웃</Text>
             <NewChevronRight />
           </Pressable>
         )}
@@ -320,7 +320,7 @@ export default function MyScreen() {
             onPress={() => router.push("/my/withdrawal")}
             className="flex h-16 w-full flex-row items-center justify-between"
           >
-            <Text className="text-base">회원탈퇴</Text>
+            <Text className="px-2 text-lg">회원탈퇴</Text>
             <NewChevronRight />
           </Pressable>
         )}

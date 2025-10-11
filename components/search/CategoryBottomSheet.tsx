@@ -155,21 +155,21 @@ export default function CategoryBottomSheet({
         {/* 하단 버튼들 */}
         <View className="flex-row gap-3">
           <Pressable
-            className="rounded-lg border border-[#E0E0E0] py-4"
+            className="h-16 items-center justify-center rounded-lg border border-[#E0E0E0] active:bg-gray-100"
             onPress={handleReset}
             style={[{ flex: 3 }]}
           >
-            <Text className="text-center text-lg font-medium text-[#707070]">
+            <Text className="text-center text-xl font-medium text-[#707070]">
               초기화
             </Text>
           </Pressable>
 
           <Pressable
-            className="rounded-lg bg-[#6C4DFF] py-4"
+            className="h-16 items-center justify-center rounded-lg bg-[#6C4DFF] active:bg-[#5638E6]"
             onPress={handleSearch}
             style={[{ flex: 7 }]}
           >
-            <Text className="text-center text-lg font-medium text-white">
+            <Text className="text-center text-xl font-semibold text-white">
               검색
             </Text>
           </Pressable>

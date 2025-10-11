@@ -75,7 +75,9 @@ function KakaoLogin({ disabled = false }: { disabled?: boolean }) {
       <View className="absolute left-6">
         <KakaoIcon size={20} color="#3E1918" />
       </View>
-      <Text className="text-lg text-black">카카오톡으로 시작하기</Text>
+      <Text className="text-lg font-medium text-black">
+        카카오톡으로 시작하기
+      </Text>
     </Pressable>
   );
 }
@@ -95,7 +97,7 @@ function AppleLogin({ disabled = false }: { disabled?: boolean }) {
       <View className="absolute left-6">
         <AppleIcon size={20} color="black" />
       </View>
-      <Text className="text-lg text-black">Apple로 시작하기</Text>
+      <Text className="text-lg font-medium text-black">Apple로 시작하기</Text>
     </Pressable>
   );
 }
@@ -169,7 +171,7 @@ export default function Login() {
             className="flex-row items-center justify-center px-6"
           >
             <View className="items-center">
-              <Text className="text-base text-[#F4F4F4]">둘러보기</Text>
+              <Text className="text-lg text-[#F4F4F4]">둘러보기</Text>
               <View className="h-px w-full bg-[#F4F4F4]" />
             </View>
           </Pressable>

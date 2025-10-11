@@ -281,16 +281,13 @@ export default function DatePickerBottomSheet({
 
         <View className="p-4">
           <Pressable
-            className={`rounded-lg py-4 ${
-              selectedDate ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
+            className={`h-16 items-center justify-center rounded-lg ${
+              selectedDate ? "bg-[#6C4DFF] active:bg-[#5638E6]" : "bg-[#BDBDBD]"
             }`}
             onPress={handleAddMySchedule}
             disabled={!selectedDate}
-            style={({ pressed }) => [
-              { opacity: pressed && selectedDate ? 0.8 : 1 },
-            ]}
           >
-            <Text className="text-center text-lg font-semibold text-white">
+            <Text className="text-center text-xl font-semibold text-white">
               내 일정에 추가하기
             </Text>
           </Pressable>

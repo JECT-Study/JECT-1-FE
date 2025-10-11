@@ -245,15 +245,15 @@ export default function EditProfile() {
       <View aria-label="edit profile" className="m-6">
         <View
           aria-label="profile_image"
-          className="relative size-[94px] rounded-full"
+          className="relative size-[100px] rounded-full"
         >
           {imageSource ? (
             <Image
               source={imageSource}
-              style={{ width: 94, height: 94, borderRadius: "100%" }}
+              style={{ width: 100, height: 100, borderRadius: "100%" }}
             />
           ) : (
-            <DefaultProfileIcon size={94} />
+            <DefaultProfileIcon size={100} />
           )}
           <Pressable
             onPress={onPress}
@@ -269,17 +269,17 @@ export default function EditProfile() {
       </View>
 
       {/* 닉네임 섹션 */}
-      <View className="w-full p-6">
-        <Text>닉네임</Text>
-        <View className="relative my-3 h-[45px] w-full">
+      <View className="w-full px-6">
+        <Text className="text-lg font-medium">닉네임</Text>
+        <View className="relative my-3 h-14 w-full">
           <TextInput
-            className="h-full w-full rounded-[4px] border-[1px] border-[#D1D3D8] bg-white px-4 pr-10"
+            className="h-full w-full rounded-lg border-[1px] border-[#D1D3D8] bg-white px-4 pr-10"
             placeholder="닉네임을 입력해주세요."
             placeholderTextColor="#9CA3AF"
             onChangeText={setInputNickname}
             value={inputNickname}
             editable={!isLoading}
-            style={{ opacity: isLoading ? 0.5 : 1 }}
+            style={{ opacity: isLoading ? 0.5 : 1, fontSize: 16 }}
           />
           {inputNickname.length > 0 && (
             <Pressable

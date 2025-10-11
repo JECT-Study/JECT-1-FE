@@ -159,8 +159,8 @@ export default function SurveyStep({
       </View>
       <View className="px-4 py-6">
         <Pressable
-          className={`h-[47px] w-full items-center justify-center rounded-[6px] ${
-            isNextDisabled ? "bg-gray300" : "bg-main"
+          className={`h-16 w-full items-center justify-center rounded-[6px] ${
+            isNextDisabled ? "bg-gray300" : "bg-main active:bg-[#5638E6]"
           }`}
           disabled={isNextDisabled}
           onPress={() => selected !== null && onNext(selected)}

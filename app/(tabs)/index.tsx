@@ -722,11 +722,11 @@ export default function HomeScreen() {
 
               <View className="px-[18px]">
                 <Pressable
-                  className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
+                  className="mt-1 h-14 w-full items-center justify-center rounded-lg border border-[#6C4DFF] bg-white"
                   onPress={handleSchedulePress}
                 >
                   <View className="flex-row items-center gap-x-1.5">
-                    <Text className="text-[15px] font-normal text-[#6C4DFF]">
+                    <Text className="text-lg font-medium text-[#6C4DFF]">
                       더보기
                     </Text>
                     <ChevronRight />
@@ -745,7 +745,7 @@ export default function HomeScreen() {
                   className="flex-row items-center gap-x-1.5"
                   onPress={handleMoreButtonPress}
                 >
-                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                  <Text className="text-base font-normal text-[#9E9E9E]">
                     더보기
                   </Text>
                   <ChevronRight width={10} height={10} color="#9E9E9E" />

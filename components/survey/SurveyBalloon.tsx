@@ -53,10 +53,10 @@ export default function SurveyBalloon({ type, onNext }: Props) {
           </View>
         )}
         <Pressable
-          className="z-50 h-[52px] w-full items-center justify-center rounded-md bg-[#6C4DFF]"
+          className="z-50 h-16 w-full items-center justify-center rounded-lg bg-[#6C4DFF] active:bg-[#5638E6]"
           onPress={() => onNext()}
         >
-          <Text className="text-lg font-medium text-white">
+          <Text className="text-xl font-semibold text-white">
             {type === "INTRO" ? "취향 분석 시작" : "마이코드 시작하기"}
           </Text>
         </Pressable>
