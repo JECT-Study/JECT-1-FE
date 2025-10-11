@@ -30,12 +30,19 @@ export default function TabLayout() {
   };
 
   const isHomePage = pathname === ROUTES.HOME;
+  const isDetailPage = pathname?.startsWith("/detail/");
+  const isSearchResultsPage = pathname?.startsWith("/search-results");
 
   return (
     <>
       <SafeAreaView
         className="flex-1"
-        style={{ backgroundColor: isHomePage ? "#816BFF" : "#FFFFFF" }}
+        style={{
+          backgroundColor:
+            isHomePage || isDetailPage || isSearchResultsPage
+              ? "#816BFF"
+              : "#FFFFFF",
+        }}
         edges={["top"]}
       >
         <View className="flex-1">
