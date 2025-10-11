@@ -424,29 +424,29 @@ export default function HomeScreen() {
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-[#816BFF]">
       {/* 기본 헤더 - 고정 */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={["#816BFF", "#5E47E3"]}
         start={{ x: 0, y: 0.14 }}
         end={{ x: 1, y: 0.86 }}
         locations={[0.0682, 0.9458]}
-      >
-        <View className="h-52 flex-row items-end justify-center px-[18px] pb-20">
-          <View className="w-full flex-row items-center gap-x-3">
-            <LogoIcon width={35} height={32} />
-            <Pressable
-              className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
-              onPress={handleSearchPress}
-            >
-              <Text className="text-[#6E6E6E]">
-                이번 주말, 뭐 할지 검색해 볼까?
-              </Text>
-              <SearchIcon size={24} color="#6B51FB" />
-            </Pressable>
-          </View>
+      > */}
+      <View className="h-32 flex-row items-end justify-center bg-[#816BFF] px-[18px] pb-20">
+        <View className="w-full flex-row items-center gap-x-3">
+          <LogoIcon width={35} height={32} />
+          <Pressable
+            className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
+            onPress={handleSearchPress}
+          >
+            <Text className="text-[#6E6E6E]">
+              이번 주말, 뭐 할지 검색해 볼까?
+            </Text>
+            <SearchIcon size={24} color="#6B51FB" />
+          </Pressable>
         </View>
-      </LinearGradient>
+      </View>
+      {/* </LinearGradient> */}
 
       <View
         className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
