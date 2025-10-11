@@ -39,7 +39,9 @@ export default function CustomHeader({
       )}
 
       <View className="absolute left-0 right-0 h-12 items-center justify-center">
-        <Text className="text-[19px] font-bold text-[#383535]">{title}</Text>
+        <Text className="text-[19px] font-semibold text-[#383535]">
+          {title}
+        </Text>
       </View>
 
       {isCommit ? (

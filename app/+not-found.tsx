@@ -9,7 +9,7 @@ export default function NotFoundScreen() {
     <>
       <StatusBar style="dark" />
       <View className="flex-1 items-center justify-center bg-white p-5">
-        <Text className="mb-4 text-3xl font-bold text-[#424242]">
+        <Text className="mb-4 text-3xl font-semibold text-[#424242]">
           페이지를 찾을 수 없습니다
         </Text>
         <Pressable

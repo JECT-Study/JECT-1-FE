@@ -198,7 +198,7 @@ export default function MyScreen() {
   return (
     <View className="w-full flex-1 bg-white pt-[60px]">
       <View className="h-14 items-center justify-center border-b border-[#EEE] bg-white px-4">
-        <Text className="text-center text-[19px] font-bold text-[#212121]">
+        <Text className="text-center text-[19px] font-semibold text-[#212121]">
           마이페이지
         </Text>
       </View>
@@ -301,26 +301,26 @@ export default function MyScreen() {
       <View className="w-full px-4">
         <Pressable
           onPress={() => router.push("/terms")}
-          className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+          className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
         >
-          <Text className="px-2 text-lg">이용약관</Text>
+          <Text className="text-lg">이용약관</Text>
           <NewChevronRight />
         </Pressable>
         {isLoggedIn && (
           <Pressable
             onPress={handleAuthAction}
-            className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+            className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
           >
-            <Text className="px-2 text-lg">로그아웃</Text>
+            <Text className="text-lg">로그아웃</Text>
             <NewChevronRight />
           </Pressable>
         )}
         {isLoggedIn && (
           <Pressable
             onPress={() => router.push("/my/withdrawal")}
-            className="flex h-16 w-full flex-row items-center justify-between"
+            className="flex h-16 w-full flex-row items-center justify-between px-2"
           >
-            <Text className="px-2 text-lg">회원탈퇴</Text>
+            <Text className="text-lg">회원탈퇴</Text>
             <NewChevronRight />
           </Pressable>
         )}
