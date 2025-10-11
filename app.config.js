@@ -48,10 +48,6 @@ export default {
     edgeToEdgeEnabled: true,
     icon: "./assets/mycode_icon.png",
     backgroundColor: "#111111",
-    adaptiveIcon: {
-      foregroundImage: "./assets/mycode_icon.png",
-      backgroundColor: "#6B51FB",
-    },
   },
 
   web: {
