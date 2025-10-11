@@ -65,9 +65,8 @@ export default function CommonModal({
           <View className={`mt-6 ${showCancelButton ? "flex-row gap-3" : ""}`}>
             {showCancelButton && (
               <Pressable
-                className="h-14 flex-1 items-center justify-center rounded-xl border border-[#E0E0E0] bg-white"
+                className="h-14 flex-1 items-center justify-center rounded-xl border border-[#E0E0E0] bg-white active:bg-gray-100"
                 onPress={handleCancel}
-                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
               >
                 <Text className="text-center text-lg font-medium text-[#616161]">
                   {cancelText}
@@ -76,9 +75,8 @@ export default function CommonModal({
             )}
 
             <Pressable
-              className={`${showCancelButton ? "flex-1" : "w-full"} h-14 items-center justify-center rounded-xl bg-[#6C4DFF]`}
+              className={`${showCancelButton ? "flex-1" : "w-full"} h-14 items-center justify-center rounded-xl bg-[#6C4DFF] active:bg-[#5638E6]`}
               onPress={handleConfirm}
-              style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
             >
               <Text className="text-center text-lg font-semibold text-white">
                 {confirmText}
