@@ -468,7 +468,7 @@ export default function HomeScreen() {
           }
         >
           {/* 카테고리 버튼 */}
-          <View className="mb-7 px-6 pt-6">
+          <View className="mb-4 px-6 pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
                 <Pressable

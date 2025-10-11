@@ -28,7 +28,10 @@ export default function CustomHeader({
       className={`relative z-0 flex h-12 w-full flex-row items-center ${separator ? "border-b border-[#EEE]" : ""} px-4`}
     >
       {cancel ? (
-        <Pressable onPress={cancel} className="h-12 w-[60px] items-start justify-center">
+        <Pressable
+          onPress={cancel}
+          className="h-12 w-[60px] items-start justify-center"
+        >
           {isCommit ? <XIcon size={30} /> : <Chevron direction="left" />}
         </Pressable>
       ) : (

@@ -469,7 +469,7 @@ export default function SearchScreen() {
         </View>
 
         <Pressable
-          className={`mr-3 flex-row items-center rounded-full px-3 py-2 ${
+          className={`mr-3 flex-row items-center rounded-full px-3 py-2.5 ${
             isCategoryFilterOpen || selectedCategory !== "ALL"
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isRegionFilterOpen
@@ -504,7 +504,7 @@ export default function SearchScreen() {
         </Pressable>
 
         <Pressable
-          className={`flex-row items-center rounded-full px-3 py-2 ${
+          className={`flex-row items-center rounded-full px-3 py-2.5 ${
             isRegionFilterOpen || selectedRegion.length > 0
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isCategoryFilterOpen
