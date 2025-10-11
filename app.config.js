@@ -16,7 +16,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "27",
+    buildNumber: "28",
     backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
@@ -52,15 +52,6 @@ export default {
       foregroundImage: "./assets/mycode_icon.png",
       backgroundColor: "#6B51FB",
     },
-    intentFilters: [
-      {
-        action: "VIEW",
-        data: {
-          scheme: "nmap",
-        },
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-    ],
   },
 
   web: {
@@ -119,6 +110,7 @@ export default {
       },
     ],
     "expo-maps",
+    "./plugins/withAndroidQueries",
   ],
 
   experiments: {
