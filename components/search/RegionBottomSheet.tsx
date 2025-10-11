@@ -74,9 +74,9 @@ export default function RegionBottomSheet({
   // 초기화 버튼 처리
   const handleReset = useCallback(() => {
     setTempSelectedRegion([]);
-    onRegionSelect([]);
+    onSearch([]);
     onClose();
-  }, [onRegionSelect, onClose]);
+  }, [onSearch, onClose]);
 
   // 검색 버튼 처리
   const handleSearch = useCallback(() => {

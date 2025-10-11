@@ -60,9 +60,9 @@ export default function CategoryBottomSheet({
   // 초기화 버튼 처리
   const handleReset = useCallback(() => {
     setTempSelectedCategory("ALL");
-    onCategorySelect("ALL");
+    onSearch("ALL");
     onClose();
-  }, [onCategorySelect, onClose]);
+  }, [onSearch, onClose]);
 
   // 검색 버튼 처리
   const handleSearch = useCallback(() => {

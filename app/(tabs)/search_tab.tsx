@@ -271,8 +271,6 @@ export default function SearchScreen() {
           { params },
         );
 
-        console.log("와와", response);
-
         if (response.data.isSuccess && response.data.result) {
           const { contentList, pageInfo } = response.data.result;
 

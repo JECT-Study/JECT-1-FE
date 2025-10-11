@@ -120,7 +120,9 @@ export default function SearchResults() {
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
     useState<boolean>(false);
   const [selectedRegion, setSelectedRegion] = useState<string[]>(
-    region ? (region as string).split(",").filter((r) => r) : [],
+    region && region !== "ALL"
+      ? (region as string).split(",").filter((r) => r)
+      : [],
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false);
   const [showEmptyKeywordModal, setShowEmptyKeywordModal] =
@@ -131,6 +133,72 @@ export default function SearchResults() {
     useCallback(() => {
       setStatusBarStyle("dark");
     }, []),
+  );
+
+  // 기본 검색 함수 (둘 다 ALL일 때)
+  const searchDefault = useCallback(
+    async (page: number = 1, isLoadMore: boolean = false) => {
+      try {
+        if (isLoadMore) {
+          setIsLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+
+        const response = await authApi.get(
+          `https://mycodemycode.site/search?page=${page}&limit=10&sort=latest`,
+        );
+
+        if (response.data.isSuccess && response.data.result) {
+          const { contents, currentPage, totalCount } = response.data.result;
+
+          if (contents.length === 0 && isLoadMore) {
+            setHasMoreData(false);
+            return;
+          }
+
+          const transformedResults: SearchContentItem[] = contents.map(
+            (item: any) => ({
+              id: item.id,
+              title: item.title,
+              thumbnailUrl: item.thumbnailUrl || "",
+              category: item.category,
+              address: item.address,
+              date: item.date || "",
+              views: item.views || 0,
+            }),
+          );
+
+          if (isLoadMore) {
+            setSearchResults((prev) => [...prev, ...transformedResults]);
+          } else {
+            setSearchResults(transformedResults);
+          }
+
+          setCurrentPage(currentPage);
+          const totalPages = Math.ceil(totalCount / 10);
+          setHasMoreData(currentPage < totalPages && contents.length === 10);
+        } else {
+          if (!isLoadMore) {
+            setSearchResults([]);
+          }
+          setHasMoreData(false);
+        }
+      } catch (error) {
+        console.error("기본 검색 실패:", error);
+        if (!isLoadMore) {
+          setSearchResults([]);
+        }
+        setHasMoreData(false);
+      } finally {
+        if (isLoadMore) {
+          setIsLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
   );
 
   // 검색 실행 함수
@@ -172,8 +240,6 @@ export default function SearchResults() {
           { params },
         );
 
-        console.log("params", params);
-
         if (response.data.isSuccess && response.data.result) {
           const { contentList, pageInfo } = response.data.result;
 
@@ -197,9 +263,6 @@ export default function SearchResults() {
 
           setCurrentPage(pageInfo.currentPage);
           setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
-
-          console.log("검색 결과:", transformedResults);
-          console.log("검색 파라미터:", params);
         } else {
           if (!isLoadMore) {
             setSearchResults([]);
@@ -225,15 +288,18 @@ export default function SearchResults() {
 
   // 페이지 로드 시 자동 검색 실행
   useEffect(() => {
-    // keyword가 있거나, 카테고리나 지역 필터가 설정된 경우 검색 실행
-    if (
+    // 둘 다 ALL일 때는 기본 검색 API 호출
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+      searchDefault(1, false);
+    } else if (
+      // keyword가 있거나, 카테고리나 지역 필터가 설정된 경우 검색 실행
       (keyword && (keyword as string).trim()) ||
       selectedCategory !== "ALL" ||
       selectedRegion.length > 0
     ) {
       executeSearch((keyword as string) || "", 1, false);
     }
-  }, [keyword, selectedCategory, selectedRegion, executeSearch]);
+  }, [keyword, selectedCategory, selectedRegion, executeSearch, searchDefault]);
 
   const handleFilterOpen = useCallback(() => {
     setIsCategoryFilterOpen(true);
@@ -250,11 +316,71 @@ export default function SearchResults() {
 
   // 카테고리 바텀시트에서 검색 버튼 클릭 시
   const handleCategorySearchPress = useCallback(
-    (category: string) => {
+    async (category: string) => {
       setSelectedCategory(category);
-      executeSearch(searchText, 1, false);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (category === "ALL" && selectedRegion.length === 0) {
+        searchDefault(1, false);
+      } else {
+        // 새로운 category 값을 직접 사용하여 검색
+        try {
+          setIsLoading(true);
+
+          const regionKeywords = selectedRegion.map((region) =>
+            getRegionKeyword(region),
+          );
+
+          const params: any = {
+            keyword: searchText || "",
+            page: 1,
+            size: SEARCH_LIMIT,
+          };
+
+          if (category !== "ALL") {
+            params.category = category;
+          }
+
+          if (selectedRegion.length > 0) {
+            params.regions = regionKeywords;
+          }
+
+          const response = await authApi.get<CategorySearchResponse>(
+            `${BACKEND_URL}/search/results`,
+            { params },
+          );
+
+          if (response.data.isSuccess && response.data.result) {
+            const { contentList, pageInfo } = response.data.result;
+
+            const transformedResults: SearchContentItem[] = contentList.map(
+              (item) => ({
+                id: item.id,
+                title: item.title,
+                thumbnailUrl: item.thumbnailUrl || "",
+                category: item.category,
+                address: item.address,
+                date: "",
+                views: 0,
+              }),
+            );
+
+            setSearchResults(transformedResults);
+            setCurrentPage(pageInfo.currentPage);
+            setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
+          } else {
+            setSearchResults([]);
+            setHasMoreData(false);
+          }
+        } catch (error) {
+          console.error("검색 실패:", error);
+          setSearchResults([]);
+          setHasMoreData(false);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     },
-    [searchText, executeSearch],
+    [searchText, selectedRegion, searchDefault],
   );
 
   const handleRegionFilterOpen = useCallback(() => {
@@ -272,18 +398,83 @@ export default function SearchResults() {
 
   // 지역 바텀시트에서 검색 버튼 클릭 시
   const handleRegionSearchPress = useCallback(
-    (regions: string[]) => {
+    async (regions: string[]) => {
       setSelectedRegion(regions);
-      executeSearch(searchText, 1, false, regions);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (selectedCategory === "ALL" && regions.length === 0) {
+        searchDefault(1, false);
+      } else {
+        // 새로운 regions 값을 직접 사용하여 검색
+        try {
+          setIsLoading(true);
+
+          const regionKeywords = regions.map((region) =>
+            getRegionKeyword(region),
+          );
+
+          const params: any = {
+            keyword: searchText || "",
+            page: 1,
+            size: SEARCH_LIMIT,
+          };
+
+          if (selectedCategory !== "ALL") {
+            params.category = selectedCategory;
+          }
+
+          if (regions.length > 0) {
+            params.regions = regionKeywords;
+          }
+
+          const response = await authApi.get<CategorySearchResponse>(
+            `${BACKEND_URL}/search/results`,
+            { params },
+          );
+
+          if (response.data.isSuccess && response.data.result) {
+            const { contentList, pageInfo } = response.data.result;
+
+            const transformedResults: SearchContentItem[] = contentList.map(
+              (item) => ({
+                id: item.id,
+                title: item.title,
+                thumbnailUrl: item.thumbnailUrl || "",
+                category: item.category,
+                address: item.address,
+                date: "",
+                views: 0,
+              }),
+            );
+
+            setSearchResults(transformedResults);
+            setCurrentPage(pageInfo.currentPage);
+            setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
+          } else {
+            setSearchResults([]);
+            setHasMoreData(false);
+          }
+        } catch (error) {
+          console.error("검색 실패:", error);
+          setSearchResults([]);
+          setHasMoreData(false);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     },
-    [searchText, executeSearch],
+    [searchText, selectedCategory, searchDefault],
   );
 
   // 무한스크롤 핸들러
   const handleLoadMore = useCallback(() => {
     if (searchResults.length > 0 && hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
-      executeSearch(searchText, nextPage, true);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+        searchDefault(nextPage, true);
+      } else {
+        executeSearch(searchText, nextPage, true);
+      }
     }
   }, [
     searchResults.length,
@@ -291,7 +482,10 @@ export default function SearchResults() {
     isLoadingMore,
     searchText,
     currentPage,
+    selectedCategory,
+    selectedRegion.length,
     executeSearch,
+    searchDefault,
   ]);
 
   // 카드 클릭 핸들러
@@ -320,9 +514,20 @@ export default function SearchResults() {
   // 새로고침 핸들러
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await executeSearch(searchText, 1, false);
+    // 둘 다 ALL일 때는 기본 검색 API 호출
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+      await searchDefault(1, false);
+    } else {
+      await executeSearch(searchText, 1, false);
+    }
     setRefreshing(false);
-  }, [searchText, executeSearch]);
+  }, [
+    searchText,
+    selectedCategory,
+    selectedRegion.length,
+    executeSearch,
+    searchDefault,
+  ]);
 
   return (
     <View className="flex-1 bg-white pt-[65px]">
