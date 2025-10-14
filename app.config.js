@@ -65,6 +65,9 @@ export default {
         imageWidth: 270,
         resizeMode: "contain",
         backgroundColor: "#6C4DFF",
+        android: {
+          imageWidth: 190,
+        },
       },
     ],
     [
