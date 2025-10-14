@@ -23,7 +23,8 @@ export const CustomDay = ({ date, state, marking, onPress }: DayProps) => {
 
   // state 또는 marking에서 선택 상태 확인
   const isSelected = state === "selected" || marking?.selected;
-  const isDisabled = state === "disabled";
+  // marking에서 disabled 상태도 확인 (오늘 날짜가 비활성화된 경우를 위해)
+  const isDisabled = state === "disabled" || (marking as any)?.disabled;
 
   // 선택된 날짜의 배경색 결정
   const selectedBgColor = marking?.selectedColor || "#6C4DFF";

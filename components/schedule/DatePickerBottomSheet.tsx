@@ -183,21 +183,29 @@ export default function DatePickerBottomSheet({
         .startOf("day");
       const end = dayjs.tz(endDate, "YYYY-MM-DD", "Asia/Seoul").endOf("day");
 
-      console.log(start);
-
       if (!start.isValid() || !end.isValid()) {
         return marked;
       }
 
-      let current = start;
+      // 현재 월의 이전/다음 월 포함하여 모든 날짜를 순회하면서 범위 밖의 날짜는 비활성화
+      const currentMonthStart = dayjs(currentMonth)
+        .startOf("month")
+        .subtract(7, "day"); // 이전 월 포함
+      const currentMonthEnd = dayjs(currentMonth).endOf("month").add(14, "day"); // 다음 월 포함
 
-      // 시작일부터 종료일까지 모든 날짜를 활성화
-      while (current.isSameOrBefore(end, "day")) {
+      let current = currentMonthStart;
+
+      while (current.isSameOrBefore(currentMonthEnd, "day")) {
         const dateString = current.format("YYYY-MM-DD");
+        const isInRange =
+          current.isSameOrAfter(start, "day") &&
+          current.isSameOrBefore(end, "day");
+
         marked[dateString] = {
-          disabled: false,
-          disableTouchEvent: false,
+          disabled: !isInRange,
+          disableTouchEvent: !isInRange,
         };
+
         current = current.add(1, "day");
       }
 
@@ -216,7 +224,7 @@ export default function DatePickerBottomSheet({
     }
 
     return marked;
-  }, [startDate, endDate, selectedDate]);
+  }, [startDate, endDate, selectedDate, currentMonth]);
 
   return (
     <BottomSheet
