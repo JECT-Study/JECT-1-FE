@@ -15,7 +15,6 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/types/schedule";
-import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 // 페이지네이션 상수
 const SCHEDULE_LIMIT = 8;
@@ -87,8 +86,6 @@ export default function ScheduleScreen() {
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
     async (date: string, page: number = 1, isLoadMore: boolean = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (isLoadMore) {
           setIsLoadingMore(true);
@@ -139,8 +136,6 @@ export default function ScheduleScreen() {
         }
         setHasMoreData(false);
       } finally {
-        await ensureMinLoadingTime(startTime);
-
         if (isLoadMore) {
           setIsLoadingMore(false);
         } else {

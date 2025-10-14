@@ -35,7 +35,6 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
-import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 import { mapUserRegionNameToKey } from "@/utils/searchUtils";
 
 // dayjs 한국어 로케일 설정
@@ -211,8 +210,6 @@ export default function HomeScreen() {
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType, skipLoading = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (!skipLoading) {
           setIsLoadingRecommendations(true);
@@ -232,8 +229,6 @@ export default function HomeScreen() {
         setRecommendationsData([]);
       } finally {
         if (!skipLoading) {
-          // 최소 0.2초 보장
-          await ensureMinLoadingTime(startTime);
           setIsLoadingRecommendations(false);
         }
       }
@@ -242,8 +237,6 @@ export default function HomeScreen() {
   );
 
   const fetchHotFestivalData = useCallback(async (skipLoading = false) => {
-    const startTime = dayjs().valueOf();
-
     try {
       if (!skipLoading) {
         setIsLoadingHotFestival(true);
@@ -259,8 +252,6 @@ export default function HomeScreen() {
       setHotFestivalData([]);
     } finally {
       if (!skipLoading) {
-        // 최소 0.2초 보장
-        await ensureMinLoadingTime(startTime);
         setIsLoadingHotFestival(false);
       }
     }
@@ -268,8 +259,6 @@ export default function HomeScreen() {
 
   const fetchWeeklyContentData = useCallback(
     async (dateIndex: number, skipLoading = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (!skipLoading) {
           setIsLoadingWeekDay(true);
@@ -280,9 +269,7 @@ export default function HomeScreen() {
           (day) => day.dayOfIndex === dateIndex,
         );
         if (!selectedDayData) {
-          // early return시에도 최소 0.2초 보장
           if (!skipLoading) {
-            await ensureMinLoadingTime(startTime);
             setIsLoadingWeekDay(false);
           }
           return;
@@ -300,8 +287,6 @@ export default function HomeScreen() {
         setWeekDayData([]);
       } finally {
         if (!skipLoading) {
-          // 최소 0.2초 보장
-          await ensureMinLoadingTime(startTime);
           setIsLoadingWeekDay(false);
         }
       }
@@ -310,8 +295,6 @@ export default function HomeScreen() {
   );
 
   const fetchCategoryContentData = useCallback(async (skipLoading = false) => {
-    const startTime = dayjs().valueOf();
-
     try {
       if (!skipLoading) {
         setIsLoadingCategoryContent(true);
@@ -327,8 +310,6 @@ export default function HomeScreen() {
       setCategoryContentData([]);
     } finally {
       if (!skipLoading) {
-        // 최소 0.2초 보장
-        await ensureMinLoadingTime(startTime);
         setIsLoadingCategoryContent(false);
       }
     }

@@ -21,17 +21,6 @@ import { ScheduleApiResponse } from "@/types/schedule";
 
 const SCHEDULE_LIMIT = 10;
 
-// 최소 로딩 시간 보장 함수
-const ensureMinLoadingTime = async (
-  startTime: number,
-  minTime: number = 500,
-) => {
-  const elapsedTime = dayjs().valueOf() - startTime;
-  if (elapsedTime < minTime) {
-    await new Promise((resolve) => setTimeout(resolve, minTime - elapsedTime));
-  }
-};
-
 // 선택된 날짜 헤더 포맷팅 함수
 const formatSelectedDateHeader = (dateString: string) => {
   const date = dayjs(dateString);
@@ -68,8 +57,6 @@ export default function Plan() {
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
     async (date: string, page: number = 0, isLoadMore: boolean = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (isLoadMore) {
           setIsLoadingMore(true);
@@ -120,8 +107,6 @@ export default function Plan() {
         }
         setHasMoreData(false);
       } finally {
-        await ensureMinLoadingTime(startTime);
-
         if (isLoadMore) {
           setIsLoadingMore(false);
         } else {
