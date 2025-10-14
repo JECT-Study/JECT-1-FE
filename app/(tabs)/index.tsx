@@ -493,13 +493,13 @@ export default function HomeScreen() {
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
             <View className="relative py-2.5">
-              <Text className="px-[18px] text-xl font-semibold text-[#424242]">
+              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-[#424242]">
                 {isLoggedIn && nickname
                   ? `${nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
               </Text>
 
-              <View className="mb-5 mt-2 flex-row gap-x-2.5 px-[18px]">
+              <View className="mb-5 flex-row gap-x-2.5 px-[18px]">
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedRecommendationsCategory === category.id;
@@ -609,7 +609,7 @@ export default function HomeScreen() {
 
             {/* 이번달 핫한 축제 */}
             <View className="py-2.5">
-              <Text className="mb-[18px] px-[18px] text-xl font-semibold text-[#424242]">
+              <Text className="mb-5 px-[18px] text-[19px] font-semibold text-[#424242]">
                 이번달 핫한 축제 🔥
               </Text>
 
@@ -633,46 +633,48 @@ export default function HomeScreen() {
             </View>
 
             {/* 금주 콘텐츠 */}
-            <View className="flex gap-y-[18px] py-2.5">
-              <Text className="px-[18px] text-xl font-semibold text-black">
+            <View className="flex py-2.5">
+              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-black">
                 금주 콘텐츠를 한눈에 👀
               </Text>
 
-              <FlatList
-                data={weekDays}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingHorizontal: 18,
-                }}
-                renderItem={({ item }) => (
-                  <Pressable
-                    className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
-                      selectedWeekDayIndex === item.dayOfIndex
-                        ? "border-0 bg-[#6C4DFF]"
-                        : "border border-[#ECECEC] bg-white"
-                    }`}
-                    onPress={() => handleDateButtonPress(item.dayOfIndex)}
-                  >
-                    <Text
-                      className={`text-lg font-medium ${
+              <View className="mb-5">
+                <FlatList
+                  data={weekDays}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
                         selectedWeekDayIndex === item.dayOfIndex
-                          ? "text-white"
-                          : "text-[#9E9E9E]"
+                          ? "border-0 bg-[#6C4DFF]"
+                          : "border border-[#ECECEC] bg-white"
                       }`}
+                      onPress={() => handleDateButtonPress(item.dayOfIndex)}
                     >
-                      {item.date}
-                    </Text>
-                    <Text
-                      className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
-                    >
-                      {item.dayName}
-                    </Text>
-                  </Pressable>
-                )}
-                keyExtractor={(item) => item.dayOfIndex.toString()}
-                ItemSeparatorComponent={() => <View className="w-2" />}
-              />
+                      <Text
+                        className={`text-lg font-medium ${
+                          selectedWeekDayIndex === item.dayOfIndex
+                            ? "text-white"
+                            : "text-[#9E9E9E]"
+                        }`}
+                      >
+                        {item.date}
+                      </Text>
+                      <Text
+                        className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
+                      >
+                        {item.dayName}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.dayOfIndex.toString()}
+                  ItemSeparatorComponent={() => <View className="w-2" />}
+                />
+              </View>
 
               {isLoadingWeekDay ? (
                 <View className="h-[270px] w-full items-center justify-center">
@@ -701,7 +703,7 @@ export default function HomeScreen() {
                 />
               )}
 
-              <View className="px-[18px]">
+              <View className="mt-5 px-[18px]">
                 <Pressable
                   className="mt-1 h-14 w-full items-center justify-center rounded-lg border border-[#6C4DFF] bg-white"
                   onPress={handleSchedulePress}
@@ -718,8 +720,8 @@ export default function HomeScreen() {
 
             {/* 이런 축제 어때요? */}
             <View className="py-2.5 pb-6">
-              <View className="mb-[18px] flex-row items-center justify-between px-[18px]">
-                <Text className="text-xl font-semibold text-[#424242]">
+              <View className="mb-5 flex-row items-center justify-between px-[18px]">
+                <Text className="text-[19px] font-semibold text-[#424242]">
                   이런 축제 어때요?
                 </Text>
                 <Pressable
