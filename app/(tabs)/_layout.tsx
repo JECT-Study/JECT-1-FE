@@ -32,6 +32,7 @@ export default function TabLayout() {
   const isHomePage = pathname === ROUTES.HOME;
   const isDetailPage = pathname?.startsWith("/detail/");
   const isSearchResultsPage = pathname?.startsWith("/search-results");
+  const isSurveyPage = pathname?.startsWith("/survey");
 
   return (
     <>
@@ -39,7 +40,7 @@ export default function TabLayout() {
         className="flex-1"
         style={{
           backgroundColor:
-            isHomePage || isDetailPage || isSearchResultsPage
+            isHomePage || isDetailPage || isSearchResultsPage || isSurveyPage
               ? "#816BFF"
               : "#FFFFFF",
         }}

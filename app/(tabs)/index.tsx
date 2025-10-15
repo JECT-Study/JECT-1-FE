@@ -568,7 +568,9 @@ export default function HomeScreen() {
                         이 공간은 잠시 비공개예요!
                       </Text>
                       <Text className="text-center text-lg text-gray-600">
-                        내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요.
+                        {!isLoggedIn
+                          ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
+                          : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
                       </Text>
                     </View>
                     <Pressable
@@ -597,7 +599,9 @@ export default function HomeScreen() {
                         }}
                       >
                         <Text className="text-base text-white">
-                          취향 분석하러 가기
+                          {!isLoggedIn
+                            ? "로그인하러 가기"
+                            : "취향 분석하러 가기"}
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
