@@ -94,14 +94,16 @@ export default function CategoryBottomSheet({
         backgroundColor: "#FFFFFF",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: -4,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 10,
+        ...(isOpen && {
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: -4,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 10,
+        }),
       }}
       handleIndicatorStyle={{
         display: "none",
