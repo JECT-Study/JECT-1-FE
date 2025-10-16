@@ -194,6 +194,8 @@ export default function DetailScreen() {
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
   const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
+  console.log("상세 데이터", contentData);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const scale = useSharedValue(1);
 
@@ -690,22 +692,21 @@ export default function DetailScreen() {
                   <Text className="mb-4 text-xl font-semibold text-gray-800">
                     컨텐츠 키워드
                   </Text>
-                  {/* 더미 데이터 임시 표시 */}
                   <View className="flex-row flex-wrap gap-2">
-                    {[
-                      "혼자 휴식",
-                      "조용한 휴식",
-                      "오감체험",
-                      "가족이랑",
-                      "감성가득",
-                    ].map((tag, index) => (
-                      <View
-                        key={index}
-                        className="rounded-lg border border-gray-300 bg-white px-2 py-1"
-                      >
-                        <Text className="text-sm text-gray-700">#{tag}</Text>
-                      </View>
-                    ))}
+                    {contentData.tags && contentData.tags.length > 0 ? (
+                      contentData.tags.map((tag, index) => (
+                        <View
+                          key={index}
+                          className="rounded-lg border border-gray-300 bg-white px-2 py-1"
+                        >
+                          <Text className="text-sm text-gray-700">#{tag}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text className="text-md text-gray-500">
+                        등록된 키워드가 없습니다.
+                      </Text>
+                    )}
                   </View>
                 </View>
 
