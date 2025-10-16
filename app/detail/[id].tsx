@@ -194,8 +194,6 @@ export default function DetailScreen() {
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
   const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
-  console.log("상세 데이터", contentData);
-
   const scrollViewRef = useRef<ScrollView>(null);
   const scale = useSharedValue(1);
 
@@ -509,6 +507,8 @@ export default function DetailScreen() {
     }
   };
 
+  console.log(contentData?.introduction);
+
   return (
     <>
       {loading || !contentData ? (
@@ -680,9 +680,16 @@ export default function DetailScreen() {
                     <Text className="w-24 text-lg font-medium text-gray-600">
                       행사내용
                     </Text>
-                    <Text className="flex-1 pr-4 text-lg text-gray-600">
-                      {contentData.introduction}
-                    </Text>
+                    <View className="flex-1 gap-1 pr-4">
+                      {contentData.introduction
+                        ?.split(/\\n/)
+                        .filter((line) => line.trim().length > 0)
+                        .map((line, index) => (
+                          <Text key={index} className="text-lg text-gray-600">
+                            {line.trim()}
+                          </Text>
+                        ))}
+                    </View>
                   </View>
                 </View>
 
