@@ -52,7 +52,7 @@ export default function CommonModal({
           className="mx-5 w-[90%] max-w-[320px] rounded-3xl bg-white p-6"
           onPress={(e) => e.stopPropagation()}
         >
-          <Text className="text-center text-lg font-semibold text-[#212121]">
+          <Text className="text-center text-xl font-semibold text-[#212121]">
             {mainTitle}
           </Text>
 
@@ -65,22 +65,20 @@ export default function CommonModal({
           <View className={`mt-6 ${showCancelButton ? "flex-row gap-3" : ""}`}>
             {showCancelButton && (
               <Pressable
-                className="flex-1 rounded-xl border border-[#E0E0E0] bg-white py-3.5"
+                className="h-14 flex-1 items-center justify-center rounded-xl border border-[#E0E0E0] bg-white active:bg-gray-100"
                 onPress={handleCancel}
-                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
               >
-                <Text className="text-center text-base font-medium text-[#616161]">
+                <Text className="text-center text-lg font-medium text-[#616161]">
                   {cancelText}
                 </Text>
               </Pressable>
             )}
 
             <Pressable
-              className={`${showCancelButton ? "flex-1" : "w-full"} rounded-xl bg-[#6C4DFF] py-3.5`}
+              className={`${showCancelButton ? "flex-1" : "w-full"} h-14 items-center justify-center rounded-xl bg-[#6C4DFF] active:bg-[#5638E6]`}
               onPress={handleConfirm}
-              style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
             >
-              <Text className="text-center text-base font-semibold text-white">
+              <Text className="text-center text-lg font-semibold text-white">
                 {confirmText}
               </Text>
             </Pressable>

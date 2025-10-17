@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
@@ -11,10 +11,8 @@ import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -22,6 +20,10 @@ import {
   View,
 } from "react-native";
 
+import Card from "@/components/home/Card";
+import HotCard from "@/components/home/HotCard";
+import MoreCard from "@/components/home/MoreCard";
+import WeeklyCard from "@/components/home/WeeklyCard";
 import ChevronRight from "@/components/icons/ChevronRight";
 import { EventIcon } from "@/components/icons/EventIcon";
 import { ExhibitionIcon } from "@/components/icons/ExhibitionIcon";
@@ -33,8 +35,7 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
-import { formatAddress } from "@/utils/addressUtils";
-import { ensureMinLoadingTime } from "@/utils/loadingUtils";
+import { mapUserRegionNameToKey } from "@/utils/searchUtils";
 
 // dayjs 한국어 로케일 설정
 dayjs.locale("ko");
@@ -78,264 +79,6 @@ const categoryConfig = [
   { id: "FESTIVAL", iconType: "festival", label: "축제" },
   { id: "EVENT", iconType: "event", label: "행사" },
 ] as const;
-
-const Card = ({ item }: { item: CustomContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="flex-row" onPress={handlePress}>
-      <View className="relative h-[111px] w-[111px] overflow-hidden rounded-[10px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[10px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[10px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[10px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="ml-3.5 flex-1">
-        <Text
-          className="mb-1 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm text-[#9E9E9E]">
-          {formatAddress(item.address)}
-        </Text>
-        <Text className="text-sm text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const HotCard = ({ item }: { item: CustomContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  // contentType에 따른 라벨 매핑
-  const getContentTypeLabel = (contentType: string) => {
-    const categoryItem = categoryConfig.find(
-      (config) => config.id === contentType,
-    );
-    return categoryItem ? categoryItem.label : "기타";
-  };
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="w-[154px]" onPress={handlePress}>
-      <View className="relative h-[154px] w-[154px] overflow-hidden rounded-[14px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[14px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[14px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[14px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="mt-2">
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
-          <Text className="text-sm font-medium text-[#707070]">
-            {getContentTypeLabel(item.contentType)}
-          </Text>
-        </View>
-        <Text
-          className="mb-1.5 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm text-[#9E9E9E]" numberOfLines={1}>
-          {formatAddress(item.address)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const WeeklyCard = ({ item }: { item: WeeklyContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="flex-row" onPress={handlePress}>
-      <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-lg"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-lg ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-lg"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="ml-3.5 flex-1">
-        <Text
-          className="mb-1 text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="text-sm font-normal text-[#9E9E9E]">
-          {formatAddress(item.address)}
-        </Text>
-        <Text className="text-sm font-normal text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-      </View>
-    </Pressable>
-  );
-};
-
-const MoreCard = ({ item }: { item: CategoryContentItem }) => {
-  const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
-  return (
-    <Pressable className="w-[154px]" onPress={handlePress}>
-      <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[14px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[14px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[14px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
-      <View className="mt-2">
-        <Text
-          className="text-lg font-semibold text-[#424242]"
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
-        <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
-        </Text>
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
-          <Text className="text-sm font-medium text-[#707070]">
-            경기 남양주시
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-};
 
 const SCROLL_THRESHOLD = 20;
 
@@ -391,9 +134,34 @@ export default function HomeScreen() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const { nickname } = useUserStore();
+  const { nickname, userRegions } = useUserStore();
 
   const router = useRouter();
+  const navigation = useNavigation();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -407,6 +175,21 @@ export default function HomeScreen() {
 
           if (accessToken && refreshToken) {
             setIsLoggedIn(true);
+
+            // nickname과 userRegions를 SecureStore에서 불러와서 Store에 설정
+            const storedNickname = await SecureStore.getItemAsync("nickname");
+            const storedUserRegions =
+              await SecureStore.getItemAsync("userRegions");
+
+            const { setNickname, setUserRegions } =
+              useUserStore.getState().action;
+
+            if (storedNickname) {
+              setNickname(storedNickname);
+            }
+            if (storedUserRegions) {
+              setUserRegions(JSON.parse(storedUserRegions));
+            }
           } else {
             setIsLoggedIn(false);
           }
@@ -426,11 +209,11 @@ export default function HomeScreen() {
   const chunkedFilteredContentData = chunkArray(weekDayData, 3);
 
   const fetchRecommendationsByCategory = useCallback(
-    async (category: CategoryType) => {
-      const startTime = dayjs().valueOf();
-
+    async (category: CategoryType, skipLoading = false) => {
       try {
-        setIsLoadingRecommendations(true);
+        if (!skipLoading) {
+          setIsLoadingRecommendations(true);
+        }
 
         const response = await authApi.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
@@ -445,19 +228,19 @@ export default function HomeScreen() {
         // 에러 시 빈 배열로 설정
         setRecommendationsData([]);
       } finally {
-        // 최소 0.2초 보장
-        await ensureMinLoadingTime(startTime);
-        setIsLoadingRecommendations(false);
+        if (!skipLoading) {
+          setIsLoadingRecommendations(false);
+        }
       }
     },
     [],
   );
 
-  const fetchHotFestivalData = useCallback(async () => {
-    const startTime = dayjs().valueOf();
-
+  const fetchHotFestivalData = useCallback(async (skipLoading = false) => {
     try {
-      setIsLoadingHotFestival(true);
+      if (!skipLoading) {
+        setIsLoadingHotFestival(true);
+      }
 
       const response = await publicApi.get(`${BACKEND_URL}/home/festival/hot`);
 
@@ -468,51 +251,54 @@ export default function HomeScreen() {
       console.error(error);
       setHotFestivalData([]);
     } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingHotFestival(false);
+      if (!skipLoading) {
+        setIsLoadingHotFestival(false);
+      }
     }
   }, []);
 
-  const fetchWeeklyContentData = useCallback(async (dateIndex: number) => {
-    const startTime = dayjs().valueOf();
+  const fetchWeeklyContentData = useCallback(
+    async (dateIndex: number, skipLoading = false) => {
+      try {
+        if (!skipLoading) {
+          setIsLoadingWeekDay(true);
+        }
 
-    try {
-      setIsLoadingWeekDay(true);
+        const weekDays = getWeekDays();
+        const selectedDayData = weekDays.find(
+          (day) => day.dayOfIndex === dateIndex,
+        );
+        if (!selectedDayData) {
+          if (!skipLoading) {
+            setIsLoadingWeekDay(false);
+          }
+          return;
+        }
 
-      const weekDays = getWeekDays();
-      const selectedDayData = weekDays.find(
-        (day) => day.dayOfIndex === dateIndex,
-      );
-      if (!selectedDayData) {
-        // early return시에도 최소 0.2초 보장
-        await ensureMinLoadingTime(startTime);
-        setIsLoadingWeekDay(false);
-        return;
+        const response = await publicApi.get(
+          `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
+        );
+
+        if (response.data.isSuccess && response.data.result) {
+          setWeekDayData(response.data.result);
+        }
+      } catch (error) {
+        console.error(error);
+        setWeekDayData([]);
+      } finally {
+        if (!skipLoading) {
+          setIsLoadingWeekDay(false);
+        }
       }
+    },
+    [],
+  );
 
-      const response = await publicApi.get(
-        `${BACKEND_URL}/home/contents/week?date=${selectedDayData.fullDate}`,
-      );
-
-      if (response.data.isSuccess && response.data.result) {
-        setWeekDayData(response.data.result);
-      }
-    } catch (error) {
-      console.error(error);
-      setWeekDayData([]);
-    } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingWeekDay(false);
-    }
-  }, []);
-
-  const fetchCategoryContentData = useCallback(async () => {
-    const startTime = dayjs().valueOf();
-
+  const fetchCategoryContentData = useCallback(async (skipLoading = false) => {
     try {
-      setIsLoadingCategoryContent(true);
+      if (!skipLoading) {
+        setIsLoadingCategoryContent(true);
+      }
 
       const response = await publicApi.get(`${BACKEND_URL}/home/category`);
 
@@ -523,9 +309,9 @@ export default function HomeScreen() {
       console.error(error);
       setCategoryContentData([]);
     } finally {
-      // 최소 0.2초 보장
-      await ensureMinLoadingTime(startTime);
-      setIsLoadingCategoryContent(false);
+      if (!skipLoading) {
+        setIsLoadingCategoryContent(false);
+      }
     }
   }, []);
 
@@ -547,10 +333,10 @@ export default function HomeScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
-      fetchRecommendationsByCategory(selectedRecommendationsCategory),
-      fetchHotFestivalData(),
-      fetchWeeklyContentData(selectedWeekDayIndex),
-      fetchCategoryContentData(),
+      fetchRecommendationsByCategory(selectedRecommendationsCategory, true),
+      fetchHotFestivalData(true),
+      fetchWeeklyContentData(selectedWeekDayIndex, true),
+      fetchCategoryContentData(true),
     ]);
     setRefreshing(false);
   }, [
@@ -591,43 +377,63 @@ export default function HomeScreen() {
     setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
   };
 
-  const handleSearchPress = () => router.push("/search-results");
+  // 검색 바 클릭 시 (region 선택 없이 이동)
+  const handleSearchPress = () => {
+    router.push("/search-keywords");
+  };
+
+  // 더보기 버튼 클릭 시 (region 선택된 채로 이동)
+  const handleMoreButtonPress = () => {
+    if (userRegions && userRegions.length > 0) {
+      // 모든 userRegions를 지역 키로 변환하여 쉼표로 연결
+      const regionKeys = userRegions
+        .map((region) => mapUserRegionNameToKey(region.name))
+        .join(",");
+      router.push({
+        pathname: "/search-results",
+        params: {
+          keyword: "",
+          category: "ALL",
+          region: regionKeys,
+        },
+      });
+    } else {
+      router.push("/search-results");
+    }
+  };
 
   const handleSchedulePress = () => router.push("/(tabs)/schedule");
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-[#816BFF]">
       {/* 기본 헤더 - 고정 */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={["#816BFF", "#5E47E3"]}
         start={{ x: 0, y: 0.14 }}
         end={{ x: 1, y: 0.86 }}
         locations={[0.0682, 0.9458]}
-      >
-        <View
-          className={`flex-row items-end justify-center px-[18px] pb-20 ${
-            Platform.OS === "web" ? "pt-10" : "h-52"
-          }`}
-        >
-          <View className="w-full flex-row items-center gap-x-2">
-            <LogoIcon width={35} height={32} />
-            <Pressable
-              className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
-              onPress={handleSearchPress}
-            >
-              <Text className="text-[#6E6E6E]">
-                이번 주말, 뭐 할지 검색해 볼까?
-              </Text>
-              <SearchIcon size={24} color="#6B51FB" />
-            </Pressable>
-          </View>
+      > */}
+      <View className="h-32 flex-row items-end justify-center bg-[#816BFF] px-[18px] pb-20">
+        <View className="w-full flex-row items-center gap-x-3">
+          <LogoIcon width={35} height={32} />
+          <Pressable
+            className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
+            onPress={handleSearchPress}
+          >
+            <Text className="text-[#6E6E6E]">
+              이번 주말, 뭐 할지 검색해 볼까?
+            </Text>
+            <SearchIcon size={24} color="#6B51FB" />
+          </Pressable>
         </View>
-      </LinearGradient>
+      </View>
+      {/* </LinearGradient> */}
 
       <View
         className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
       >
         <ScrollView
+          ref={scrollViewRef}
           className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}
           contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
@@ -643,7 +449,7 @@ export default function HomeScreen() {
           }
         >
           {/* 카테고리 버튼 */}
-          <View className="mb-7 px-6 pt-6">
+          <View className="mb-4 px-6 pt-6">
             <View className="flex-row items-center justify-center gap-x-6">
               {categoryConfig.map((item) => (
                 <Pressable
@@ -687,13 +493,13 @@ export default function HomeScreen() {
           <View className="gap-y-[34px]">
             {/* 맞춤 콘텐츠 */}
             <View className="relative py-2.5">
-              <Text className="px-[18px] text-xl font-semibold text-[#424242]">
+              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-[#424242]">
                 {isLoggedIn && nickname
                   ? `${nickname}님을 위한 맞춤 콘텐츠`
                   : "맞춤 콘텐츠"}
               </Text>
 
-              <View className="mb-5 mt-3 flex-row gap-x-2.5 px-[18px]">
+              <View className="mb-5 flex-row gap-x-2.5 px-[18px]">
                 {categoryConfig.map((category) => {
                   const isSelected =
                     selectedRecommendationsCategory === category.id;
@@ -703,7 +509,7 @@ export default function HomeScreen() {
                     <Pressable
                       key={category.id}
                       disabled={isDisabled}
-                      className={`flex h-8 w-12 items-center justify-center rounded-full border border-[#6C4DFF] ${
+                      className={`flex h-9 w-14 items-center justify-center rounded-full border border-[#6C4DFF] ${
                         isSelected ? "bg-[#6C4DFF]" : "bg-white"
                       }`}
                       onPress={() => {
@@ -711,7 +517,7 @@ export default function HomeScreen() {
                       }}
                     >
                       <Text
-                        className={`text-sm ${
+                        className={`text-base ${
                           isSelected ? "text-white" : "text-[#6C4DFF]"
                         }`}
                       >
@@ -749,7 +555,7 @@ export default function HomeScreen() {
                 />
               )}
 
-              {!isLoggedIn && (
+              {(!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
                 <BlurView
                   intensity={8}
                   className="absolute inset-0 flex items-center justify-center"
@@ -762,13 +568,19 @@ export default function HomeScreen() {
                         이 공간은 잠시 비공개예요!
                       </Text>
                       <Text className="text-center text-lg text-gray-600">
-                        내게 꼭 맞는 전시, 로그인하면 바로 보여드려요.
+                        {!isLoggedIn
+                          ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
+                          : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
                       </Text>
                     </View>
                     <Pressable
                       onPress={() => {
-                        router.dismissAll();
-                        router.push("/");
+                        if (!isLoggedIn) {
+                          router.dismissAll();
+                          router.push("/");
+                        } else {
+                          router.push("/survey");
+                        }
                       }}
                     >
                       <LinearGradient
@@ -787,7 +599,9 @@ export default function HomeScreen() {
                         }}
                       >
                         <Text className="text-base text-white">
-                          로그인하러 가기
+                          {!isLoggedIn
+                            ? "로그인하러 가기"
+                            : "취향 분석하러 가기"}
                         </Text>
                         <ChevronRight width={10} height={10} color="#FFFFFF" />
                       </LinearGradient>
@@ -799,7 +613,7 @@ export default function HomeScreen() {
 
             {/* 이번달 핫한 축제 */}
             <View className="py-2.5">
-              <Text className="mb-[18px] px-[18px] text-xl font-semibold text-[#424242]">
+              <Text className="mb-5 px-[18px] text-[19px] font-semibold text-[#424242]">
                 이번달 핫한 축제 🔥
               </Text>
 
@@ -823,46 +637,48 @@ export default function HomeScreen() {
             </View>
 
             {/* 금주 콘텐츠 */}
-            <View className="flex gap-y-[18px] py-2.5">
-              <Text className="px-[18px] text-xl font-semibold text-black">
-                금주 콘텐츠를 한눈에👀
+            <View className="flex py-2.5">
+              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-black">
+                금주 콘텐츠를 한눈에 👀
               </Text>
 
-              <FlatList
-                data={weekDays}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingHorizontal: 18,
-                }}
-                renderItem={({ item }) => (
-                  <Pressable
-                    className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
-                      selectedWeekDayIndex === item.dayOfIndex
-                        ? "border-0 bg-[#6C4DFF]"
-                        : "border border-[#ECECEC] bg-white"
-                    }`}
-                    onPress={() => handleDateButtonPress(item.dayOfIndex)}
-                  >
-                    <Text
-                      className={`text-lg font-medium ${
+              <View className="mb-5">
+                <FlatList
+                  data={weekDays}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    paddingHorizontal: 18,
+                  }}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
                         selectedWeekDayIndex === item.dayOfIndex
-                          ? "text-white"
-                          : "text-[#9E9E9E]"
+                          ? "border-0 bg-[#6C4DFF]"
+                          : "border border-[#ECECEC] bg-white"
                       }`}
+                      onPress={() => handleDateButtonPress(item.dayOfIndex)}
                     >
-                      {item.date}
-                    </Text>
-                    <Text
-                      className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
-                    >
-                      {item.dayName}
-                    </Text>
-                  </Pressable>
-                )}
-                keyExtractor={(item) => item.dayOfIndex.toString()}
-                ItemSeparatorComponent={() => <View className="w-2" />}
-              />
+                      <Text
+                        className={`text-lg font-medium ${
+                          selectedWeekDayIndex === item.dayOfIndex
+                            ? "text-white"
+                            : "text-[#9E9E9E]"
+                        }`}
+                      >
+                        {item.date}
+                      </Text>
+                      <Text
+                        className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
+                      >
+                        {item.dayName}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.dayOfIndex.toString()}
+                  ItemSeparatorComponent={() => <View className="w-2" />}
+                />
+              </View>
 
               {isLoadingWeekDay ? (
                 <View className="h-[270px] w-full items-center justify-center">
@@ -891,13 +707,13 @@ export default function HomeScreen() {
                 />
               )}
 
-              <View className="px-[18px]">
+              <View className="mt-5 px-[18px]">
                 <Pressable
-                  className="mt-1 h-[46px] w-full items-center justify-center rounded-md border border-[#6C4DFF] bg-white"
+                  className="mt-1 h-14 w-full items-center justify-center rounded-lg border border-[#6C4DFF] bg-white"
                   onPress={handleSchedulePress}
                 >
                   <View className="flex-row items-center gap-x-1.5">
-                    <Text className="text-[15px] font-normal text-[#6C4DFF]">
+                    <Text className="text-lg font-medium text-[#6C4DFF]">
                       더보기
                     </Text>
                     <ChevronRight />
@@ -908,15 +724,15 @@ export default function HomeScreen() {
 
             {/* 이런 축제 어때요? */}
             <View className="py-2.5 pb-6">
-              <View className="mb-[18px] flex-row items-center justify-between px-[18px]">
-                <Text className="text-xl font-semibold text-[#424242]">
+              <View className="mb-5 flex-row items-center justify-between px-[18px]">
+                <Text className="text-[19px] font-semibold text-[#424242]">
                   이런 축제 어때요?
                 </Text>
                 <Pressable
                   className="flex-row items-center gap-x-1.5"
-                  onPress={handleSearchPress}
+                  onPress={handleMoreButtonPress}
                 >
-                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                  <Text className="text-base font-normal text-[#9E9E9E]">
                     더보기
                   </Text>
                   <ChevronRight width={10} height={10} color="#9E9E9E" />

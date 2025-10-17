@@ -1,4 +1,4 @@
-import Svg, { Rect, Path } from "react-native-svg";
+import Svg, { Path, Rect } from "react-native-svg";
 
 interface DropdownIconProps {
   color?: string;

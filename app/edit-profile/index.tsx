@@ -8,22 +8,20 @@ import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 import CameraIcon from "@/components/icons/CameraIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
 import XIcon from "@/components/icons/X";
+import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
-import ImagePickerBottomSheet from "@/components/ui/ImagePickerBottomSheet";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import useCustomImagePicker from "@/features/user/useCustomImagePicker";
+import useCustomImagePicker from "@/hooks/useCustomImagePicker";
 import {
   useCancelEditProfile,
-  useInitializeFromUserStore,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
 import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
-  const initializeFromUserStore = useInitializeFromUserStore();
   const setGlobalNickname = useSetNickname();
   const setGlobalProfileImage = useSetProfileImage();
 
@@ -61,18 +59,21 @@ export default function EditProfile() {
         }
 
         if (savedProfileImage) {
+          console.log(
+            "📸 SecureStore에서 불러온 프로필 이미지:",
+            savedProfileImage,
+          );
           setCurrentProfileImage(savedProfileImage);
+        } else {
+          console.log("📸 SecureStore에 저장된 프로필 이미지 없음");
         }
-
-        // Zustand store도 초기화 (다른 컴포넌트와의 일관성을 위해)
-        initializeFromUserStore();
       } catch (error) {
         console.error("사용자 정보 로드 실패:", error);
       }
     };
 
     loadUserInfo();
-  }, [initializeFromUserStore]);
+  }, []);
 
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
@@ -167,7 +168,10 @@ export default function EditProfile() {
         setModalConfirmText("확인");
         setModalOnConfirm(() => () => {
           setShowModal(false);
-          router.back();
+          // 모달이 완전히 닫힌 후 화면 이동
+          setTimeout(() => {
+            router.back();
+          }, 100);
         });
         setShowModal(true);
       } else {
@@ -193,12 +197,20 @@ export default function EditProfile() {
 
   // 이미지 소스 결정 로직
   const getImageSource = () => {
-    // 1. 새로 선택한 이미지가 있고, 기본 SVG 이미지가 아닌 경우에만 사용
-    if (
+    console.log("🔍 getImageSource 호출됨");
+    console.log("  - profileUri:", profileUri);
+    console.log("  - currentProfileImage:", currentProfileImage);
+
+    // profileUri가 실제 이미지 URI인지 확인 (기본 SVG가 아닌 경우)
+    const hasNewImage =
       profileUri &&
       profileUri.trim() !== "" &&
-      !profileUri.startsWith("data:image/svg+xml")
-    ) {
+      !profileUri.startsWith("data:image/svg+xml");
+
+    console.log("  - hasNewImage:", hasNewImage);
+
+    // 1. 새로 선택한 이미지가 있으면 사용
+    if (hasNewImage) {
       console.log("✅ 새로 선택한 이미지 사용:", profileUri);
       return profileUri;
     }
@@ -233,15 +245,15 @@ export default function EditProfile() {
       <View aria-label="edit profile" className="m-6">
         <View
           aria-label="profile_image"
-          className="relative size-[94px] rounded-full"
+          className="relative size-[100px] rounded-full"
         >
           {imageSource ? (
             <Image
               source={imageSource}
-              style={{ width: 94, height: 94, borderRadius: "100%" }}
+              style={{ width: 100, height: 100, borderRadius: "100%" }}
             />
           ) : (
-            <DefaultProfileIcon size={94} />
+            <DefaultProfileIcon size={100} />
           )}
           <Pressable
             onPress={onPress}
@@ -257,17 +269,17 @@ export default function EditProfile() {
       </View>
 
       {/* 닉네임 섹션 */}
-      <View className="w-full p-6">
-        <Text>닉네임</Text>
-        <View className="relative my-3 h-[45px] w-full">
+      <View className="w-full px-6">
+        <Text className="text-lg font-medium">닉네임</Text>
+        <View className="relative my-3 h-14 w-full">
           <TextInput
-            className="h-full w-full rounded-[4px] border-[1px] border-[#D1D3D8] bg-white px-4 pr-10"
+            className="h-full w-full rounded-lg border-[1px] border-[#D1D3D8] bg-white px-4 pr-10"
             placeholder="닉네임을 입력해주세요."
             placeholderTextColor="#9CA3AF"
             onChangeText={setInputNickname}
             value={inputNickname}
             editable={!isLoading}
-            style={{ opacity: isLoading ? 0.5 : 1 }}
+            style={{ opacity: isLoading ? 0.5 : 1, fontSize: 16 }}
           />
           {inputNickname.length > 0 && (
             <Pressable
@@ -290,10 +302,25 @@ export default function EditProfile() {
       </View>
 
       {/* 이미지 피커 바텀시트 */}
-      <ImagePickerBottomSheet
+      <ActionBottomSheet
         isOpen={isBottomSheetOpen}
         onClose={onCloseBottomSheet}
-        onLibrary={onLibrary}
+        actions={[
+          {
+            label: "앨범에서 선택",
+            onPress: () => {
+              onLibrary();
+              onCloseBottomSheet();
+            },
+            color: "#007AFF",
+          },
+          {
+            label: "닫기",
+            onPress: onCloseBottomSheet,
+            color: "#007AFF",
+          },
+        ]}
+        snapPoint={200}
       />
 
       {/* 공통 모달 */}

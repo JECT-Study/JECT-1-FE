@@ -2,19 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
 import { router } from "expo-router";
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import DeleteScheduleBottomSheet from "@/components/schedule/DeleteScheduleBottomSheet";
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
+import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
@@ -23,20 +17,9 @@ import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
-import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
+import { ScheduleApiResponse } from "@/types/schedule";
 
 const SCHEDULE_LIMIT = 10;
-
-// 최소 로딩 시간 보장 함수
-const ensureMinLoadingTime = async (
-  startTime: number,
-  minTime: number = 500,
-) => {
-  const elapsedTime = dayjs().valueOf() - startTime;
-  if (elapsedTime < minTime) {
-    await new Promise((resolve) => setTimeout(resolve, minTime - elapsedTime));
-  }
-};
 
 // 선택된 날짜 헤더 포맷팅 함수
 const formatSelectedDateHeader = (dateString: string) => {
@@ -63,7 +46,6 @@ export default function Plan() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const [refresh, setRefresh] = useState<boolean>(false);
   const [showBottomSheet, setShowBottomSheet] = useState<boolean>(false);
 
   const [showDeleteAlert, setShowDeleteAlert] = useState<boolean>(false);
@@ -75,8 +57,6 @@ export default function Plan() {
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
     async (date: string, page: number = 0, isLoadMore: boolean = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (isLoadMore) {
           setIsLoadingMore(true);
@@ -127,8 +107,6 @@ export default function Plan() {
         }
         setHasMoreData(false);
       } finally {
-        await ensureMinLoadingTime(startTime);
-
         if (isLoadMore) {
           setIsLoadingMore(false);
         } else {
@@ -175,16 +153,6 @@ export default function Plan() {
   const handleScheduleItemPress = useCallback((contentId: number) => {
     router.push(`/detail/${contentId}`);
   }, []);
-
-  // 새로고침 핸들러
-  const onRefresh = useCallback(() => {
-    setRefresh(true);
-    setCurrentPage(1);
-    setHasMoreData(true);
-    fetchScheduleData(selectedDate, 0, false).finally(() => {
-      setRefresh(false);
-    });
-  }, [selectedDate, fetchScheduleData]);
 
   // 메뉴 버튼 클릭 핸들러
   const handleMenuPress = useCallback((contentId: number) => {
@@ -276,7 +244,7 @@ export default function Plan() {
           />
 
           <FlatList
-            className="mx-4 mt-7 flex-1"
+            className="mx-4 flex-1"
             data={schedules}
             renderItem={({ item }) => (
               <ScheduleItem
@@ -291,35 +259,24 @@ export default function Plan() {
               isLoading ? (
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
-                  <Text className="mt-4 text-center text-gray-500">
-                    나의 일정을 불러오는 중...
-                  </Text>
                 </View>
               ) : (
                 <ScheduleEmptyState />
               )
             }
             ListHeaderComponent={
-              schedules.length > 0
-                ? () => (
-                    <View className="mb-4">
-                      <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                        {formatSelectedDateHeader(selectedDate)}
-                      </Text>
-                    </View>
-                  )
-                : null
+              schedules.length > 0 ? (
+                <View className="mb-4">
+                  <Text className="text-[13px] font-normal text-[#9E9E9E]">
+                    {formatSelectedDateHeader(selectedDate)}
+                  </Text>
+                </View>
+              ) : null
             }
             ListFooterComponent={
               isLoadingMore && !isLoading ? (
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
-                </View>
-              ) : !hasMoreData && schedules.length > 0 ? (
-                <View className="items-center justify-center py-4">
-                  <Text className="text-sm text-gray-500">
-                    모든 일정을 불러왔습니다.
-                  </Text>
                 </View>
               ) : null
             }
@@ -329,29 +286,38 @@ export default function Plan() {
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: schedules.length === 0 ? "center" : "flex-start",
+              paddingVertical: 20,
             }}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}
             removeClippedSubviews={true}
             initialNumToRender={10}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
-            }
           />
         </CalendarProvider>
       </View>
 
       {/* 삭제 바텀 시트 */}
-      <DeleteScheduleBottomSheet
+      <ActionBottomSheet
         isOpen={showBottomSheet}
-        onDelete={handleBottomSheetDelete}
         onClose={() => {
           console.log("바텀시트 onClose 호출됨 - selectedContentId 유지");
           setShowBottomSheet(false);
           // selectedContentId는 건드리지 않음
         }}
-        onCancel={handleBottomSheetCancel}
+        actions={[
+          {
+            label: "삭제하기",
+            onPress: handleBottomSheetDelete,
+            color: "#EF4444", // red-500
+          },
+          {
+            label: "취소",
+            onPress: handleBottomSheetCancel,
+            color: "#3B82F6", // blue-500
+          },
+        ]}
+        snapPoint={200}
       />
 
       {/* 삭제 확인 모달 */}

@@ -1,5 +1,5 @@
 import { Tabs, usePathname } from "expo-router";
-import { Platform, Text } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -29,88 +29,108 @@ export default function TabLayout() {
     }
   };
 
+  const isHomePage = pathname === ROUTES.HOME;
+  const isDetailPage = pathname?.startsWith("/detail/");
+  const isSearchResultsPage = pathname?.startsWith("/search-results");
+  const isSurveyPage = pathname?.startsWith("/survey");
+
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["bottom"]}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarButton: HapticTab,
-          tabBarStyle: {
-            paddingBottom: 10,
-            paddingTop: 5,
-            height: Platform.OS === "ios" ? 60 : 70,
-            backgroundColor: "white",
-            borderTopWidth: 0, // 기존 border 제거
-            shadowColor: "#575757",
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            elevation: 0, // Android에서 그림자 제거
-          },
-          tabBarIconStyle: {
-            marginBottom: 3,
-          },
-          tabBarLabelStyle: {
-            fontSize: 11,
-          },
-          tabBarActiveTintColor: TabColors.active,
-          tabBarInactiveTintColor: TabColors.inactive,
+    <>
+      <SafeAreaView
+        className="flex-1"
+        style={{
+          backgroundColor:
+            isHomePage || isDetailPage || isSearchResultsPage || isSurveyPage
+              ? "#816BFF"
+              : "#FFFFFF",
         }}
+        edges={["top"]}
       >
-        {TAB_SCREENS.map((screen) => {
-          // 일반 탭 처리
-          return (
-            <Tabs.Screen
-              key={screen.name}
-              name={screen.name}
-              options={{
-                title: screen.title,
-                tabBarIcon: ({ size }) => {
-                  const isActive = isTabActive(screen);
-                  const color = isActive
-                    ? TabColors.active
-                    : TabColors.inactive;
-                  const iconSize = 28; // 아이콘 크기를 28로 고정
+        <View className="flex-1">
+          <Tabs
+            screenOptions={{
+              headerShown: false,
+              tabBarButton: HapticTab,
+              tabBarStyle: {
+                paddingBottom: 10,
+                paddingTop: 5,
+                height: Platform.OS === "ios" ? 60 : 70,
+                backgroundColor: "white",
+                borderTopWidth: 0, // 기존 border 제거
+                shadowColor: "#575757",
+                shadowOffset: { width: 0, height: -2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 0, // Android에서 그림자 제거
+              },
+              tabBarIconStyle: {
+                marginBottom: 3,
+              },
+              tabBarLabelStyle: {
+                fontSize: 11,
+              },
+              tabBarActiveTintColor: TabColors.active,
+              tabBarInactiveTintColor: TabColors.inactive,
+            }}
+          >
+            {TAB_SCREENS.map((screen) => {
+              // 일반 탭 처리
+              return (
+                <Tabs.Screen
+                  key={screen.name}
+                  name={screen.name}
+                  options={{
+                    title: screen.title,
+                    tabBarIcon: ({ size }) => {
+                      const isActive = isTabActive(screen);
+                      const color = isActive
+                        ? TabColors.active
+                        : TabColors.inactive;
+                      const iconSize = 28; // 아이콘 크기를 28로 고정
 
-                  // 홈, 일정, 마이페이지 아이콘의 경우 isActive prop 추가
-                  if (
-                    screen.name === "index" ||
-                    screen.name === "schedule" ||
-                    screen.name === "mypage"
-                  ) {
-                    return (
-                      <screen.Icon
-                        color={color}
-                        size={iconSize}
-                        isActive={isActive}
-                      />
-                    );
-                  }
+                      // 홈, 검색, 일정, 마이페이지 아이콘의 경우 isActive prop 추가
+                      if (
+                        screen.name === "index" ||
+                        screen.name === "search_tab" ||
+                        screen.name === "schedule" ||
+                        screen.name === "mypage"
+                      ) {
+                        return (
+                          <screen.Icon
+                            color={color}
+                            size={iconSize}
+                            isActive={isActive}
+                          />
+                        );
+                      }
 
-                  return <screen.Icon color={color} size={iconSize} />;
-                },
-                tabBarLabel: ({ focused }) => {
-                  const isActive = isTabActive(screen);
-                  const color = isActive
-                    ? TabColors.active
-                    : TabColors.inactiveText;
-                  return (
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: color,
-                        lineHeight: 11, // 웹 렌더링 호환성을 위한 설정
-                      }}
-                    >
-                      {screen.title}
-                    </Text>
-                  );
-                },
-              }}
-            />
-          );
-        })}
-      </Tabs>
-    </SafeAreaView>
+                      return <screen.Icon color={color} size={iconSize} />;
+                    },
+                    tabBarLabel: ({ focused }) => {
+                      const isActive = isTabActive(screen);
+                      const color = isActive
+                        ? TabColors.active
+                        : TabColors.inactiveText;
+                      return (
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: color,
+                            lineHeight: 11, // 웹 렌더링 호환성을 위한 설정
+                          }}
+                        >
+                          {screen.title}
+                        </Text>
+                      );
+                    },
+                  }}
+                />
+              );
+            })}
+          </Tabs>
+        </View>
+      </SafeAreaView>
+      <SafeAreaView className="bg-white" edges={["bottom"]} />
+    </>
   );
 }

@@ -14,26 +14,26 @@ export default function Terms() {
         separator
         cancel={() => router.back()}
       />
-      <View className="mt-9 w-full">
+      <View className="w-full">
         <Pressable
           onPress={() => router.push("/my/terms/service_terms")}
           className="flex h-16 w-full flex-row items-center justify-between border-b border-[#DCDEE3] px-4"
         >
-          <Text className="text-base text-[#212121]">서비스 이용약관</Text>
+          <Text className="text-lg text-[#212121]">서비스 이용약관</Text>
           <NewChevronRight />
         </Pressable>
         <Pressable
           onPress={() => router.push("/my/terms/service_privacy")}
           className="flex h-16 w-full flex-row items-center justify-between border-b border-[#DCDEE3] px-4"
         >
-          <Text className="text-base text-[#212121]">개인 정보 처리방침</Text>
+          <Text className="text-lg text-[#212121]">개인 정보 처리방침</Text>
           <NewChevronRight />
         </Pressable>
         <Pressable
           onPress={() => router.push("/my/terms/service_location")}
           className="flex h-16 w-full flex-row items-center justify-between px-4"
         >
-          <Text className="text-base text-[#212121]">
+          <Text className="text-lg text-[#212121]">
             위치기반 서비스 이용약관
           </Text>
           <NewChevronRight />

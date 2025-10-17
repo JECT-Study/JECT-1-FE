@@ -141,7 +141,7 @@ export default function ImageViewerScreen() {
           </Pressable>
 
           <Text className="text-lg font-medium text-white">
-            {currentIndex + 1}/{imageList.length}
+            {currentIndex + 1} / {imageList.length}
           </Text>
 
           <View className="w-8" />

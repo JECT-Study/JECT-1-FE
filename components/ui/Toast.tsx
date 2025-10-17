@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Animated, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import CheckmarkIcon from "@/components/icons/CheckmarkIcon";
+
 interface ToastProps {
   visible: boolean;
   message: string;
@@ -81,9 +83,9 @@ export default function Toast({
         <View className="flex-row items-center rounded-lg bg-[#424242] px-4 py-3 shadow-lg">
           {/* Blue checkmark icon */}
           <View className="mr-3 h-6 w-6 items-center justify-center rounded-full bg-[##007AFF]">
-            <Text className="text-base text-[#FAFAFA]">✓</Text>
+            <CheckmarkIcon size={10} color="white" />
           </View>
-          <Text className="flex-1 text-base text-white">{message}</Text>
+          <Text className="flex-1 text-lg text-white">{message}</Text>
         </View>
       </Pressable>
     </Animated.View>

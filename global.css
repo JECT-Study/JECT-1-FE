@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family:
+    Pretendard,
+    -apple-system,
+    system-ui,
+    sans-serif;
+}

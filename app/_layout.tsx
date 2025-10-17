@@ -12,12 +12,15 @@ import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { AppState, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+
+// 전역 플래그로 초기 URL 처리 중복 방지
+let initialURLProcessed = false;
 
 SplashScreen.setOptions({
   // duration: 1000,
@@ -30,17 +33,34 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Pretendard: require("pretendard/dist/public/static/Pretendard-Regular.otf"),
+    "Pretendard-Bold": require("pretendard/dist/public/static/Pretendard-Bold.otf"),
+    "Pretendard-SemiBold": require("pretendard/dist/public/static/Pretendard-SemiBold.otf"),
+    "Pretendard-Medium": require("pretendard/dist/public/static/Pretendard-Medium.otf"),
+    "Pretendard-Light": require("pretendard/dist/public/static/Pretendard-Light.otf"),
   });
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  // 최소 1초 타이머 설정
+  // 최소 1초 타이머 설정 (딥링크가 아닐 때만)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 1000);
+    const checkInitialUrlAndSetTimer = async () => {
+      const url = await Linking.getInitialURL();
+      const isDeepLink = url && url.includes("kakaolink");
 
-    return () => clearTimeout(timer);
+      if (isDeepLink) {
+        // 딥링크로 실행된 경우 즉시 설정
+        setMinTimeElapsed(true);
+      } else {
+        // 일반 실행인 경우 1초 지연
+        const timer = setTimeout(() => {
+          setMinTimeElapsed(true);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkInitialUrlAndSetTimer();
   }, []);
 
   // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
@@ -50,45 +70,70 @@ export default function RootLayout() {
     }
   }, [loaded, minTimeElapsed]);
 
+  // 앱이 이미 실행 중일 때만 딥링크 처리
   useEffect(() => {
     const handleDeepLink = async (url: string) => {
-      console.log("🔗 딥링크 수신:", url);
       const parsed = Linking.parse(url);
-      console.log("🔍 파싱된 URL:", parsed);
 
       // 카카오 딥링크 처리: kakao[앱키]://kakaolink?target=detail&id=123
       if (parsed.hostname === "kakaolink" && parsed.queryParams) {
         const { target, id } = parsed.queryParams;
-        console.log("🎯 카카오 딥링크 - target:", target, "id:", id);
 
         if (target === "detail" && id) {
           console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
-          router.push(`/detail/${id}`);
-        }
-      }
-      // mycode://detail/123 형태의 일반 딥링크 처리
-      else if (parsed.hostname === "detail" && parsed.path) {
-        const contentId = parsed.path.replace("/", "");
-        console.log("📍 추출된 contentId:", contentId);
-        if (contentId) {
-          router.push(`/detail/${contentId}`);
+
+          // 앱이 백그라운드에서 실행 중일 때는 활성화될 때까지 대기
+          const handleAppStateChange = (nextAppState: string) => {
+            console.log("앱 상태 변경:", nextAppState);
+            if (nextAppState === "active") {
+              console.log("앱 활성화됨 - detail 페이지로 이동");
+              router.push(`/detail/${id}`);
+              subscription.remove();
+            }
+          };
+          const subscription = AppState.addEventListener(
+            "change",
+            handleAppStateChange,
+          );
         }
       }
     };
 
     // 앱이 이미 실행 중일 때 딥링크 처리
-    const subscription = Linking.addEventListener("url", (event) => {
-      handleDeepLink(event.url);
-    });
-
-    // 앱이 종료된 상태에서 딥링크로 실행될 때 처리
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleDeepLink(url);
-      }
+    const subscription = Linking.addEventListener("url", (e) => {
+      handleDeepLink(e.url);
     });
 
     return () => subscription?.remove();
+  }, [router]);
+
+  // 앱이 종료된 상태에서 딥링크로 실행될 때만 처리
+  useEffect(() => {
+    if (!initialURLProcessed) {
+      initialURLProcessed = true;
+
+      const handleInitialURL = async () => {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          const parsed = Linking.parse(url);
+
+          // 카카오 딥링크 처리: kakao[앱키]://kakaolink?target=detail&id=123
+          if (parsed.hostname === "kakaolink" && parsed.queryParams) {
+            const { target, id } = parsed.queryParams;
+
+            if (target === "detail" && id) {
+              console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
+              // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
+              setTimeout(() => {
+                router.push(`/detail/${id}`);
+              }, 500);
+            }
+          }
+        }
+      };
+
+      handleInitialURL();
+    }
   }, [router]);
 
   if (!loaded || !minTimeElapsed) {
@@ -107,13 +152,13 @@ export default function RootLayout() {
             style={{
               flex: 1,
               alignItems: "center",
-              backgroundColor: "#010101",
+              backgroundColor: "#FFFFFF",
             }}
           >
             <View
               style={{
                 width: "100%",
-                maxWidth: "100%",
+                maxWidth: 500,
                 flex: 1,
               }}
             >
@@ -127,7 +172,10 @@ export default function RootLayout() {
                   name="(tabs)"
                   options={{ headerShown: false, gestureEnabled: false }}
                 />
-                <Stack.Screen name="+not-found" />
+                <Stack.Screen
+                  name="+not-found"
+                  options={{ headerShown: false }}
+                />
                 <Stack.Screen
                   name="my/withdrawal"
                   options={{ headerShown: false }}

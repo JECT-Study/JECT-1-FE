@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
@@ -14,8 +14,7 @@ import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
-import { ScheduleApiResponse } from "@/interfaces/search.interfaces";
-import { ensureMinLoadingTime } from "@/utils/loadingUtils";
+import { ScheduleApiResponse } from "@/types/schedule";
 
 // 페이지네이션 상수
 const SCHEDULE_LIMIT = 8;
@@ -51,6 +50,31 @@ export default function ScheduleScreen() {
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
   const router = useRouter();
+  const navigation = useNavigation();
+  const flatListRef = useRef<FlatList>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -62,8 +86,6 @@ export default function ScheduleScreen() {
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(
     async (date: string, page: number = 1, isLoadMore: boolean = false) => {
-      const startTime = dayjs().valueOf();
-
       try {
         if (isLoadMore) {
           setIsLoadingMore(true);
@@ -114,8 +136,6 @@ export default function ScheduleScreen() {
         }
         setHasMoreData(false);
       } finally {
-        await ensureMinLoadingTime(startTime);
-
         if (isLoadMore) {
           setIsLoadingMore(false);
         } else {
@@ -167,10 +187,10 @@ export default function ScheduleScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
+    <View className="flex-1 bg-white">
       <View className="flex-1 bg-white">
-        <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-          <Text className="text-center text-xl font-medium text-[#212121]">
+        <View className="h-14 items-center justify-center border-b border-[#DCDEE3] bg-white px-4">
+          <Text className="text-center text-[19px] font-semibold text-[#212121]">
             컨텐츠 일정
           </Text>
         </View>
@@ -182,7 +202,8 @@ export default function ScheduleScreen() {
           />
 
           <FlatList
-            className="mx-4 mt-7 flex-1"
+            ref={flatListRef}
+            className="mx-4 flex-1"
             data={schedules}
             renderItem={({ item }) => (
               <ScheduleItem item={item} onPress={handleScheduleItemPress} />
@@ -192,9 +213,6 @@ export default function ScheduleScreen() {
               isLoading ? (
                 <View className="flex-1 items-center justify-center py-20">
                   <ActivityIndicator size="large" color="#6C4DFF" />
-                  <Text className="mt-4 text-center text-gray-500">
-                    일정을 불러오는 중...
-                  </Text>
                 </View>
               ) : (
                 <ScheduleEmptyState />
@@ -214,12 +232,6 @@ export default function ScheduleScreen() {
                 <View className="flex-row items-center justify-center py-4">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
-              ) : !hasMoreData && schedules.length > 0 ? (
-                <View className="items-center justify-center py-4">
-                  <Text className="text-sm text-gray-500">
-                    모든 일정을 불러왔습니다.
-                  </Text>
-                </View>
               ) : null
             }
             ItemSeparatorComponent={() => (
@@ -228,6 +240,7 @@ export default function ScheduleScreen() {
             contentContainerStyle={{
               flexGrow: 1,
               justifyContent: schedules.length === 0 ? "center" : "flex-start",
+              paddingVertical: 20,
             }}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}

@@ -4,7 +4,14 @@ import { useNavigation } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import Chevron from "@/components/icons/Chevron";
-import { chunk } from "@/features/survey/chunkOption";
+
+const chunk = <T,>(array: T[], size: number): T[][] => {
+  const result: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+};
 
 export default function SurveyStep({
   question,
@@ -15,17 +22,19 @@ export default function SurveyStep({
   currentStep,
   dividedOptions,
   selectedValue,
+  multipleSelect,
 }: {
   question: string;
   options: string[];
   dividedOptions?: boolean;
-  onNext: (answerIndex: number) => void;
+  onNext: (answerIndex: number | number[]) => void;
   onBack: () => void;
   total: number;
   currentStep: number;
-  selectedValue?: number;
+  selectedValue?: number | number[];
+  multipleSelect?: boolean;
 }) {
-  const [selected, setSelected] = useState<number | null>(
+  const [selected, setSelected] = useState<number | number[] | null>(
     selectedValue ?? null,
   );
 
@@ -44,6 +53,30 @@ export default function SurveyStep({
   useEffect(() => {
     setSelected(selectedValue ?? null);
   }, [selectedValue]);
+
+  const handleSelect = (index: number) => {
+    if (multipleSelect) {
+      const currentSelected = Array.isArray(selected) ? selected : [];
+      if (currentSelected.includes(index)) {
+        setSelected(currentSelected.filter((i) => i !== index));
+      } else {
+        setSelected([...currentSelected, index]);
+      }
+    } else {
+      setSelected(index);
+    }
+  };
+
+  const isSelected = (index: number) => {
+    if (multipleSelect && Array.isArray(selected)) {
+      return selected.includes(index);
+    }
+    return selected === index;
+  };
+
+  const isNextDisabled =
+    selected === null ||
+    (multipleSelect && Array.isArray(selected) && selected.length === 0);
 
   return (
     <View className="w-full flex-1 justify-between bg-white">
@@ -77,16 +110,16 @@ export default function SurveyStep({
                     return (
                       <Pressable
                         key={globalIndex}
-                        onPress={() => setSelected(globalIndex)}
+                        onPress={() => handleSelect(globalIndex)}
                         className={`h-[58px] flex-1 items-center justify-center rounded-lg p-[10px] ${
-                          selected === globalIndex
+                          isSelected(globalIndex)
                             ? "border-[1.5px] border-main bg-sub"
                             : "bg-gray-100"
                         }`}
                       >
                         <Text
                           className={`text-center text-lg ${
-                            selected === globalIndex
+                            isSelected(globalIndex)
                               ? "font-semibold text-main"
                               : "text-gray-600"
                           }`}
@@ -104,16 +137,16 @@ export default function SurveyStep({
             : options.map((label, index) => (
                 <Pressable
                   key={index}
-                  onPress={() => setSelected(index)}
+                  onPress={() => handleSelect(index)}
                   className={`h-[58px] items-center justify-center rounded-lg p-[10px] ${
-                    selected === index
+                    isSelected(index)
                       ? "border-[2px] border-main bg-sub"
                       : "bg-gray100"
                   }`}
                 >
                   <Text
                     className={`text-center text-[16px] ${
-                      selected === index
+                      isSelected(index)
                         ? "font-semibold text-main"
                         : "text-gray600"
                     }`}
@@ -126,15 +159,15 @@ export default function SurveyStep({
       </View>
       <View className="px-4 py-6">
         <Pressable
-          className={`h-[47px] w-full items-center justify-center rounded-[6px] ${
-            selected === null ? "bg-gray300" : "bg-main"
+          className={`h-16 w-full items-center justify-center rounded-[6px] ${
+            isNextDisabled ? "bg-gray300" : "bg-main active:bg-[#5638E6]"
           }`}
-          disabled={selected === null}
+          disabled={isNextDisabled}
           onPress={() => selected !== null && onNext(selected)}
         >
           <Text
-            className={`text-center text-lg font-semibold ${
-              selected === null ? "text-gray500" : "text-white"
+            className={`text-center text-xl font-semibold ${
+              isNextDisabled ? "text-gray500" : "text-white"
             }`}
           >
             다음

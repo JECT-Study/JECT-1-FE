@@ -9,7 +9,6 @@ import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import { formatAddress } from "@/utils/addressUtils";
-import { getImageSource } from "@/utils/imageUtils";
 
 interface infoInterface {
   contentId: number;
@@ -22,7 +21,7 @@ interface infoInterface {
   likes?: number;
 }
 
-interface PostBlockProps {
+interface FavoriteContentItemProps {
   info: infoInterface;
   onLikeChange?: (
     contentId: number,
@@ -32,14 +31,19 @@ interface PostBlockProps {
   showSeparator?: boolean;
 }
 
-export default function PostBlock({
+export default function FavoriteContentItem({
   info,
   onLikeChange,
   showSeparator = true,
-}: PostBlockProps) {
+}: FavoriteContentItemProps) {
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const hasImage = info.img_url && info.img_url.trim() !== "";
+  const imageSource = hasImage
+    ? { uri: info.img_url }
+    : require("../../assets/images/content_placeholder.png");
 
   // 토큰 확인을 통한 로그인 상태 체크
   useEffect(() => {
@@ -106,17 +110,13 @@ export default function PostBlock({
 
   return (
     <>
-      <View className="flex flex-row items-center">
+      <View className="flex-row">
         <Image
-          source={
-            info.img_url
-              ? { uri: info.img_url }
-              : getImageSource(info.contentId)
-          }
+          source={imageSource}
           className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
           resizeMode="cover"
         />
-        <View className="ml-[18px] mr-2 flex-1 justify-center">
+        <View className="ml-3.5 mr-2 flex-1">
           <Text
             className="text-lg font-semibold leading-normal text-[#111]"
             numberOfLines={2}

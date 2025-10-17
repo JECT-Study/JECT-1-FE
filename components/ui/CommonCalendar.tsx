@@ -11,7 +11,6 @@ import {
   LocaleConfig,
 } from "react-native-calendars";
 
-import ChevronIndicator from "@/components/icons/ChevronIndicator";
 import CalendarHeader from "@/components/ui/CalendarHeader";
 import { CustomDay } from "@/components/ui/CustomDay";
 import { getCalendarTheme } from "@/constants/CalendarTheme";
@@ -85,12 +84,6 @@ export default function CommonCalendar({
     (month: DateData) => {
       console.log("월 변경");
 
-      // 캘린더가 접힌 상태에서는 날짜 변경하지 않음
-      if (!isCalendarExpanded) {
-        console.log("캘린더가 접힌 상태이므로 날짜 변경 안 함");
-        return;
-      }
-
       // 현재 selectedDate의 월과 다른 경우에만 업데이트
       const currentSelectedMonth = dayjs(selectedDate).format("YYYY-MM");
       const newMonth = dayjs(month.dateString).format("YYYY-MM");
@@ -103,7 +96,7 @@ export default function CommonCalendar({
         onDateChange(firstDayOfMonth);
       }
     },
-    [selectedDate, onDateChange, isCalendarExpanded],
+    [selectedDate, onDateChange],
   );
 
   // 캘린더 확장/축소 상태 변경 시 호출되는 핸들러
@@ -160,14 +153,21 @@ export default function CommonCalendar({
 
       {isInitialized && (
         <View
-          className={`items-center rounded-b-[32px] bg-white px-4 pb-2 pt-4 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
+          className={`items-center rounded-b-[32px] bg-white px-4 pb-4 pt-2 shadow-[0px_2px_14px_0px_rgba(0,0,0,0.12)]`}
         >
           <Pressable
             disabled={isToggling !== null}
             className={`p-2 ${isToggling !== null ? "opacity-50" : ""}`}
             onPress={toggleCalendar}
           >
-            <ChevronIndicator direction={isCalendarExpanded ? "up" : "down"} />
+            <View
+              style={{
+                width: 45,
+                height: 4,
+                borderRadius: 11,
+                backgroundColor: "#CDCDCD",
+              }}
+            />
           </Pressable>
         </View>
       )}

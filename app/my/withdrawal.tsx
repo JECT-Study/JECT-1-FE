@@ -66,18 +66,15 @@ export default function Withdrawal() {
 
   const handleWithdraw = async () => {
     if (checkSubmit()) {
-      console.log("이유", selected);
-      console.log("상세 이유", otherReason);
       try {
         await authApi.delete(WithdrawUrl);
-
-        console.log("회원탈퇴 성공");
 
         // 토큰 및 사용자 정보 삭제
         await SecureStore.deleteItemAsync("accessToken");
         await SecureStore.deleteItemAsync("refreshToken");
         await SecureStore.deleteItemAsync("nickname");
         await SecureStore.deleteItemAsync("profileImage");
+        await SecureStore.deleteItemAsync("userRegions");
 
         // Store 초기화
         const { clearUserInfo } = useUserStore.getState().action;
@@ -174,12 +171,12 @@ export default function Withdrawal() {
 
         <View className="pb-8">
           <Pressable
-            className={`flex h-[45px] w-full items-center justify-center rounded-lg ${
+            className={`flex h-16 w-full items-center justify-center rounded-lg ${
               checkSubmit() ? "bg-[#6C4DFF]" : "bg-[#E0E0E0]"
             }`}
             onPress={handleWithdraw}
           >
-            <Text className="text-center text-lg font-semibold text-white">
+            <Text className="text-center text-xl font-semibold text-white">
               제출
             </Text>
           </Pressable>

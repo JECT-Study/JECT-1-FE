@@ -48,14 +48,15 @@ export const kakaoLogin = async () => {
       socialType: "KAKAO",
     });
 
-    const { accessToken, refreshToken, nickname, image } = response.data.result;
-
-    console.log("📝 카카오 로그인 성공 - 사용자 정보:", {
+    const {
+      accessToken,
+      refreshToken,
       nickname,
-      image: image ? "있음" : "없음",
-      accessToken: accessToken ? "있음" : "없음",
-      refreshToken: refreshToken ? "있음" : "없음",
-    });
+      image,
+      userRegions = [],
+    } = response.data.result;
+
+    console.log("카카오 로그인", response.data.result);
 
     await SecureStore.setItemAsync("accessToken", accessToken);
     await SecureStore.setItemAsync("refreshToken", refreshToken);
@@ -63,10 +64,11 @@ export const kakaoLogin = async () => {
     // 사용자 정보도 SecureStore에 저장
     await SecureStore.setItemAsync("nickname", nickname || "");
     await SecureStore.setItemAsync("profileImage", image || "");
+    await SecureStore.setItemAsync("userRegions", JSON.stringify(userRegions));
 
     // Store에 사용자 정보 저장
     const { setUserInfo } = useUserStore.getState().action;
-    setUserInfo(nickname || "", image || "");
+    setUserInfo(nickname || "", image || "", userRegions);
 
     router.push("/(tabs)");
   } catch (error: any) {

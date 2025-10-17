@@ -66,3 +66,21 @@ export const getRegionLabel = (region: string): string => {
       return "지역";
   }
 };
+
+// userRegions의 name을 RegionBottomSheet의 key로 변환하는 함수
+export const mapUserRegionNameToKey = (regionName: string): string => {
+  const nameToKeyMap: { [key: string]: string } = {
+    서울: "SEOUL",
+    "경기·인천": "GYEONGGI_INCHEON",
+    강원: "GANGWON",
+    "충청권(충북·대전·세종)": "CHUNGCHEONG",
+    충남: "CHUNGNAM",
+    "대구·경북": "DAEGU_GYEONGBUK",
+    "경남·울산": "GYEONGNAM_ULSAN",
+    "광주·전남": "GWANGJU_JEONNAM",
+    전북: "JEONBUK",
+    부산: "BUSAN",
+    제주: "JEJU",
+  };
+  return nameToKeyMap[regionName] || "ALL";
+};

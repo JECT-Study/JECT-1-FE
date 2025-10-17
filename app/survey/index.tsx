@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
@@ -9,9 +10,10 @@ import SurveyStep from "@/components/survey/SurveyStep";
 import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
 import { authApi } from "@/features/axios/axiosInstance";
+import useUserStore from "@/stores/useUserStore";
 
 interface SurveyResult {
-  step1?: number;
+  step1?: number[];
   step2?: number;
   step3?: number;
   step4?: number;
@@ -48,8 +50,21 @@ export default function SurveyScreen() {
   ) => {
     const newContext = { ...context, step6: answerIndex };
 
-    // 첫 번째 질문의 답변을 region으로 사용
-    const region = options.Q1[context.step1 ?? 0];
+    // 지역명 변환 함수: "경기, 인천" → "경기·인천", 띄어쓰기 제거
+    const formatRegionName = (region: string) => {
+      return region.replace(/,\s*/g, "·").replace(/\s+/g, "");
+    };
+
+    // 첫 번째 질문의 답변을 regions 배열로 변환하고 포맷 적용 (API 전송용)
+    const regions = (context.step1 ?? []).map((index) =>
+      formatRegionName(options.Q1[index]),
+    );
+
+    // userRegions 저장용: id와 name을 포함한 객체 배열
+    const userRegionsWithId = (context.step1 ?? []).map((index) => ({
+      id: index + 1, // id는 1부터 시작
+      name: formatRegionName(options.Q1[index]),
+    }));
 
     const answers = [
       {
@@ -72,29 +87,35 @@ export default function SurveyScreen() {
     ];
 
     const requestBody = {
-      region,
+      regions,
       answers,
     };
 
     console.log("API 전송 데이터:", requestBody);
 
-    // // API 호출
     try {
       const response = await authApi.post("/trait-test", requestBody);
 
       if (response.data.isSuccess) {
         console.log("설문 제출 성공:", response.data);
+
+        // 설문 제출 성공 시 userRegions 업데이트 (id와 name 포함)
+        await SecureStore.setItemAsync(
+          "userRegions",
+          JSON.stringify(userRegionsWithId),
+        );
+        const { setUserRegions } = useUserStore.getState().action;
+        setUserRegions(userRegionsWithId);
+
         history.push("done", newContext);
       } else {
         throw new Error(response.data.message || "설문 제출 실패");
       }
     } catch (error) {
       console.error("설문 제출 중 오류 발생:", error);
+
       setShowErrorModal(true);
     }
-
-    // 임시로 done 페이지로 이동
-    // history.push("done", newContext);
   };
 
   return (
@@ -108,7 +129,10 @@ export default function SurveyScreen() {
             question={questions.Q1}
             options={options.Q1}
             onNext={(answerIndex) =>
-              history.push("step2", { ...context, step1: answerIndex })
+              history.push("step2", {
+                ...context,
+                step1: answerIndex as number[],
+              })
             }
             onBack={() => {
               setShowExitAlert(true);
@@ -117,6 +141,7 @@ export default function SurveyScreen() {
             currentStep={1}
             dividedOptions={true}
             selectedValue={context.step1}
+            multipleSelect={true}
           />
         )}
         step2={({ history, context }) => (
@@ -124,7 +149,10 @@ export default function SurveyScreen() {
             question={questions.Q2}
             options={options.Q2}
             onNext={(answerIndex) =>
-              history.push("step3", { ...context, step2: answerIndex })
+              history.push("step3", {
+                ...context,
+                step2: answerIndex as number,
+              })
             }
             onBack={() => history.push("step1", context)}
             total={totalQuestions}
@@ -137,7 +165,10 @@ export default function SurveyScreen() {
             question={questions.Q3}
             options={options.Q3}
             onNext={(answerIndex) =>
-              history.push("step4", { ...context, step3: answerIndex })
+              history.push("step4", {
+                ...context,
+                step3: answerIndex as number,
+              })
             }
             onBack={() => history.push("step2", context)}
             total={totalQuestions}
@@ -150,7 +181,10 @@ export default function SurveyScreen() {
             question={questions.Q4}
             options={options.Q4}
             onNext={(answerIndex) =>
-              history.push("step5", { ...context, step4: answerIndex })
+              history.push("step5", {
+                ...context,
+                step4: answerIndex as number,
+              })
             }
             onBack={() => history.push("step3", context)}
             total={totalQuestions}
@@ -163,7 +197,10 @@ export default function SurveyScreen() {
             question={questions.Q5}
             options={options.Q5}
             onNext={(answerIndex) =>
-              history.push("step6", { ...context, step5: answerIndex })
+              history.push("step6", {
+                ...context,
+                step5: answerIndex as number,
+              })
             }
             onBack={() => history.push("step4", context)}
             total={totalQuestions}
@@ -176,7 +213,7 @@ export default function SurveyScreen() {
             question={questions.Q6}
             options={options.Q6}
             onNext={(answerIndex) =>
-              handleStep6Next(answerIndex, context, history)
+              handleStep6Next(answerIndex as number, context, history)
             }
             onBack={() => history.push("step5", context)}
             total={totalQuestions}

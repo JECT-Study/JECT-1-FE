@@ -25,29 +25,36 @@ export default function CustomHeader({
   return (
     <View
       aria-label={`${title} header`}
-      className={`relative z-0 flex h-[60px] w-full flex-row items-center justify-between ${separator ? "border-b border-[#DCDEE3]" : ""} p-4`}
+      className={`relative z-0 flex h-12 w-full flex-row items-center ${separator ? "border-b border-[#DCDEE3]" : ""} px-4`}
     >
       {cancel ? (
-        <Pressable onPress={cancel} className="w-[60px] items-start">
-          {isCommit ? <XIcon size={24} /> : <Chevron direction="left" />}
+        <Pressable
+          onPress={cancel}
+          className="h-12 w-[60px] items-start justify-center"
+        >
+          {isCommit ? <XIcon size={30} /> : <Chevron direction="left" />}
         </Pressable>
       ) : (
-        <View className="w-[60px]" />
+        <View className="h-12 w-[60px]" />
       )}
 
-      <View className="flex-1 items-center">
-        <Text className="text-xl font-semibold text-[#383535]">{title}</Text>
+      <View className="absolute left-0 right-0 h-12 items-center justify-center">
+        <Text className="text-[19px] font-semibold text-[#383535]">
+          {title}
+        </Text>
       </View>
 
       {isCommit ? (
-        <Pressable
-          onPress={commit ? commit : null}
-          className="w-[60px] items-end"
-        >
-          <Text className="text-[16px] text-[#383535]">완료</Text>
-        </Pressable>
+        <View className="ml-auto">
+          <Pressable
+            onPress={commit ? commit : null}
+            className="h-12 w-[60px] items-end justify-center"
+          >
+            <Text className="text-xl font-medium text-[#383535]">완료</Text>
+          </Pressable>
+        </View>
       ) : (
-        <View className="w-[60px]" />
+        <View className="ml-auto h-12 w-[60px]" />
       )}
     </View>
   );

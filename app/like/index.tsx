@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -11,14 +12,15 @@ import {
   View,
 } from "react-native";
 
+import FavoriteContentItem from "@/components/like/FavoriteContentItem";
 import CustomHeader from "@/components/ui/CustomHeader";
-import PostBlock from "@/components/ui/PostBlock";
+import Toast from "@/components/ui/Toast";
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { categoryUnion, filterData } from "@/constants/Filter";
 import { authApi } from "@/features/axios/axiosInstance";
 
 // 좋아요 아이템 타입 정의
-type FavoriteItem = {
+interface FavoriteItem {
   contentId: number;
   likeId: number;
   title: string;
@@ -26,7 +28,7 @@ type FavoriteItem = {
   address: string;
   startDate: string;
   endDate: string;
-};
+}
 
 // 카테고리 매핑 함수 (contentType 파라미터용)
 const getCategoryParam = (category: categoryUnion) => {
@@ -42,12 +44,13 @@ const getCategoryParam = (category: categoryUnion) => {
 
 export default function Like() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [refresh, setRefresh] = useState(false);
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] =
     useState<categoryUnion>("all");
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   // 좋아요 데이터 가져오기 함수
   const fetchLikes = useCallback(
@@ -67,17 +70,16 @@ export default function Like() {
           params,
         });
 
-        const { content, last, totalElements } = response.data.result;
+        const { content, last } = response.data.result;
 
         if (isLoadMore) {
           setFavorites((prev) => [...prev, ...content]);
-          setPage(pageNumber);
         } else {
           setFavorites(content);
-          setPage(0);
         }
+        setPage(pageNumber);
 
-        setHasMore(!last && (isLoadMore ? true : totalElements > 0));
+        setHasMore(!last);
       } catch (error) {
         const axiosError = error as AxiosError;
         console.error("좋아요 데이터 로딩 실패:", axiosError);
@@ -109,7 +111,8 @@ export default function Like() {
   // 카테고리 변경 시 데이터 새로고침
   useEffect(() => {
     fetchLikes(0, false);
-  }, [selectedCategory, fetchLikes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory]);
 
   // 카테고리 변경 핸들러
   const handleCategoryChange = useCallback((category: categoryUnion) => {
@@ -125,10 +128,17 @@ export default function Like() {
       if (!isLiked) {
         // 찜 목록에서 좋아요를 취소하면 해당 항목이 사라져야 하므로 새로고침
         fetchLikes(0, false);
+        // 토스트 표시
+        setShowToast(true);
       }
     },
     [fetchLikes],
   );
+
+  // 토스트 숨김 핸들러
+  const handleToastHide = () => {
+    setShowToast(false);
+  };
 
   return (
     <SafeAreaView className="w-full flex-1 items-center bg-white">
@@ -167,40 +177,67 @@ export default function Like() {
           })}
         </View>
       </View>
-      {favorites.length === 0 && !loading ? (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-base text-gray-500">
-            일치하는 내용이 없습니다.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          className="w-full flex-1 px-6 py-2"
-          data={favorites}
-          renderItem={({ item, index }) => (
-            <PostBlock
-              info={{
-                contentId: item.contentId,
-                title: item.title,
-                address: item.address,
-                start_date: item.startDate,
-                end_date: item.endDate,
-                img_url: item.image || undefined,
-                likeId: item.likeId,
-                // likes는 PostBlock 내부에서 API로 가져옴
-              }}
-              onLikeChange={handleLikeChange}
-              showSeparator={index < favorites.length - 1}
-            />
-          )}
-          keyExtractor={(item) => item.contentId.toString()}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.8}
-          refreshControl={
-            <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
-          }
-        />
-      )}
+      <FlatList
+        className="w-full flex-1 px-6 py-2"
+        data={favorites}
+        renderItem={({ item, index }) => (
+          <FavoriteContentItem
+            info={{
+              contentId: item.contentId,
+              title: item.title,
+              address: item.address,
+              start_date: item.startDate,
+              end_date: item.endDate,
+              img_url: item.image || undefined,
+              likeId: item.likeId,
+            }}
+            onLikeChange={handleLikeChange}
+            showSeparator={index < favorites.length - 1}
+          />
+        )}
+        keyExtractor={(item) => item.contentId.toString()}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.8}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: favorites.length === 0 ? "center" : "flex-start",
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refresh}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
+        ListEmptyComponent={
+          loading ? (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color="#6C4DFF" />
+            </View>
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-base text-gray-500">
+                아직 찜한 콘텐츠가 없어요.
+              </Text>
+            </View>
+          )
+        }
+        ListFooterComponent={
+          loading && favorites.length > 0 ? (
+            <View className="flex-row items-center justify-center py-4">
+              <ActivityIndicator size="large" color="#6C4DFF" />
+            </View>
+          ) : null
+        }
+      />
+
+      {/* 토스트 */}
+      <Toast
+        visible={showToast}
+        message="관심 목록에서 삭제되었습니다."
+        onHide={handleToastHide}
+      />
     </SafeAreaView>
   );
 }

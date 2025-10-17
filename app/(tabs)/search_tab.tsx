@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
   Image,
-  Platform,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -77,7 +77,7 @@ function EventCard({ item, onPress }: EventCardProps) {
       </View>
       <View className="mt-3 w-full">
         <Text
-          className="text-lg font-semibold leading-5 text-gray-800"
+          className="text-lg font-semibold leading-6 text-gray-800"
           numberOfLines={2}
         >
           {item.title}
@@ -93,11 +93,12 @@ function EventCard({ item, onPress }: EventCardProps) {
 export default function SearchScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false); // 무한스크롤로 추가 데이터를 불러오는 중인지 여부 (하단 로딩 인디케이터 표시용)
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL"); // 선택된 카테고리 필터
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
     useState<boolean>(false); // 카테고리 바텀시트 열림/닫힘 상태
-  const [selectedRegion, setSelectedRegion] = useState<string>("ALL"); // 선택된 지역 필터
+  const [selectedRegion, setSelectedRegion] = useState<string[]>([]); // 선택된 지역 필터
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false); // 지역 바텀시트 열림/닫힘 상태
 
   const [filterSearchResults, setFilterSearchResults] = useState<
@@ -113,6 +114,32 @@ export default function SearchScreen() {
   >([]);
   const [defaultSearchPage, setDefaultSearchPage] = useState<number>(1); // 기본 검색 페이지
   const [defaultHasMoreData, setDefaultHasMoreData] = useState<boolean>(true); // 기본 검색 더 불러올 데이터 있는지
+
+  const navigation = useNavigation();
+  const flatListRef = useRef<FlatList>(null);
+  const isFocusedRef = useRef(false);
+
+  // 포커스 상태 추적
+  useFocusEffect(
+    useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, []),
+  );
+
+  // 탭 재클릭 시 스크롤을 최상단으로 이동
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("tabPress" as any, () => {
+      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
+      if (isFocusedRef.current) {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -194,7 +221,7 @@ export default function SearchScreen() {
 
   // 컴포넌트 마운트 시 기본 검색 실행
   useEffect(() => {
-    if (selectedCategory === "ALL" && selectedRegion === "ALL") {
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
       searchDefault(1, false);
       setIsFilterSearchMode(false);
     }
@@ -205,7 +232,7 @@ export default function SearchScreen() {
   const searchByFilters = useCallback(
     async (
       category: string,
-      region: string,
+      regions: string[],
       page: number = 1,
       isLoadMore: boolean = false,
     ) => {
@@ -217,7 +244,10 @@ export default function SearchScreen() {
           setIsFilterSearchMode(true);
         }
 
-        const regionKeyword = getRegionKeyword(region);
+        // 여러 지역의 키워드를 배열로 변환
+        const regionKeywords = regions.map((region) =>
+          getRegionKeyword(region),
+        );
 
         // API 파라미터 구성
         const params: any = {
@@ -226,13 +256,14 @@ export default function SearchScreen() {
           size: SEARCH_LIMIT,
         };
 
-        // 카테고리와 지역 필터 조건 추가
+        // 카테고리 필터 조건 추가
         if (category !== "ALL") {
           params.category = category;
         }
 
-        if (region !== "ALL") {
-          params.region = regionKeyword;
+        // 지역 필터 조건 추가 (배열로 전달)
+        if (regions.length > 0) {
+          params.regions = regionKeywords;
         }
 
         const response = await authApi.get<CategorySearchResponse>(
@@ -318,15 +349,15 @@ export default function SearchScreen() {
   }, []);
 
   // 지역 선택 처리
-  const handleRegionSelect = useCallback((region: string) => {
-    setSelectedRegion(region);
+  const handleRegionSelect = useCallback((regions: string[]) => {
+    setSelectedRegion(regions);
   }, []);
 
   // 지역 바텀시트에서 검색 버튼 클릭 시
   const handleRegionSearchPress = useCallback(
-    (region: string) => {
-      setSelectedRegion(region);
-      searchByFilters(selectedCategory, region, 1, false);
+    (regions: string[]) => {
+      setSelectedRegion(regions);
+      searchByFilters(selectedCategory, regions, 1, false);
     },
     [selectedCategory, searchByFilters],
   );
@@ -380,17 +411,26 @@ export default function SearchScreen() {
     [handleCardPress],
   );
 
-  // ListFooterComponent 조건 변수들
-  const isFilterSearchComplete =
-    isFilterSearchMode && !filterHasMoreData && filterSearchResults.length > 0;
-  const isDefaultSearchComplete =
-    !isFilterSearchMode &&
-    !defaultHasMoreData &&
-    defaultSearchResults.length > 0;
+  // 새로고침 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    if (isFilterSearchMode) {
+      await searchByFilters(selectedCategory, selectedRegion, 1, false);
+    } else {
+      await searchDefault(1, false);
+    }
+    setRefreshing(false);
+  }, [
+    isFilterSearchMode,
+    selectedCategory,
+    selectedRegion,
+    searchByFilters,
+    searchDefault,
+  ]);
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
-      <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
+    <View className="flex-1 bg-white">
+      <View className="px-4 pb-4 pt-2">
         <View className="flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 py-3">
           <SearchIcon size={20} color="#6C4DFF" />
           <Pressable
@@ -400,7 +440,7 @@ export default function SearchScreen() {
                 pathname: "/search-keywords",
                 params: {
                   category: selectedCategory,
-                  region: selectedRegion,
+                  region: selectedRegion.join(","),
                 },
               })
             }
@@ -429,7 +469,7 @@ export default function SearchScreen() {
         </View>
 
         <Pressable
-          className={`mr-3 flex-row items-center rounded-full px-3 py-2 ${
+          className={`mr-3 flex-row items-center rounded-full px-3 py-2.5 ${
             isCategoryFilterOpen || selectedCategory !== "ALL"
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isRegionFilterOpen
@@ -464,8 +504,8 @@ export default function SearchScreen() {
         </Pressable>
 
         <Pressable
-          className={`flex-row items-center rounded-full px-3 py-2 ${
-            isRegionFilterOpen || selectedRegion !== "ALL"
+          className={`flex-row items-center rounded-full px-3 py-2.5 ${
+            isRegionFilterOpen || selectedRegion.length > 0
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isCategoryFilterOpen
                 ? "border border-[#E0E0E0] bg-gray-100"
@@ -476,20 +516,24 @@ export default function SearchScreen() {
         >
           <Text
             className={`mr-1 text-[14px] ${
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "text-[#6C4DFF]"
                 : isCategoryFilterOpen
                   ? "text-[#9CA3AF]"
                   : "text-[#424242]"
             }`}
           >
-            {getRegionLabel(selectedRegion)}
+            {selectedRegion.length === 0
+              ? "지역"
+              : selectedRegion.length === 1
+                ? getRegionLabel(selectedRegion[0])
+                : `${getRegionLabel(selectedRegion[0])} 외 ${selectedRegion.length - 1}`}
           </Text>
           <Chevron
             direction="down"
             size={12}
             color={
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "#6C4DFF"
                 : isCategoryFilterOpen
                   ? "#9CA3AF"
@@ -502,6 +546,7 @@ export default function SearchScreen() {
       <Divider />
 
       <FlatList
+        ref={flatListRef}
         className="pt-8"
         data={isFilterSearchMode ? filterSearchResults : defaultSearchResults}
         keyExtractor={(item) => item.id.toString()}
@@ -509,6 +554,12 @@ export default function SearchScreen() {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 100,
+          flexGrow: 1,
+          justifyContent:
+            (isFilterSearchMode ? filterSearchResults : defaultSearchResults)
+              .length === 0
+              ? "center"
+              : "flex-start",
         }}
         columnWrapperStyle={{
           justifyContent: "space-between",
@@ -517,13 +568,18 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
         ListEmptyComponent={
           isLoading ? (
             <View className="flex-1 items-center justify-center py-20">
               <ActivityIndicator size="large" color="#6C4DFF" />
-              <Text className="mt-4 text-center text-gray-500">
-                {isFilterSearchMode ? "필터 검색 중..." : "검색 중..."}
-              </Text>
             </View>
           ) : (
             <View className="flex-1 items-center justify-center py-20">
@@ -543,12 +599,6 @@ export default function SearchScreen() {
           isLoadingMore && !isLoading ? (
             <View className="flex-row items-center justify-center py-4">
               <ActivityIndicator size="large" color="#6C4DFF" />
-            </View>
-          ) : isFilterSearchComplete || isDefaultSearchComplete ? (
-            <View className="items-center justify-center py-4">
-              <Text className="text-sm text-gray-500">
-                모든 검색 결과를 불러왔습니다.
-              </Text>
             </View>
           ) : null
         }

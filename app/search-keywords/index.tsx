@@ -26,10 +26,7 @@ export default function SearchKeywords() {
   const inputRef = useRef<TextInput>(null);
 
   // URL 파라미터에서 카테고리와 지역 값 받기
-  const { category = "ALL", region = "ALL" } = useLocalSearchParams();
-
-  console.log("받은 카테고리:", category);
-  console.log("받은 지역:", region);
+  const { category = "ALL", region = "" } = useLocalSearchParams();
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -136,7 +133,7 @@ export default function SearchKeywords() {
   return (
     <View className="flex-1 bg-white pt-[65px]">
       {/* 검색바 영역 */}
-      <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
+      <View className="px-4 pb-4 pt-2">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
             <BackArrow />

@@ -60,9 +60,9 @@ export default function CategoryBottomSheet({
   // 초기화 버튼 처리
   const handleReset = useCallback(() => {
     setTempSelectedCategory("ALL");
-    onCategorySelect("ALL");
+    onSearch("ALL");
     onClose();
-  }, [onCategorySelect, onClose]);
+  }, [onSearch, onClose]);
 
   // 검색 버튼 처리
   const handleSearch = useCallback(() => {
@@ -94,14 +94,16 @@ export default function CategoryBottomSheet({
         backgroundColor: "#FFFFFF",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: -4,
-        },
-        shadowOpacity: isOpen ? 0.1 : 0,
-        shadowRadius: isOpen ? 8 : 0,
-        elevation: isOpen ? 10 : 0,
+        ...(isOpen && {
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: -4,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 10,
+        }),
       }}
       handleIndicatorStyle={{
         display: "none",
@@ -155,21 +157,21 @@ export default function CategoryBottomSheet({
         {/* 하단 버튼들 */}
         <View className="flex-row gap-3">
           <Pressable
-            className="rounded-lg border border-[#E0E0E0] py-4"
+            className="h-16 items-center justify-center rounded-lg border border-[#E0E0E0] active:bg-gray-100"
             onPress={handleReset}
             style={[{ flex: 3 }]}
           >
-            <Text className="text-center text-lg font-medium text-[#707070]">
+            <Text className="text-center text-xl font-medium text-[#707070]">
               초기화
             </Text>
           </Pressable>
 
           <Pressable
-            className="rounded-lg bg-[#6C4DFF] py-4"
+            className="h-16 items-center justify-center rounded-lg bg-[#6C4DFF] active:bg-[#5638E6]"
             onPress={handleSearch}
             style={[{ flex: 7 }]}
           >
-            <Text className="text-center text-lg font-medium text-white">
+            <Text className="text-center text-xl font-semibold text-white">
               검색
             </Text>
           </Pressable>

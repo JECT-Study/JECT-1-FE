@@ -4,7 +4,7 @@ export default {
   name: "마이코드",
   slug: "mycode",
   owner: "donggukim",
-  version: "1.0.2",
+  version: "1.0.4",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
   scheme: "mycode",
@@ -16,12 +16,14 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "22",
+    buildNumber: "34",
     backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
     },
     infoPlist: {
+      CFBundleDevelopmentRegion: "ko",
+      CFBundleLocalizations: ["ko"],
       LSApplicationQueriesSchemes: [
         "kakaokompassauth",
         "kakaolink",
@@ -46,19 +48,6 @@ export default {
     edgeToEdgeEnabled: true,
     icon: "./assets/mycode_icon.png",
     backgroundColor: "#111111",
-    adaptiveIcon: {
-      foregroundImage: "./assets/mycode_icon.png",
-      backgroundColor: "#6B51FB",
-    },
-    intentFilters: [
-      {
-        action: "VIEW",
-        data: {
-          scheme: "nmap",
-        },
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-    ],
   },
 
   web: {
@@ -76,6 +65,9 @@ export default {
         imageWidth: 270,
         resizeMode: "contain",
         backgroundColor: "#6C4DFF",
+        android: {
+          imageWidth: 190,
+        },
       },
     ],
     [
@@ -117,6 +109,7 @@ export default {
       },
     ],
     "expo-maps",
+    "./plugins/withAndroidQueries",
   ],
 
   experiments: {

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
@@ -13,13 +13,13 @@ import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
 import CommonModal from "@/components/ui/CommonModal";
-import usePageNavigation from "@/hooks/usePageNavigation";
-import useUserStore from "@/stores/useUserStore";
+import useUserStore, {
+  useIsLoggedIn,
+  useNickname,
+  useProfileImage,
+} from "@/stores/useUserStore";
 
 export default function MyScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [nickname, setNickname] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
@@ -28,8 +28,11 @@ export default function MyScreen() {
     useState<boolean>(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState<string>("");
 
-  const { goEditProfile, goLike, goPlan, goSurvey, goTerms, goWithdrawal } =
-    usePageNavigation();
+  const isFirstLoad = useRef<boolean>(true);
+
+  const isLoggedIn = useIsLoggedIn();
+  const nickname = useNickname();
+  const profileImage = useProfileImage();
 
   const handleAuthAction = async () => {
     // 항상 로그아웃 확인 모달 표시
@@ -78,42 +81,60 @@ export default function MyScreen() {
     setShowLogoutAlert(false);
   };
 
-  // 화면 포커스 시 실행 (마운트 시도 포함)
+  // 화면 포커스 시 실행
   useFocusEffect(
     useCallback(() => {
       // StatusBar 스타일을 dark로 설정
       setStatusBarStyle("dark");
 
+      // 모달 상태 초기화
+      setShowStatusModal(false);
+      setShowLogoutAlert(false);
+      setShowLoginPromptModal(false);
+
+      // SecureStore의 토큰을 확인하고 로그인 상태 동기화
       const checkLoginStatus = async () => {
-        setIsLoading(true);
         try {
+          // 첫 로드일 때만 로딩 스피너 표시
+          if (isFirstLoad.current) {
+            setIsLoading(true);
+          }
+
           const accessToken = await SecureStore.getItemAsync("accessToken");
           const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
+          const { setLoggedIn } = useUserStore.getState().action;
 
-            // 로그인 상태일 때 사용자 정보도 SecureStore에서 로드
-            const savedNickname = await SecureStore.getItemAsync("nickname");
-            const savedProfileImage =
+          if (accessToken && refreshToken) {
+            setLoggedIn(true);
+
+            // nickname과 profileImage도 SecureStore에서 불러와서 Store에 설정
+            const storedNickname = await SecureStore.getItemAsync("nickname");
+            const storedProfileImage =
               await SecureStore.getItemAsync("profileImage");
 
-            setNickname(savedNickname || "");
-            setProfileImage(savedProfileImage || "");
+            const { setNickname, setProfileImage } =
+              useUserStore.getState().action;
+
+            if (storedNickname) {
+              setNickname(storedNickname);
+            }
+            if (storedProfileImage) {
+              setProfileImage(storedProfileImage);
+            }
           } else {
-            setIsLoggedIn(false);
-            setNickname("");
-            setProfileImage("");
+            setLoggedIn(false);
           }
         } catch (error) {
-          console.log("❌ MyScreen 토큰 확인 중 에러:", error);
-          setIsLoggedIn(false);
-          setNickname("");
-          setProfileImage("");
+          console.log("❌ 토큰 확인 중 에러:", error);
         } finally {
-          setIsLoading(false);
+          if (isFirstLoad.current) {
+            setIsLoading(false);
+            isFirstLoad.current = false;
+          }
         }
       };
+
       checkLoginStatus();
     }, []),
   );
@@ -125,7 +146,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goEditProfile();
+    router.push("/edit-profile");
   };
 
   // 프로필 이미지 결정 로직
@@ -151,7 +172,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goPlan();
+    router.push("/plan");
   };
 
   // 관심목록 버튼 클릭 핸들러
@@ -161,7 +182,7 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goLike();
+    router.push("/like");
   };
 
   // 취향 분석하기 버튼 클릭 핸들러
@@ -171,17 +192,13 @@ export default function MyScreen() {
       setShowLoginPromptModal(true);
       return;
     }
-    goSurvey();
+    router.push("/survey");
   };
 
-  return isLoading ? (
-    <View className="flex-1 items-center justify-center bg-white">
-      <ActivityIndicator size="large" color="#6C4DFF" />
-    </View>
-  ) : (
-    <View className="w-full flex-1 bg-white pt-[65px]">
-      <View className="border-b border-[#DCDEE3] bg-white px-4 py-3">
-        <Text className="text-center text-xl font-medium text-[#212121]">
+  return (
+    <View className="w-full flex-1 bg-white">
+      <View className="h-14 items-center justify-center border-b border-[#DCDEE3] bg-white px-4">
+        <Text className="text-center text-[19px] font-semibold text-[#212121]">
           마이페이지
         </Text>
       </View>
@@ -203,20 +220,22 @@ export default function MyScreen() {
               )}
             </View>
             <View className="ml-2 h-full justify-center p-2">
-              <Text className="mr-1 text-[16px]">{getDisplayName()}</Text>
+              <Text className="mr-1 text-xl font-medium">
+                {getDisplayName()}
+              </Text>
             </View>
           </View>
 
           <Pressable
-            className="mx-4 mt-4 flex h-10 items-center justify-center rounded-[4px] bg-gray-100"
+            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-lg bg-gray-100"
             onPress={handleEditProfile}
           >
-            <Text className="text-sm font-medium text-[#424242]">
+            <Text className="text-base font-semibold text-[#424242]">
               프로필 수정
             </Text>
           </Pressable>
 
-          <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-md bg-[#F2F3F6]">
+          <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-lg bg-[#F2F3F6]">
             <Pressable
               onPress={handlePlan}
               className="m-2 flex h-[70px] w-[105px] items-center justify-center"
@@ -260,7 +279,7 @@ export default function MyScreen() {
               마이코드와 함께하세요!
             </Text>
             <Pressable
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-[#6C4DFF] px-6"
+              className="flex h-16 w-full items-center justify-center rounded-xl bg-[#6C4DFF] px-6 active:bg-[#5638E6]"
               onPress={() => {
                 router.dismissAll();
                 router.push("/");
@@ -281,31 +300,38 @@ export default function MyScreen() {
 
       <View className="w-full px-4">
         <Pressable
-          onPress={() => goTerms()}
-          className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+          onPress={() => router.push("/terms")}
+          className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
         >
-          <Text className="text-base">이용약관</Text>
+          <Text className="text-lg">이용약관</Text>
           <NewChevronRight />
         </Pressable>
         {isLoggedIn && (
           <Pressable
             onPress={handleAuthAction}
-            className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC]"
+            className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
           >
-            <Text className="text-base">로그아웃</Text>
+            <Text className="text-lg">로그아웃</Text>
             <NewChevronRight />
           </Pressable>
         )}
         {isLoggedIn && (
           <Pressable
-            onPress={() => goWithdrawal()}
-            className="flex h-16 w-full flex-row items-center justify-between"
+            onPress={() => router.push("/my/withdrawal")}
+            className="flex h-16 w-full flex-row items-center justify-between px-2"
           >
-            <Text className="text-base">회원탈퇴</Text>
+            <Text className="text-lg">회원탈퇴</Text>
             <NewChevronRight />
           </Pressable>
         )}
       </View>
+
+      {/* 로딩 스피너 */}
+      {isLoading && (
+        <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center bg-white">
+          <ActivityIndicator size="large" color="#6C4DFF" />
+        </View>
+      )}
 
       {/* 로그아웃 확인 모달 */}
       <CommonModal

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { Pressable, Text, View } from "react-native";
@@ -18,6 +20,8 @@ import { authApi } from "@/features/axios/axiosInstance";
 // dayjs 플러그인 확장 및 타임존 설정
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 dayjs.tz.setDefault("Asia/Seoul");
 
 // 한국어 로케일 설정
@@ -80,13 +84,7 @@ export default function DatePickerBottomSheet({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<string>(() => {
-    try {
-      return dayjs(startDate).isValid()
-        ? dayjs(startDate).format("YYYY-MM-DD")
-        : dayjs().format("YYYY-MM-DD");
-    } catch {
-      return dayjs().format("YYYY-MM-DD");
-    }
+    return dayjs().format("YYYY-MM-DD");
   });
 
   const bottomSheetRef = useRef<BottomSheet | null>(null);
@@ -96,25 +94,31 @@ export default function DatePickerBottomSheet({
   useEffect(() => {
     if (isOpen) {
       bottomSheetRef.current?.expand();
-      // 바텀시트가 열릴 때마다 startDate로 리셋하고 선택된 날짜 초기화
-      try {
-        const validStartDate = dayjs(startDate).isValid()
-          ? startDate
-          : dayjs().format("YYYY-MM-DD");
-        setCurrentMonth(validStartDate);
-      } catch {
-        setCurrentMonth(dayjs().format("YYYY-MM-DD"));
-      }
+      // 바텀시트가 열릴 때마다 오늘 날짜로 리셋하고 선택된 날짜 초기화
+      setCurrentMonth(dayjs().format("YYYY-MM-DD"));
       setSelectedDate(null);
     } else {
       bottomSheetRef.current?.close();
     }
-  }, [isOpen, startDate]);
+  }, [isOpen]);
 
   // 날짜 선택 처리
-  const handleDayPress = useCallback((day: DateData) => {
-    setSelectedDate(day.dateString);
-  }, []);
+  const handleDayPress = useCallback(
+    (day: DateData) => {
+      const selectedDay = dayjs(day.dateString);
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+
+      // 콘텐츠 기간 내의 날짜만 선택 가능
+      if (
+        selectedDay.isSameOrAfter(start, "day") &&
+        selectedDay.isSameOrBefore(end, "day")
+      ) {
+        setSelectedDate(day.dateString);
+      }
+    },
+    [startDate, endDate],
+  );
 
   // 월 변경 처리
   const handleMonthChange = useCallback((month: DateData) => {
@@ -164,11 +168,9 @@ export default function DatePickerBottomSheet({
       <CalendarHeader
         selectedDate={currentMonth}
         setSelectedDate={handleHeaderMonthChange}
-        minDate={startDate}
-        maxDate={endDate}
       />
     );
-  }, [currentMonth, handleHeaderMonthChange, startDate, endDate]);
+  }, [currentMonth, handleHeaderMonthChange]);
 
   // 마킹된 날짜들 생성
   const markedDates = useMemo(() => {
@@ -181,21 +183,29 @@ export default function DatePickerBottomSheet({
         .startOf("day");
       const end = dayjs.tz(endDate, "YYYY-MM-DD", "Asia/Seoul").endOf("day");
 
-      console.log(start);
-
       if (!start.isValid() || !end.isValid()) {
         return marked;
       }
 
-      let current = start;
+      // 현재 월의 이전/다음 월 포함하여 모든 날짜를 순회하면서 범위 밖의 날짜는 비활성화
+      const currentMonthStart = dayjs(currentMonth)
+        .startOf("month")
+        .subtract(7, "day"); // 이전 월 포함
+      const currentMonthEnd = dayjs(currentMonth).endOf("month").add(14, "day"); // 다음 월 포함
 
-      // 시작일부터 종료일까지 모든 날짜를 활성화
-      while (current.isSameOrBefore(end, "day")) {
+      let current = currentMonthStart;
+
+      while (current.isSameOrBefore(currentMonthEnd, "day")) {
         const dateString = current.format("YYYY-MM-DD");
+        const isInRange =
+          current.isSameOrAfter(start, "day") &&
+          current.isSameOrBefore(end, "day");
+
         marked[dateString] = {
-          disabled: false,
-          disableTouchEvent: false,
+          disabled: !isInRange,
+          disableTouchEvent: !isInRange,
         };
+
         current = current.add(1, "day");
       }
 
@@ -214,7 +224,7 @@ export default function DatePickerBottomSheet({
     }
 
     return marked;
-  }, [startDate, endDate, selectedDate]);
+  }, [startDate, endDate, selectedDate, currentMonth]);
 
   return (
     <BottomSheet
@@ -279,16 +289,13 @@ export default function DatePickerBottomSheet({
 
         <View className="p-4">
           <Pressable
-            className={`flex-1 rounded-lg py-4 ${
-              selectedDate ? "bg-[#6C4DFF]" : "bg-[#BDBDBD]"
+            className={`h-16 items-center justify-center rounded-lg ${
+              selectedDate ? "bg-[#6C4DFF] active:bg-[#5638E6]" : "bg-[#BDBDBD]"
             }`}
             onPress={handleAddMySchedule}
             disabled={!selectedDate}
-            style={({ pressed }) => [
-              { opacity: pressed && selectedDate ? 0.8 : 1 },
-            ]}
           >
-            <Text className="text-center text-lg font-semibold text-white">
+            <Text className="text-center text-xl font-semibold text-white">
               내 일정에 추가하기
             </Text>
           </Pressable>

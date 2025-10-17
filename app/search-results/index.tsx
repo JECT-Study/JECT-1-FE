@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
+  RefreshControl,
   Text,
   TextInput,
   View,
@@ -21,6 +22,7 @@ import FilterIcon from "@/components/icons/FilterIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import FilterBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
+import CommonModal from "@/components/ui/CommonModal";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -80,7 +82,7 @@ function EventCard({ item, onPress }: EventCardProps) {
       </View>
       <View className="mt-3 w-full">
         <Text
-          className="text-lg font-semibold leading-5 text-gray-800"
+          className="text-lg font-semibold leading-6 text-gray-800"
           numberOfLines={2}
         >
           {item.title}
@@ -98,29 +100,33 @@ export default function SearchResults() {
   const {
     keyword = "",
     category = "ALL",
-    region = "ALL",
+    region = "",
   } = useLocalSearchParams();
 
-  console.log("받은 검색어:", keyword);
-  console.log("받은 카테고리:", category);
-  console.log("받은 지역:", region);
-
   const [searchText, setSearchText] = useState<string>(keyword as string);
+  const [lastValidSearchText, setLastValidSearchText] = useState<string>(
+    keyword as string,
+  );
   const [searchResults, setSearchResults] = useState<SearchContentItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(
     category as string,
   );
   const [isCategoryFilterOpen, setIsCategoryFilterOpen] =
     useState<boolean>(false);
-  const [selectedRegion, setSelectedRegion] = useState<string>(
-    region as string,
+  const [selectedRegion, setSelectedRegion] = useState<string[]>(
+    region && region !== "ALL"
+      ? (region as string).split(",").filter((r) => r)
+      : [],
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState<boolean>(false);
+  const [showEmptyKeywordModal, setShowEmptyKeywordModal] =
+    useState<boolean>(false);
 
   // 탭 포커스 시 StatusBar 스타일 설정
   useFocusEffect(
@@ -129,12 +135,79 @@ export default function SearchResults() {
     }, []),
   );
 
+  // 기본 검색 함수 (둘 다 ALL일 때)
+  const searchDefault = useCallback(
+    async (page: number = 1, isLoadMore: boolean = false) => {
+      try {
+        if (isLoadMore) {
+          setIsLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+
+        const response = await authApi.get(
+          `https://mycodemycode.site/search?page=${page}&limit=10&sort=latest`,
+        );
+
+        if (response.data.isSuccess && response.data.result) {
+          const { contents, currentPage, totalCount } = response.data.result;
+
+          if (contents.length === 0 && isLoadMore) {
+            setHasMoreData(false);
+            return;
+          }
+
+          const transformedResults: SearchContentItem[] = contents.map(
+            (item: any) => ({
+              id: item.id,
+              title: item.title,
+              thumbnailUrl: item.thumbnailUrl || "",
+              category: item.category,
+              address: item.address,
+              date: item.date || "",
+              views: item.views || 0,
+            }),
+          );
+
+          if (isLoadMore) {
+            setSearchResults((prev) => [...prev, ...transformedResults]);
+          } else {
+            setSearchResults(transformedResults);
+          }
+
+          setCurrentPage(currentPage);
+          const totalPages = Math.ceil(totalCount / 10);
+          setHasMoreData(currentPage < totalPages && contents.length === 10);
+        } else {
+          if (!isLoadMore) {
+            setSearchResults([]);
+          }
+          setHasMoreData(false);
+        }
+      } catch (error) {
+        console.error("기본 검색 실패:", error);
+        if (!isLoadMore) {
+          setSearchResults([]);
+        }
+        setHasMoreData(false);
+      } finally {
+        if (isLoadMore) {
+          setIsLoadingMore(false);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
   // 검색 실행 함수
   const executeSearch = useCallback(
     async (
       searchKeyword: string,
       page: number = 1,
       isLoadMore: boolean = false,
+      regions: string[] = selectedRegion,
     ) => {
       try {
         if (isLoadMore) {
@@ -143,28 +216,29 @@ export default function SearchResults() {
           setIsLoading(true);
         }
 
-        const regionKeyword = getRegionKeyword(selectedRegion);
+        // 여러 지역의 키워드를 배열로 변환
+        const regionKeywords = regions.map((region) =>
+          getRegionKeyword(region),
+        );
 
         const params: any = {
           keyword: searchKeyword || "", // 빈 문자열도 허용
           page: page,
-          limit: SEARCH_LIMIT,
+          size: SEARCH_LIMIT,
         };
 
         if (selectedCategory !== "ALL") {
           params.category = selectedCategory;
         }
 
-        if (selectedRegion !== "ALL") {
-          params.region = regionKeyword;
+        if (regions.length > 0) {
+          params.regions = regionKeywords;
         }
 
         const response = await authApi.get<CategorySearchResponse>(
           `${BACKEND_URL}/search/results`,
           { params },
         );
-
-        console.log("params", params);
 
         if (response.data.isSuccess && response.data.result) {
           const { contentList, pageInfo } = response.data.result;
@@ -189,9 +263,6 @@ export default function SearchResults() {
 
           setCurrentPage(pageInfo.currentPage);
           setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
-
-          console.log("검색 결과:", transformedResults);
-          console.log("검색 파라미터:", params);
         } else {
           if (!isLoadMore) {
             setSearchResults([]);
@@ -217,15 +288,18 @@ export default function SearchResults() {
 
   // 페이지 로드 시 자동 검색 실행
   useEffect(() => {
-    // keyword가 있거나, 카테고리나 지역 필터가 설정된 경우 검색 실행
-    if (
+    // 둘 다 ALL일 때는 기본 검색 API 호출
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+      searchDefault(1, false);
+    } else if (
+      // keyword가 있거나, 카테고리나 지역 필터가 설정된 경우 검색 실행
       (keyword && (keyword as string).trim()) ||
       selectedCategory !== "ALL" ||
-      selectedRegion !== "ALL"
+      selectedRegion.length > 0
     ) {
       executeSearch((keyword as string) || "", 1, false);
     }
-  }, [keyword, selectedCategory, selectedRegion, executeSearch]);
+  }, [keyword, selectedCategory, selectedRegion, executeSearch, searchDefault]);
 
   const handleFilterOpen = useCallback(() => {
     setIsCategoryFilterOpen(true);
@@ -242,11 +316,71 @@ export default function SearchResults() {
 
   // 카테고리 바텀시트에서 검색 버튼 클릭 시
   const handleCategorySearchPress = useCallback(
-    (category: string) => {
+    async (category: string) => {
       setSelectedCategory(category);
-      executeSearch(searchText, 1, false);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (category === "ALL" && selectedRegion.length === 0) {
+        searchDefault(1, false);
+      } else {
+        // 새로운 category 값을 직접 사용하여 검색
+        try {
+          setIsLoading(true);
+
+          const regionKeywords = selectedRegion.map((region) =>
+            getRegionKeyword(region),
+          );
+
+          const params: any = {
+            keyword: searchText || "",
+            page: 1,
+            size: SEARCH_LIMIT,
+          };
+
+          if (category !== "ALL") {
+            params.category = category;
+          }
+
+          if (selectedRegion.length > 0) {
+            params.regions = regionKeywords;
+          }
+
+          const response = await authApi.get<CategorySearchResponse>(
+            `${BACKEND_URL}/search/results`,
+            { params },
+          );
+
+          if (response.data.isSuccess && response.data.result) {
+            const { contentList, pageInfo } = response.data.result;
+
+            const transformedResults: SearchContentItem[] = contentList.map(
+              (item) => ({
+                id: item.id,
+                title: item.title,
+                thumbnailUrl: item.thumbnailUrl || "",
+                category: item.category,
+                address: item.address,
+                date: "",
+                views: 0,
+              }),
+            );
+
+            setSearchResults(transformedResults);
+            setCurrentPage(pageInfo.currentPage);
+            setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
+          } else {
+            setSearchResults([]);
+            setHasMoreData(false);
+          }
+        } catch (error) {
+          console.error("검색 실패:", error);
+          setSearchResults([]);
+          setHasMoreData(false);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     },
-    [searchText, executeSearch],
+    [searchText, selectedRegion, searchDefault],
   );
 
   const handleRegionFilterOpen = useCallback(() => {
@@ -258,24 +392,89 @@ export default function SearchResults() {
   }, []);
 
   // 지역 선택 처리
-  const handleRegionSelect = useCallback((region: string) => {
-    setSelectedRegion(region);
+  const handleRegionSelect = useCallback((regions: string[]) => {
+    setSelectedRegion(regions);
   }, []);
 
   // 지역 바텀시트에서 검색 버튼 클릭 시
   const handleRegionSearchPress = useCallback(
-    (region: string) => {
-      setSelectedRegion(region);
-      executeSearch(searchText, 1, false);
+    async (regions: string[]) => {
+      setSelectedRegion(regions);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (selectedCategory === "ALL" && regions.length === 0) {
+        searchDefault(1, false);
+      } else {
+        // 새로운 regions 값을 직접 사용하여 검색
+        try {
+          setIsLoading(true);
+
+          const regionKeywords = regions.map((region) =>
+            getRegionKeyword(region),
+          );
+
+          const params: any = {
+            keyword: searchText || "",
+            page: 1,
+            size: SEARCH_LIMIT,
+          };
+
+          if (selectedCategory !== "ALL") {
+            params.category = selectedCategory;
+          }
+
+          if (regions.length > 0) {
+            params.regions = regionKeywords;
+          }
+
+          const response = await authApi.get<CategorySearchResponse>(
+            `${BACKEND_URL}/search/results`,
+            { params },
+          );
+
+          if (response.data.isSuccess && response.data.result) {
+            const { contentList, pageInfo } = response.data.result;
+
+            const transformedResults: SearchContentItem[] = contentList.map(
+              (item) => ({
+                id: item.id,
+                title: item.title,
+                thumbnailUrl: item.thumbnailUrl || "",
+                category: item.category,
+                address: item.address,
+                date: "",
+                views: 0,
+              }),
+            );
+
+            setSearchResults(transformedResults);
+            setCurrentPage(pageInfo.currentPage);
+            setHasMoreData(pageInfo.currentPage < pageInfo.totalPages);
+          } else {
+            setSearchResults([]);
+            setHasMoreData(false);
+          }
+        } catch (error) {
+          console.error("검색 실패:", error);
+          setSearchResults([]);
+          setHasMoreData(false);
+        } finally {
+          setIsLoading(false);
+        }
+      }
     },
-    [searchText, executeSearch],
+    [searchText, selectedCategory, searchDefault],
   );
 
   // 무한스크롤 핸들러
   const handleLoadMore = useCallback(() => {
     if (searchResults.length > 0 && hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
-      executeSearch(searchText, nextPage, true);
+      // 둘 다 ALL일 때는 기본 검색 API 호출
+      if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+        searchDefault(nextPage, true);
+      } else {
+        executeSearch(searchText, nextPage, true);
+      }
     }
   }, [
     searchResults.length,
@@ -283,7 +482,10 @@ export default function SearchResults() {
     isLoadingMore,
     searchText,
     currentPage,
+    selectedCategory,
+    selectedRegion.length,
     executeSearch,
+    searchDefault,
   ]);
 
   // 카드 클릭 핸들러
@@ -309,9 +511,27 @@ export default function SearchResults() {
     [handleCardPress],
   );
 
+  // 새로고침 핸들러
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // 둘 다 ALL일 때는 기본 검색 API 호출
+    if (selectedCategory === "ALL" && selectedRegion.length === 0) {
+      await searchDefault(1, false);
+    } else {
+      await executeSearch(searchText, 1, false);
+    }
+    setRefreshing(false);
+  }, [
+    searchText,
+    selectedCategory,
+    selectedRegion.length,
+    executeSearch,
+    searchDefault,
+  ]);
+
   return (
     <View className="flex-1 bg-white pt-[65px]">
-      <View className={`px-4 pb-4 ${Platform.OS === "web" ? "pt-10" : "pt-2"}`}>
+      <View className="px-4 pb-4 pt-2">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
             <BackArrow />
@@ -327,6 +547,11 @@ export default function SearchResults() {
               value={searchText}
               onChangeText={setSearchText}
               onSubmitEditing={() => {
+                if (!searchText.trim()) {
+                  setShowEmptyKeywordModal(true);
+                  return;
+                }
+                setLastValidSearchText(searchText);
                 executeSearch(searchText, 1, false);
               }}
               returnKeyType="search"
@@ -362,7 +587,7 @@ export default function SearchResults() {
         </View>
 
         <Pressable
-          className={`mr-3 flex-row items-center rounded-full px-3 py-2 ${
+          className={`mr-3 flex-row items-center rounded-full px-3 py-2.5 ${
             isCategoryFilterOpen || selectedCategory !== "ALL"
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isRegionFilterOpen
@@ -397,8 +622,8 @@ export default function SearchResults() {
         </Pressable>
 
         <Pressable
-          className={`flex-row items-center rounded-full px-3 py-2 ${
-            isRegionFilterOpen || selectedRegion !== "ALL"
+          className={`flex-row items-center rounded-full px-3 py-2.5 ${
+            isRegionFilterOpen || selectedRegion.length > 0
               ? "border border-[#6C4DFF] bg-[#DFD8FD]"
               : isCategoryFilterOpen
                 ? "border border-[#E0E0E0] bg-gray-100"
@@ -409,20 +634,24 @@ export default function SearchResults() {
         >
           <Text
             className={`mr-1 text-[14px] ${
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "text-[#6C4DFF]"
                 : isCategoryFilterOpen
                   ? "text-[#9CA3AF]"
                   : "text-[#424242]"
             }`}
           >
-            {getRegionLabel(selectedRegion)}
+            {selectedRegion.length === 0
+              ? "지역"
+              : selectedRegion.length === 1
+                ? getRegionLabel(selectedRegion[0])
+                : `${getRegionLabel(selectedRegion[0])} 외 ${selectedRegion.length - 1}`}
           </Text>
           <Chevron
             direction="down"
             size={12}
             color={
-              isRegionFilterOpen || selectedRegion !== "ALL"
+              isRegionFilterOpen || selectedRegion.length > 0
                 ? "#6C4DFF"
                 : isCategoryFilterOpen
                   ? "#9CA3AF"
@@ -451,6 +680,14 @@ export default function SearchResults() {
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6C4DFF"
+            colors={["#6C4DFF"]}
+          />
+        }
         ListEmptyComponent={
           isLoading ? (
             <View className="flex-1 items-center justify-center py-20">
@@ -473,12 +710,6 @@ export default function SearchResults() {
             <View className="flex-row items-center justify-center py-4">
               <ActivityIndicator size="large" color="#6C4DFF" />
             </View>
-          ) : searchResults.length > 0 && !hasMoreData ? (
-            <View className="items-center justify-center py-4">
-              <Text className="text-sm text-gray-500">
-                모든 검색 결과를 불러왔습니다.
-              </Text>
-            </View>
           ) : null
         }
       />
@@ -497,6 +728,21 @@ export default function SearchResults() {
         selectedRegion={selectedRegion}
         onRegionSelect={handleRegionSelect}
         onSearch={handleRegionSearchPress}
+      />
+
+      <CommonModal
+        visible={showEmptyKeywordModal}
+        onClose={() => {
+          setSearchText(lastValidSearchText);
+          setShowEmptyKeywordModal(false);
+        }}
+        mainTitle="검색어를 입력해주세요."
+        confirmText="확인"
+        showCancelButton={false}
+        onConfirm={() => {
+          setSearchText(lastValidSearchText);
+          setShowEmptyKeywordModal(false);
+        }}
       />
     </View>
   );

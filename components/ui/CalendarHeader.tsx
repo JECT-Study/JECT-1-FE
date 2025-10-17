@@ -30,19 +30,16 @@ export default function CalendarHeader({
 }: CalendarHeaderProps) {
   const { year, month } = formatYearMonth(selectedDate);
 
-  // 기본값: 오늘 기준 ±3개월
-  const today = dayjs();
-  const defaultMinMonth = today.subtract(3, "month").format("YYYY-MM");
-  const defaultMaxMonth = today.add(3, "month").format("YYYY-MM");
-
-  // minDate/maxDate가 제공되면 해당 값 사용, 아니면 기본값 사용
-  const minMonth = minDate ? dayjs(minDate).format("YYYY-MM") : defaultMinMonth;
-  const maxMonth = maxDate ? dayjs(maxDate).format("YYYY-MM") : defaultMaxMonth;
+  // minDate/maxDate가 제공된 경우에만 제한 적용
   const currentMonthStr = dayjs(selectedDate).format("YYYY-MM");
 
   // 이전/다음 월 이동 가능 여부 체크
-  const canGoPrevious = currentMonthStr > minMonth;
-  const canGoNext = currentMonthStr < maxMonth;
+  const canGoPrevious = minDate
+    ? currentMonthStr > dayjs(minDate).format("YYYY-MM")
+    : true;
+  const canGoNext = maxDate
+    ? currentMonthStr < dayjs(maxDate).format("YYYY-MM")
+    : true;
 
   // 이전 월로 이동
   const goToPreviousMonth = useCallback(() => {

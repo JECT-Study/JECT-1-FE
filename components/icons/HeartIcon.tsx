@@ -1,4 +1,15 @@
-import Svg, { Path, Defs, Filter, FeFlood, FeColorMatrix, FeOffset, FeGaussianBlur, FeComposite, FeBlend, G } from "react-native-svg";
+import Svg, {
+  Defs,
+  FeBlend,
+  FeColorMatrix,
+  FeComposite,
+  FeFlood,
+  FeGaussianBlur,
+  FeOffset,
+  Filter,
+  G,
+  Path,
+} from "react-native-svg";
 
 export default function HeartIcon() {
   return (
@@ -11,7 +22,6 @@ export default function HeartIcon() {
           width="26.1"
           height="24.0561"
           filterUnits="userSpaceOnUse"
-          colorInterpolationFilters="sRGB"
         >
           <FeFlood floodOpacity="0" result="BackgroundImageFix" />
           <FeColorMatrix

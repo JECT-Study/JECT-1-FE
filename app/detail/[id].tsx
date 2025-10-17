@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { shareFeedTemplate } from "@react-native-kakao/share";
 import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import {
-  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   Platform,
@@ -17,9 +18,16 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import DetailSkeleton from "@/components/detail/DetailSkeleton";
 import BackArrow from "@/components/icons/BackArrow";
 import CopyIcon from "@/components/icons/CopyIcon";
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
@@ -181,15 +189,24 @@ export default function DetailScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
   const [showToast, setShowToast] = useState<boolean>(false);
   const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
+  const [showLikeToast, setShowLikeToast] = useState<boolean>(false);
+  const [likeToastMessage, setLikeToastMessage] = useState<string>("");
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false); // 로그인 모달 상태
   const [showShareModal, setShowShareModal] = useState<boolean>(false); // 공유 모달 상태
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const scale = useSharedValue(1);
 
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { showActionSheetWithOptions } = useActionSheet();
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
 
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
@@ -218,7 +235,6 @@ export default function DetailScreen() {
 
           if (response.data.isSuccess) {
             const contentDetail = response.data.result;
-            console.log(contentDetail);
             setContentData(contentDetail);
             // likeId가 있으면 좋아요 상태로 설정
             setIsLiked(contentDetail.likeId !== null);
@@ -238,54 +254,55 @@ export default function DetailScreen() {
 
   const showHeaderBackground = scrollY > 300;
 
-  const handleKakaoShare = () => {
-    setShowShareModal(true);
-  };
-
-  // const handleKakaoShare = async () => {
-  //   if (!contentData) return;
-
-  //   try {
-  //     const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
-  //     const deepLinkUrl = `mycode://detail/${id}`;
-  //     console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
-
-  //     await shareFeedTemplate({
-  //       template: {
-  //         content: {
-  //           title: contentData.title,
-  //           description: contentData.description,
-  //           imageUrl:
-  //             getImageSource(contentData.contentId).uri ||
-  //             "https://mfnmcpsoimdf9o2j.public.blob.vercel-storage.com/content_placeholder.png",
-  //           link: {
-  //             // 앱이 설치된 경우 딥링크로 이동
-  //             mobileWebUrl: deepLinkUrl,
-  //             webUrl: appStoreUrl,
-  //             // 앱이 설치되지 않은 경우 앱스토어로 이동
-  //             androidExecutionParams: { target: "detail", id: String(id) },
-  //             iosExecutionParams: { target: "detail", id: String(id) },
-  //           },
-  //         },
-  //         buttons: [
-  //           {
-  //             title: "자세히 보기",
-  //             link: {
-  //               mobileWebUrl: deepLinkUrl,
-  //               webUrl: appStoreUrl,
-  //               androidExecutionParams: { target: "detail", id: String(id) },
-  //               iosExecutionParams: { target: "detail", id: String(id) },
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("카카오톡 공유 오류:", error);
-  //     // 사용자에게 오류 메시지 표시
-  //     Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
-  //   }
+  // const handleKakaoShare = () => {
+  //   setShowShareModal(true);
   // };
+
+  const handleKakaoShare = async () => {
+    if (!contentData) return;
+
+    try {
+      const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
+      const deepLinkUrl = `mycode://detail/${id}`;
+      console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
+
+      await shareFeedTemplate({
+        template: {
+          content: {
+            title: contentData.title,
+            description: contentData.description,
+            imageUrl:
+              contentData.images && contentData.images.length > 0
+                ? contentData.images[0]
+                : require("../../assets/images/content_placeholder.png"),
+            link: {
+              // 앱이 설치된 경우 딥링크로 이동
+              mobileWebUrl: deepLinkUrl,
+              webUrl: appStoreUrl,
+              // 앱이 설치되지 않은 경우 앱스토어로 이동
+              androidExecutionParams: { target: "detail", id: String(id) },
+              iosExecutionParams: { target: "detail", id: String(id) },
+            },
+          },
+          buttons: [
+            {
+              title: "자세히 보기",
+              link: {
+                mobileWebUrl: deepLinkUrl,
+                webUrl: appStoreUrl,
+                androidExecutionParams: { target: "detail", id: String(id) },
+                iosExecutionParams: { target: "detail", id: String(id) },
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("카카오톡 공유 오류:", error);
+      // 사용자에게 오류 메시지 표시
+      Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleGoBack = () => {
     router.back();
@@ -340,6 +357,14 @@ export default function DetailScreen() {
         const likeCount = isAddAction ? result.likeCount : result;
         const likeId = isAddAction ? result.likeId : null;
 
+        // 애니메이션 실행 (찜하기 추가할 때만)
+        if (isAddAction) {
+          scale.value = withSequence(
+            withSpring(1.3, { damping: 10, stiffness: 100 }),
+            withSpring(1, { damping: 10, stiffness: 100 }),
+          );
+        }
+
         // UI 상태 업데이트
         setIsLiked(!currentIsLiked);
         setLikeCount(likeCount); // API 응답의 likeCount 사용
@@ -351,6 +376,12 @@ export default function DetailScreen() {
               }
             : null,
         );
+
+        // 토스트 표시 (추가할 때만)
+        if (isAddAction) {
+          setLikeToastMessage("관심 목록에 추가되었습니다.");
+          setShowLikeToast(true);
+        }
       }
     } catch (error) {
       console.error("좋아요 오류:", error);
@@ -399,6 +430,11 @@ export default function DetailScreen() {
   // 복사 토스트 숨김 핸들러
   const handleCopyToastHide = () => {
     setShowCopyToast(false);
+  };
+
+  // 찜 토스트 숨김 핸들러
+  const handleLikeToastHide = () => {
+    setShowLikeToast(false);
   };
 
   const openAppleMaps = async () => {
@@ -471,17 +507,12 @@ export default function DetailScreen() {
     }
   };
 
+  console.log(contentData?.introduction);
+
   return (
     <>
       {loading || !contentData ? (
-        <View className="flex-1 items-center justify-center bg-white">
-          <StatusBar
-            barStyle="dark-content"
-            backgroundColor="transparent"
-            translucent
-          />
-          <ActivityIndicator size="large" color="#6C4DFF" />
-        </View>
+        <DetailSkeleton imageHeight={IMAGE_HEIGHT} />
       ) : (
         <View className="flex-1 bg-white">
           <StatusBar
@@ -567,10 +598,10 @@ export default function DetailScreen() {
               <View>
                 <View className="my-6 flex-col gap-y-2">
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       기간
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.startDate && contentData.endDate
                         ? `${dayjs(contentData.startDate).format("YYYY.MM.DD")} - ${dayjs(contentData.endDate).format("YYYY.MM.DD")}`
                         : ""}
@@ -578,11 +609,11 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       주소
                     </Text>
                     <View className="flex-1 flex-row items-start">
-                      <Text className="mr-2 flex-1 text-base text-gray-600">
+                      <Text className="mr-2 flex-1 text-lg text-gray-600">
                         {contentData.address}
                       </Text>
                       <Pressable
@@ -601,10 +632,10 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       관람시간
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.isAlwaysOpen
                         ? "24시간 운영"
                         : contentData.openingHour && contentData.closedHour
@@ -614,16 +645,16 @@ export default function DetailScreen() {
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       전화번호
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
+                    <Text className="flex-1 pr-4 text-lg text-gray-600">
                       {contentData.telNumber || "-"}
                     </Text>
                   </View>
 
                   <View className="flex-row items-center">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       링크
                     </Text>
                     {contentData.homepage ? (
@@ -641,17 +672,24 @@ export default function DetailScreen() {
                         </Text>
                       </Pressable>
                     ) : (
-                      <Text className="text-base text-gray-600">-</Text>
+                      <Text className="text-lg text-gray-600">-</Text>
                     )}
                   </View>
 
                   <View className="flex-row">
-                    <Text className="w-24 text-base font-medium text-gray-600">
+                    <Text className="w-24 text-lg font-medium text-gray-600">
                       행사내용
                     </Text>
-                    <Text className="flex-1 pr-4 text-base text-gray-600">
-                      {contentData.introduction}
-                    </Text>
+                    <View className="flex-1 gap-1 pr-4">
+                      {contentData.introduction
+                        ?.split(/\\n/)
+                        .filter((line) => line.trim().length > 0)
+                        .map((line, index) => (
+                          <Text key={index} className="text-lg text-gray-600">
+                            {line.trim()}
+                          </Text>
+                        ))}
+                    </View>
                   </View>
                 </View>
 
@@ -661,22 +699,21 @@ export default function DetailScreen() {
                   <Text className="mb-4 text-xl font-semibold text-gray-800">
                     컨텐츠 키워드
                   </Text>
-                  {/* 더미 데이터 임시 표시 */}
                   <View className="flex-row flex-wrap gap-2">
-                    {[
-                      "혼자 휴식",
-                      "조용한 휴식",
-                      "오감체험",
-                      "가족이랑",
-                      "감성가득",
-                    ].map((tag, index) => (
-                      <View
-                        key={index}
-                        className="rounded-md border border-gray-300 bg-white px-2 py-1"
-                      >
-                        <Text className="text-sm text-gray-700">#{tag}</Text>
-                      </View>
-                    ))}
+                    {contentData.tags && contentData.tags.length > 0 ? (
+                      contentData.tags.map((tag, index) => (
+                        <View
+                          key={index}
+                          className="rounded-lg border border-gray-300 bg-white px-2 py-1"
+                        >
+                          <Text className="text-sm text-gray-700">#{tag}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text className="text-md text-gray-500">
+                        등록된 키워드가 없습니다.
+                      </Text>
+                    )}
                   </View>
                 </View>
 
@@ -698,8 +735,8 @@ export default function DetailScreen() {
                     />
                   )}
 
-                  <View className="my-3 flex-row items-center">
-                    <LocationIcon size={18} />
+                  <View className="my-3 flex-row items-center pr-3">
+                    <LocationIcon size={20} />
                     <Text className="ml-1.5 text-base text-black">
                       {contentData.address}
                     </Text>
@@ -710,8 +747,8 @@ export default function DetailScreen() {
                     style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
                     onPress={handleNaverMapPress}
                   >
-                    <LocationPinIcon size={16} />
-                    <Text className="ml-1.5 text-center font-medium text-black">
+                    <LocationPinIcon size={18} />
+                    <Text className="ml-1 text-center text-base font-medium text-black">
                       길찾기
                     </Text>
                   </Pressable>
@@ -738,17 +775,19 @@ export default function DetailScreen() {
                   onPress={handleLikeToggle}
                   disabled={!isLoggedIn || isLikeLoading}
                 >
-                  {isLiked ? (
-                    <HeartFilledIcon
-                      size={28}
-                      color={!isLoggedIn ? "#E0E0E0" : undefined}
-                    />
-                  ) : (
-                    <HeartOutlineIcon
-                      size={28}
-                      color={!isLoggedIn ? "#E0E0E0" : undefined}
-                    />
-                  )}
+                  <Animated.View style={animatedStyle}>
+                    {isLiked ? (
+                      <HeartFilledIcon
+                        size={28}
+                        color={!isLoggedIn ? "#E0E0E0" : undefined}
+                      />
+                    ) : (
+                      <HeartOutlineIcon
+                        size={28}
+                        color={!isLoggedIn ? "#E0E0E0" : undefined}
+                      />
+                    )}
+                  </Animated.View>
                 </Pressable>
                 <Text
                   className="text-sm"
@@ -759,23 +798,17 @@ export default function DetailScreen() {
               </View>
 
               <Pressable
-                className={`h-[50px] flex-1 justify-center rounded-lg px-6 ${
+                className={`h-16 flex-1 justify-center rounded-lg px-6 ${
                   isLoggedIn && contentData.scheduleId === null
-                    ? "bg-[#6C4DFF]"
+                    ? "bg-[#6C4DFF] active:bg-[#5638E6]"
                     : contentData.scheduleId !== null
                       ? "bg-gray-300"
-                      : "bg-[#6C4DFF]"
+                      : "bg-[#6C4DFF] active:bg-[#5638E6]"
                 }`}
-                style={({ pressed }) => [
-                  {
-                    opacity:
-                      contentData.scheduleId !== null ? 0.6 : pressed ? 0.9 : 1,
-                  },
-                ]}
                 onPress={handleAddToSchedule}
                 disabled={contentData.scheduleId !== null}
               >
-                <Text className="text-center text-lg font-semibold text-white">
+                <Text className="text-center text-xl font-semibold text-white">
                   {contentData.scheduleId !== null
                     ? "이미 추가됨"
                     : "내 일정에 추가"}
@@ -819,6 +852,13 @@ export default function DetailScreen() {
         visible={showCopyToast}
         message="주소가 복사되었습니다."
         onHide={handleCopyToastHide}
+      />
+
+      {/* 찜 토스트 */}
+      <Toast
+        visible={showLikeToast}
+        message={likeToastMessage}
+        onHide={handleLikeToastHide}
       />
 
       {/* 로그인 안내 모달 */}
